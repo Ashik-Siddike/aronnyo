@@ -1,9 +1,43 @@
-// Static useContent hook - No Supabase dependency
-// Uses static data from staticData.ts
-// Can be easily converted to Django API calls later
+// MongoDB-connected useContent hook
+// Fetches real data from MongoDB via Express API
 
 import { useState, useEffect } from 'react';
-import { staticGrades, staticSubjects, staticContents, mockDelay, Grade, Subject, Content } from '@/data/staticData';
+import { gradesApi, subjectsApi, contentsApi, GradeData, SubjectData, ContentData } from '@/services/api';
+
+export interface Grade {
+  id: number;
+  name: string;
+  order_index: number;
+  created_at?: string;
+}
+
+export interface Subject {
+  id: number;
+  name: string;
+  grade_id: number;
+  order_index: number;
+  created_at?: string;
+}
+
+export interface Content {
+  id: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  content_type: 'text' | 'pdf' | 'youtube' | 'video' | 'audio' | 'image' | 'interactive';
+  youtube_link?: string;
+  file_url?: string;
+  pages?: any;
+  content_data?: any;
+  class?: string;
+  subject?: string;
+  grade_id?: number;
+  subject_id?: number;
+  chapter_id?: number;
+  lesson_order?: number;
+  is_published: boolean;
+  created_at: string;
+}
 
 export const useContent = () => {
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -16,28 +50,27 @@ export const useContent = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Simulate API delay
-      await mockDelay(300);
 
-      // Load from static data
-      const gradesData = [...staticGrades];
-      const subjectsData = [...staticSubjects];
-      const contentsData = staticContents.filter(c => c.is_published === true);
+      // Fetch from MongoDB API in parallel
+      const [gradesData, subjectsData, contentsData] = await Promise.all([
+        gradesApi.getAll(),
+        subjectsApi.getAll(),
+        contentsApi.getAll()
+      ]);
 
-      console.log('Data loaded successfully:', {
+      console.log('📦 Data loaded from MongoDB:', {
         grades: gradesData.length,
         subjects: subjectsData.length,
         contents: contentsData.length
       });
 
-      setGrades(gradesData);
-      setSubjects(subjectsData);
-      setContents(contentsData);
+      setGrades(gradesData as Grade[]);
+      setSubjects(subjectsData as Subject[]);
+      setContents(contentsData.filter(c => c.is_published === true) as Content[]);
 
     } catch (err: any) {
-      console.error('Error loading content:', err);
-      setError(err.message || 'Failed to load content');
+      console.error('Error loading content from MongoDB:', err);
+      setError(err.message || 'Failed to load content from database');
     } finally {
       setLoading(false);
     }

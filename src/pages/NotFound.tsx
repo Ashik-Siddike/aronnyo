@@ -1,97 +1,110 @@
-
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import { Home, Search, BookOpen, Gamepad2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Home, ArrowLeft, Search, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const NotFound = () => {
-  const location = useLocation();
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [stars, setStars] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
 
   useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
+    const newStars = Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      delay: Math.random() * 3,
+    }));
+    setStars(newStars);
+  }, []);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+    });
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-400 via-pink-300 to-blue-400 relative overflow-hidden">
-      {/* Floating decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-300 rounded-full opacity-60 animate-bounce-gentle"></div>
-        <div className="absolute top-32 right-20 w-16 h-16 bg-green-300 rounded-full opacity-70 animate-float delay-300"></div>
-        <div className="absolute bottom-20 left-20 w-24 h-24 bg-pink-300 rounded-full opacity-50 animate-wiggle delay-500"></div>
-        <div className="absolute bottom-32 right-10 w-18 h-18 bg-blue-300 rounded-full opacity-60 animate-scale-bounce delay-700"></div>
-        <div className="absolute top-1/2 left-1/4 w-12 h-12 bg-orange-300 rounded-full opacity-40 animate-float delay-1000"></div>
-      </div>
+    <div
+      className="min-h-screen relative overflow-hidden flex items-center justify-center"
+      onMouseMove={handleMouseMove}
+      style={{
+        background: `radial-gradient(circle at ${mousePos.x}% ${mousePos.y}%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), linear-gradient(135deg, #667eea11 0%, #764ba211 100%)`,
+      }}
+    >
+      {/* Floating Stars */}
+      {stars.map((star) => (
+        <div
+          key={star.id}
+          className="absolute text-2xl animate-float pointer-events-none opacity-30"
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            animationDelay: `${star.delay}s`,
+            animationDuration: `${3 + Math.random() * 4}s`,
+          }}
+        >
+          ⭐
+        </div>
+      ))}
 
-      <div className="text-center relative z-10 max-w-2xl mx-auto px-6">
+      {/* Floating Background Shapes */}
+      <div className="absolute top-20 left-10 w-32 h-32 bg-eduplay-purple/10 rounded-full animate-float blur-xl" />
+      <div className="absolute bottom-20 right-10 w-40 h-40 bg-eduplay-blue/10 rounded-full animate-bounce-gentle blur-xl" />
+      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-eduplay-pink/10 rounded-full animate-wiggle blur-xl" />
+
+      <div className="text-center relative z-10 px-6 max-w-xl mx-auto">
         {/* 404 Number */}
-        <div className="mb-8">
-          <h1 className="text-8xl sm:text-9xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 bg-clip-text text-transparent animate-scale-bounce">
+        <div className="relative mb-8">
+          <h1 className="text-[120px] sm:text-[180px] font-black text-transparent bg-gradient-to-br from-eduplay-purple via-eduplay-blue to-eduplay-green bg-clip-text leading-none select-none">
             404
           </h1>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-5xl sm:text-7xl animate-bounce-gentle">🔭</div>
+          </div>
         </div>
 
-        {/* Sad Face Icon */}
-        <div className="mb-6 animate-wiggle">
-          <div className="text-6xl">😕</div>
-        </div>
-
-        {/* Main Message */}
-        <div className="mb-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 animate-fade-in">
-            Oops! Page Not Found
+        {/* Message */}
+        <div className="mb-8 animate-fade-in">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
+            ওহ না! পৃষ্ঠাটি খুঁজে পাওয়া যাচ্ছে না! 😮
           </h2>
-          <p className="text-lg sm:text-xl text-white/90 mb-2 animate-fade-in delay-300">
-            It looks like this page went on an adventure without us! 🚀
+          <p className="text-gray-600 text-lg leading-relaxed">
+            মনে হচ্ছে তুমি একটু হারিয়ে গেছো! চিন্তা নেই — 
+            চলো আবার শেখার অ্যাডভেঞ্চারে ফিরে যাই! 🚀
           </p>
-          <p className="text-base sm:text-lg text-white/80 animate-fade-in delay-500">
-            Let's get you back to the learning playground where all the fun happens!
-          </p>
+        </div>
+
+        {/* Fun Emoji Row */}
+        <div className="flex justify-center gap-4 mb-8 animate-fade-in delay-300">
+          <span className="text-3xl animate-wiggle">📚</span>
+          <span className="text-3xl animate-float" style={{ animationDelay: '0.2s' }}>🎮</span>
+          <span className="text-3xl animate-bounce-gentle" style={{ animationDelay: '0.4s' }}>🧩</span>
+          <span className="text-3xl animate-scale-bounce" style={{ animationDelay: '0.6s' }}>🎓</span>
+          <span className="text-3xl animate-wiggle" style={{ animationDelay: '0.8s' }}>🌟</span>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in delay-700">
-          <Button 
-            asChild
-            size="lg"
-            className="bg-white/20 backdrop-blur-sm text-white border-2 border-white/30 hover:bg-white/30 hover:scale-105 transition-all duration-300 min-w-[200px]"
-          >
-            <a href="/" className="flex items-center gap-2">
-              <Home className="w-5 h-5" />
-              Back to Learning Fun
-            </a>
-          </Button>
-
-          <Button 
-            asChild
-            size="lg" 
+        <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-500">
+          <Link to="/">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-eduplay-purple to-eduplay-blue hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg px-8 py-6 rounded-2xl w-full"
+            >
+              <Home className="w-5 h-5 mr-2" />
+              হোমে ফিরে যাও
+            </Button>
+          </Link>
+          <Button
             variant="outline"
-            className="bg-white text-purple-600 hover:bg-purple-50 hover:scale-105 transition-all duration-300 min-w-[200px] border-2"
+            size="lg"
+            onClick={() => window.history.back()}
+            className="border-2 border-eduplay-purple text-eduplay-purple hover:bg-eduplay-purple hover:text-white text-lg px-8 py-6 rounded-2xl transition-all duration-300 w-full"
           >
-            <a href="/teams" className="flex items-center gap-2">
-              <Search className="w-5 h-5" />
-              Explore Subjects
-            </a>
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            আগের পৃষ্ঠায় যাও
           </Button>
-        </div>
-
-        {/* Fun Learning Icons */}
-        <div className="mt-12 flex justify-center gap-8 animate-fade-in delay-1000">
-          <div className="text-4xl animate-bounce-gentle">
-            <BookOpen className="w-8 h-8 text-white/70" />
-          </div>
-          <div className="text-4xl animate-float delay-300">
-            <Gamepad2 className="w-8 h-8 text-white/70" />
-          </div>
-        </div>
-
-        {/* Motivational Message */}
-        <div className="mt-8 animate-fade-in delay-1000">
-          <p className="text-sm text-white/70 italic">
-            "Every great learner gets lost sometimes, but they always find their way back to knowledge! 🌟"
-          </p>
         </div>
       </div>
     </div>

@@ -1,43 +1,52 @@
 
-import { ArrowLeft, User, BarChart, Calendar, Trophy, Clock, AlertCircle, TrendingUp, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, User, BarChart, Calendar, Trophy, Clock, AlertCircle, TrendingUp, Star, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { dashboardApi } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ParentPanel = () => {
-  const childData = {
-    name: "Sarah",
-    age: 8,
-    grade: "Class 3",
-    totalLearningTime: "45 hours",
-    lessonsCompleted: 42,
-    averageAccuracy: 89,
-    currentStreak: 7,
-    subjects: [
-      { name: "Math", progress: 85, timeSpent: "12h", accuracy: 92, lastActivity: "Today" },
-      { name: "English", progress: 72, timeSpent: "10h", accuracy: 88, lastActivity: "Yesterday" },
-      { name: "Bangla", progress: 90, timeSpent: "15h", accuracy: 94, lastActivity: "Today" },
-      { name: "Science", progress: 67, timeSpent: "8h", accuracy: 82, lastActivity: "2 days ago" }
-    ],
-    weeklyStats: {
-      lessonsThisWeek: 12,
-      starsEarned: 75,
-      timeSpent: "8h 30m",
-      improvement: "+15%"
-    },
-    recentActivity: [
-      { subject: "Math", lesson: "Simple Addition", score: "3/3", time: "2 hours ago" },
-      { subject: "Bangla", lesson: "বাংলা বর্ণমালা", score: "2/3", time: "5 hours ago" },
-      { subject: "English", lesson: "ABC Letters", score: "3/3", time: "1 day ago" }
-    ],
-    recommendations: [
-      "Sarah is doing great in Bangla! Consider encouraging more practice.",
-      "Science progress could be improved with daily 15-minute sessions.",
-      "Excellent streak! Reward Sarah for her consistency."
-    ]
-  };
+  const [childData, setChildData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        const data = await dashboardApi.getParentDashboard(user?.id);
+        setChildData(data);
+      } catch (err: any) {
+        console.error('Failed to fetch dashboard:', err);
+        setError(err.message || 'Failed to load dashboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <RefreshCw className="w-8 h-8 animate-spin text-eduplay-blue" />
+      </div>
+    );
+  }
+
+  if (error || !childData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center flex-col">
+        <p className="text-red-500 mb-4">{error || 'Data not found'}</p>
+        <Link to="/"><Button>Back to Home</Button></Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">

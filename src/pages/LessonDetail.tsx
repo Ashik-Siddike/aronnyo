@@ -11,6 +11,7 @@ import NotFound from './NotFound';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useAuth } from '@/contexts/AuthContext';
 import { staticContents, mockDelay } from '@/data/staticData';
+import confetti from 'canvas-confetti';
 
 const LessonDetail = () => {
   const { subject, id } = useParams();
@@ -61,6 +62,18 @@ const LessonDetail = () => {
   }, [id, user, subject, trackLessonStart]);
 
   useEffect(() => {
+    if (completed) {
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF8C42', '#9D4EDD']
+      });
+      playSound('correct');
+    }
+  }, [completed]);
+
+  useEffect(() => {
     return () => {
       audioService.stop();
     };
@@ -92,6 +105,22 @@ const LessonDetail = () => {
         setIsPlaying(false);
       } catch (error) {
         console.error('Audio playback failed:', error);
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  const handleReadAloud = async (text: string) => {
+    if (isPlaying) {
+      audioService.stop();
+      setIsPlaying(false);
+    } else {
+      setIsPlaying(true);
+      try {
+        await audioService.playText(text);
+        setIsPlaying(false);
+      } catch (error) {
+        console.error('TTS playback failed:', error);
         setIsPlaying(false);
       }
     }
@@ -242,9 +271,20 @@ const LessonDetail = () => {
                 {dbContent.content_data?.pages && Array.isArray(dbContent.content_data.pages) && (
                   <div className="space-y-4">
                     {dbContent.content_data.pages.map((page: any, index: number) => (
-                      <div key={index} className="bg-white rounded-xl p-6 border shadow-sm">
-                        {page.title && <h3 className="text-xl font-bold mb-3">{page.title}</h3>}
-                        {page.description && <p className="text-gray-700 whitespace-pre-wrap">{page.description}</p>}
+                      <div key={index} className="bg-white rounded-xl p-6 border shadow-sm relative group">
+                        {page.title && <h3 className="text-xl font-bold mb-3 pr-12">{page.title}</h3>}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleReadAloud(page.description || page.content || page.title)}
+                          className="absolute top-4 right-4 text-eduplay-blue hover:bg-blue-50 transition-colors"
+                          title="Read Aloud"
+                        >
+                          {isPlaying ? <Pause className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                        </Button>
+                        {(page.description || page.content) && (
+                          <p className="text-gray-700 whitespace-pre-wrap text-lg leading-relaxed">{page.description || page.content}</p>
+                        )}
                         {page.youtube_link && (
                           <div className="aspect-video w-full rounded-lg overflow-hidden mt-4">
                             <iframe

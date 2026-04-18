@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Menu, X, Home, BookOpen, BarChart3, GraduationCap } from 'lucide-react';
+import { Menu, X, Home, BookOpen, BarChart3, GraduationCap, Trophy, Users, Calendar, Award, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import UserProfileButton from '@/components/UserProfileButton';
@@ -155,6 +155,40 @@ const Header = () => {
               <BarChart3 className="w-4 h-4" />
               <span>Dashboard</span>
             </Link>
+            {/* More Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="text-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-1 px-3 py-2 rounded-lg text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5"
+                >
+                  <span>More</span>
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-52 bg-white border border-gray-200 shadow-lg">
+                <DropdownMenuItem onClick={() => navigate('/leaderboard')} className="cursor-pointer hover:bg-eduplay-purple/10">
+                  <Trophy className="w-4 h-4 mr-2 text-eduplay-orange" />
+                  Leaderboard 🏆
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/attendance')} className="cursor-pointer hover:bg-eduplay-purple/10">
+                  <Calendar className="w-4 h-4 mr-2 text-eduplay-blue" />
+                  Attendance 📋
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/report-card')} className="cursor-pointer hover:bg-eduplay-purple/10">
+                  <Award className="w-4 h-4 mr-2 text-eduplay-green" />
+                  Report Card 📄
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/teams')} className="cursor-pointer hover:bg-eduplay-purple/10">
+                  <Users className="w-4 h-4 mr-2 text-eduplay-purple" />
+                  Teams 👥
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/parent')} className="cursor-pointer hover:bg-eduplay-purple/10">
+                  <Users className="w-4 h-4 mr-2 text-eduplay-pink" />
+                  Parent Panel 👪
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
 
           {/* User Actions - Desktop */}
@@ -249,6 +283,34 @@ const Header = () => {
                 <BarChart3 className="w-5 h-5" />
                 <span>Dashboard</span>
               </Link>
+
+              {/* More Section */}
+              <div className="pt-2 border-t border-gray-200 mt-2">
+                <div className="flex items-center space-x-3 px-4 py-2 text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                  <span>More Features</span>
+                </div>
+                {[
+                  { to: '/leaderboard', label: 'Leaderboard 🏆', icon: Trophy },
+                  { to: '/attendance', label: 'Attendance 📋', icon: Calendar },
+                  { to: '/report-card', label: 'Report Card 📄', icon: Award },
+                  { to: '/teams', label: 'Teams 👥', icon: Users },
+                  { to: '/parent', label: 'Parent Panel 👪', icon: Users },
+                ].map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg text-base font-medium transition-all duration-200 ${
+                      isActive(item.to)
+                        ? 'text-eduplay-purple bg-eduplay-purple/10'
+                        : 'text-gray-600 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+              </div>
 
               {/* Mobile User Actions */}
               <div className="pt-4 mt-4 border-t border-gray-200 animate-fade-in delay-500">

@@ -61,12 +61,12 @@ const FeaturesSection = () => {
         <div className="text-center space-y-6 mb-16">
           <h2 className="text-4xl md:text-5xl font-bold">
             <span className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green bg-clip-text text-transparent">
-              Why Kids Love Kids Learning Website!
+              Why Kids Love 247School!
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             We've designed every feature to make learning feel like playing!
-            Here's what makes Kids Learning Website special 🌈
+            Here's what makes 247School special 🌈
           </p>
         </div>
 
@@ -109,7 +109,7 @@ const FeaturesSection = () => {
               </span>
             </h3>
             <p className="text-lg text-gray-700 mb-6">
-              Kids who use Kids Learning Website spend 3x more time learning and remember 85% more information
+              Kids who use 247School spend 3x more time learning and remember 85% more information
               compared to traditional methods! That's the power of fun learning! 🚀
             </p>
             <div className="flex justify-center space-x-8 text-center">

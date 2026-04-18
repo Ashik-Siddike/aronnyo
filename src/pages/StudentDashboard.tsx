@@ -1,91 +1,53 @@
 
-import { ArrowLeft, BarChart, Star, Trophy, Clock, Target, TrendingUp, Calendar, BookOpen, Award, Brain, Zap, Heart, Users, ChevronRight, Play } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, BarChart, Star, Trophy, Clock, Target, TrendingUp, Calendar, BookOpen, Award, Brain, Zap, Heart, Users, ChevronRight, Play, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { dashboardApi } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const StudentDashboard = () => {
-  const studentData = {
-    name: "Sarah",
-    totalStars: 1250,
-    badges: 15,
-    hoursLearned: 45,
-    accuracy: 89,
-    streak: 7,
-    level: "Math Explorer",
-    rank: 15,
-    totalStudents: 150,
-    subjects: [
-      { 
-        name: "Math", 
-        progress: 85, 
-        icon: "🔢", 
-        color: "text-eduplay-blue",
-        lessonsCompleted: 17,
-        totalLessons: 20,
-        lastScore: 95,
-        timeSpent: "12h 30m"
-      },
-      { 
-        name: "English", 
-        progress: 72, 
-        icon: "📖", 
-        color: "text-eduplay-green",
-        lessonsCompleted: 13,
-        totalLessons: 18,
-        lastScore: 88,
-        timeSpent: "9h 45m"
-      },
-      { 
-        name: "Bangla", 
-        progress: 90, 
-        icon: "🇧🇩", 
-        color: "text-eduplay-orange",
-        lessonsCompleted: 18,
-        totalLessons: 20,
-        lastScore: 92,
-        timeSpent: "11h 20m"
-      },
-      { 
-        name: "Science", 
-        progress: 67, 
-        icon: "🔬", 
-        color: "text-eduplay-purple",
-        lessonsCompleted: 10,
-        totalLessons: 15,
-        lastScore: 85,
-        timeSpent: "8h 15m"
+  const [studentData, setStudentData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        // Pass user ID if logged in, otherwise default student
+        const data = await dashboardApi.getStudentDashboard(user?.id);
+        setStudentData(data);
+      } catch (err: any) {
+        console.error('Failed to fetch dashboard:', err);
+        setError(err.message || 'Failed to load dashboard');
+      } finally {
+        setLoading(false);
       }
-    ],
-    recentAchievements: [
-      { title: "Math Master", description: "Solved 50 problems!", icon: "🏆", date: "Today", points: 100 },
-      { title: "Bookworm", description: "Read 25 stories!", icon: "📚", date: "Yesterday", points: 75 },
-      { title: "Star Collector", description: "Earned 1000 stars!", icon: "⭐", date: "2 days ago", points: 150 },
-      { title: "Science Explorer", description: "Completed 10 experiments!", icon: "🧪", date: "3 days ago", points: 80 }
-    ],
-    weeklyActivity: [
-      { day: "Mon", lessons: 3, stars: 12, minutes: 45 },
-      { day: "Tue", lessons: 2, stars: 8, minutes: 30 },
-      { day: "Wed", lessons: 4, stars: 15, minutes: 60 },
-      { day: "Thu", lessons: 3, stars: 11, minutes: 40 },
-      { day: "Fri", lessons: 5, stars: 18, minutes: 75 },
-      { day: "Sat", lessons: 2, stars: 7, minutes: 25 },
-      { day: "Sun", lessons: 1, stars: 4, minutes: 15 }
-    ],
-    favoriteSubjects: ["Math", "Science"],
-    currentGoals: [
-      { subject: "Science", target: 10, current: 6, description: "Complete 10 Science Lessons" },
-      { subject: "English", target: 15, current: 13, description: "Read 15 Stories" },
-      { subject: "Math", target: 100, current: 78, description: "Solve 100 Problems" }
-    ],
-    friends: [
-      { name: "Ashik", avatar: "👦", stars: 980, isOnline: true },
-      { name: "Maya", avatar: "👧", stars: 1150, isOnline: false },
-      { name: "Zara", avatar: "👧", stars: 1320, isOnline: true }
-    ]
-  };
+    };
+    fetchDashboard();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <RefreshCw className="w-8 h-8 animate-spin text-eduplay-blue" />
+      </div>
+    );
+  }
+
+  if (error || !studentData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center flex-col">
+        <p className="text-red-500 mb-4">{error || 'Data not found'}</p>
+        <Link to="/"><Button>Back to Home</Button></Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
@@ -355,10 +317,10 @@ const StudentDashboard = () => {
             <Card className="border-0 playful-shadow bg-gradient-to-br from-eduplay-orange/10 to-eduplay-pink/10">
               <CardContent className="p-6 text-center">
                 <div className="text-4xl mb-2">💪</div>
-                <div className="text-lg font-bold text-eduplay-orange mb-2">You're doing great!</div>
-                <div className="text-sm text-gray-700">Keep up the amazing work, {studentData.name}!</div>
+                <div className="text-lg font-bold text-eduplay-orange mb-2">তুমি দারুণ করছো!</div>
+                <div className="text-sm text-gray-700">এভাবেই চালিয়ে যাও, {studentData.name}!</div>
                 <div className="text-xs text-gray-600 mt-2">
-                  "Learning is a treasure that will follow its owner everywhere!" ✨
+                  "শিক্ষাই আলো, শিক্ষাই শক্তি — প্রতিদিন একটু একটু করে শেখো!" ✨
                 </div>
               </CardContent>
             </Card>

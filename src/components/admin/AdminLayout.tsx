@@ -13,78 +13,93 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-[#0B1120] text-slate-200 font-sans selection:bg-blue-500/30">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-900/20 blur-[120px]"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/20 blur-[120px]"></div>
+        <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] rounded-full bg-purple-900/20 blur-[100px]"></div>
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay"></div>
+      </div>
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white shadow-2xl">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center space-x-6">
+      <div className="relative z-10 border-b border-white/5 bg-slate-900/50 backdrop-blur-xl supports-[backdrop-filter]:bg-slate-900/20 sticky top-0">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between py-4 md:py-5 gap-4">
+            <div className="flex items-center space-x-6 w-full md:w-auto justify-between md:justify-start">
               <Link to="/">
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 transition-all duration-200 rounded-full px-4">
-                  <Home className="w-4 h-4 mr-2" />
-                  Back to Home
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-4 py-2 h-auto group">
+                  <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+                  <span className="hidden sm:inline">Exit Console</span>
                 </Button>
               </Link>
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-white/20 rounded-xl">
-                  <Shield className="w-6 h-6" />
+              <div className="flex items-center space-x-4 pl-4 border-l border-white/10">
+                <div className="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 shadow-inner">
+                  <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-2xl"></div>
+                  <Shield className="w-6 h-6 text-blue-400 relative z-10" />
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                    Admin Panel
+                <div className="hidden md:block">
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-indigo-200 bg-clip-text text-transparent tracking-tight">
+                    Nexus Admin
                   </h1>
-                  <p className="text-sm text-blue-200">Play Learn Grow - Management Console</p>
+                  <div className="flex items-center mt-0.5">
+                    <span className="relative flex h-2 w-2 mr-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <p className="text-xs text-emerald-400 font-medium tracking-wider uppercase">Systems Online</p>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <nav className="flex items-center space-x-1 bg-white/10 rounded-2xl p-1 backdrop-blur-sm">
+            <nav className="flex items-center space-x-1.5 bg-slate-950/40 rounded-2xl p-1.5 border border-white/5 backdrop-blur-md overflow-x-auto w-full md:w-auto custom-scrollbar pb-1.5 md:pb-1.5">
               <Link to="/admin">
                 <Button 
-                  variant={isActive('/admin') ? 'secondary' : 'ghost'} 
+                  variant="ghost"
                   size="sm" 
-                  className={`text-white hover:bg-white/20 transition-all duration-200 rounded-xl px-4 ${
-                    isActive('/admin') ? 'bg-white/30 shadow-lg' : ''
+                  className={`text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-4 py-2 h-auto ${
+                    isActive('/admin') ? 'bg-blue-600/20 text-blue-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] border border-blue-500/20 font-medium' : ''
                   }`}
                 >
-                  <BarChart className="w-4 h-4 mr-2" />
-                  Dashboard
+                  <BarChart className={`w-4 h-4 mr-2 ${isActive('/admin') ? 'text-blue-400' : ''}`} />
+                  Overview
                 </Button>
               </Link>
               <Link to="/admin/users">
                 <Button 
-                  variant={isActive('/admin/users') ? 'secondary' : 'ghost'} 
+                  variant="ghost"
                   size="sm" 
-                  className={`text-white hover:bg-white/20 transition-all duration-200 rounded-xl px-4 ${
-                    isActive('/admin/users') ? 'bg-white/30 shadow-lg' : ''
+                  className={`text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-4 py-2 h-auto ${
+                    isActive('/admin/users') ? 'bg-indigo-600/20 text-indigo-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] border border-indigo-500/20 font-medium' : ''
                   }`}
                 >
-                  <Users className="w-4 h-4 mr-2" />
-                  Users
+                  <Users className={`w-4 h-4 mr-2 ${isActive('/admin/users') ? 'text-indigo-400' : ''}`} />
+                  Identities
                 </Button>
               </Link>
               <Link to="/admin/content">
                 <Button 
-                  variant={isActive('/admin/content') ? 'secondary' : 'ghost'} 
+                  variant="ghost"
                   size="sm" 
-                  className={`text-white hover:bg-white/20 transition-all duration-200 rounded-xl px-4 ${
-                    isActive('/admin/content') ? 'bg-white/30 shadow-lg' : ''
+                  className={`text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-4 py-2 h-auto ${
+                    isActive('/admin/content') ? 'bg-emerald-600/20 text-emerald-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] border border-emerald-500/20 font-medium' : ''
                   }`}
                 >
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Content
+                  <BookOpen className={`w-4 h-4 mr-2 ${isActive('/admin/content') ? 'text-emerald-400' : ''}`} />
+                  Content Matrix
                 </Button>
               </Link>
               <Link to="/admin/grades">
                 <Button 
-                  variant={isActive('/admin/grades') ? 'secondary' : 'ghost'} 
+                  variant="ghost"
                   size="sm" 
-                  className={`text-white hover:bg-white/20 transition-all duration-200 rounded-xl px-4 ${
-                    isActive('/admin/grades') ? 'bg-white/30 shadow-lg' : ''
+                  className={`text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-4 py-2 h-auto ${
+                    isActive('/admin/grades') ? 'bg-purple-600/20 text-purple-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] border border-purple-500/20 font-medium' : ''
                   }`}
                 >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Grades & Subjects
+                  <Settings className={`w-4 h-4 mr-2 ${isActive('/admin/grades') ? 'text-purple-400' : ''}`} />
+                  Architecture
                 </Button>
               </Link>
             </nav>
@@ -93,8 +108,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-white/50 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
+      <div className="relative z-10 container mx-auto px-4 md:px-8 py-8 md:py-12">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           {children}
         </div>
       </div>

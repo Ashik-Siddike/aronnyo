@@ -35,6 +35,11 @@ import SpellingWizard from "./pages/SpellingWizard";
 import AnimalQuiz from "./pages/AnimalQuiz";
 import PlantExplorer from "./pages/PlantExplorer";
 import MemoryMatch from "./pages/MemoryMatch";
+import AIChatbot from "./components/AIChatbot";
+import ScrollToTop from "./components/ScrollToTop";
+import Leaderboard from "./pages/Leaderboard";
+import Attendance from "./pages/Attendance";
+import ReportCard from "./pages/ReportCard";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +51,8 @@ const App = () => (
         <Toaster />
         <Sonner />
         <DevelopmentOverlay />
+        <AIChatbot />
+        <ScrollToTop />
         <BrowserRouter>
           <Layout>
             <Routes>
@@ -69,6 +76,9 @@ const App = () => (
               <Route path="/animal-quiz" element={<AnimalQuiz />} />
               <Route path="/plant-explorer" element={<PlantExplorer />} />
               <Route path="/memory-match" element={<MemoryMatch />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/attendance" element={<Attendance />} />
+              <Route path="/report-card" element={<ReportCard />} />
               <Route path="/dashboard" element={
                 <DashboardErrorBoundary>
                   <StudentDashboard />

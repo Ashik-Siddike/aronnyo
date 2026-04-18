@@ -1,9 +1,8 @@
-// Static AuthContext - No Supabase dependency
-// Uses localStorage for authentication
-// Can be easily converted to Django API calls later
+// MongoDB-connected AuthContext
+// Uses Express API for authentication with MongoDB backend
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { staticUsers, storage, STORAGE_KEYS, mockDelay, User as StaticUser } from '@/data/staticData';
+import { authApi, LoginResponse } from '@/services/api';
 
 interface Profile {
   id: string;
@@ -43,36 +42,43 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const STORAGE_KEYS = {
+  AUTH_USER: 'play_learn_grow_auth_user',
+  AUTH_PROFILE: 'play_learn_grow_auth_profile',
+  AUTH_SESSION: 'play_learn_grow_auth_session',
+};
+
+const storage = {
+  get: <T,>(key: string): T | null => {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch {
+      return null;
+    }
+  },
+  set: <T,>(key: string, value: T): void => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  },
+  remove: (key: string): void => {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error removing from localStorage:', error);
+    }
+  },
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-// Mock user database (in real app, this would be Django API)
-const mockUsers: { [email: string]: { password: string; user: StaticUser } } = {
-  'ashiksiddike@gmail.com': {
-    password: 'ashik1234',
-    user: staticUsers[0]
-  },
-  'admin@school.com': {
-    password: 'admin123',
-    user: staticUsers[1]
-  },
-  'demo@school.com': {
-    password: 'demo123',
-    user: staticUsers[2]
-  },
-  'teacher@school.com': {
-    password: 'teacher123',
-    user: staticUsers[3]
-  },
-  'parent@school.com': {
-    password: 'parent123',
-    user: staticUsers[4]
-  },
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -85,17 +91,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const loadStoredAuth = async () => {
       try {
-        await mockDelay(200);
-        
         const storedUser = storage.get<User>(STORAGE_KEYS.AUTH_USER);
         const storedProfile = storage.get<Profile>(STORAGE_KEYS.AUTH_PROFILE);
         const storedSession = storage.get<Session>(STORAGE_KEYS.AUTH_SESSION);
 
         if (storedUser && storedProfile && storedSession) {
-          console.log('Loading stored auth:', storedUser.email);
-          setUser(storedUser);
-          setProfile(storedProfile);
-          setSession(storedSession);
+          // Check if session is still valid
+          if (storedSession.expires_at && storedSession.expires_at > Date.now()) {
+            console.log('🔐 Restoring session for:', storedUser.email);
+            setUser(storedUser);
+            setProfile(storedProfile);
+            setSession(storedSession);
+          } else {
+            console.log('⏰ Session expired, clearing auth');
+            storage.remove(STORAGE_KEYS.AUTH_USER);
+            storage.remove(STORAGE_KEYS.AUTH_PROFILE);
+            storage.remove(STORAGE_KEYS.AUTH_SESSION);
+          }
         }
       } catch (error) {
         console.error('Error loading stored auth:', error);
@@ -107,173 +119,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadStoredAuth();
   }, []);
 
+  const handleAuthResponse = (data: LoginResponse) => {
+    const authUser: User = data.user;
+    const authProfile: Profile = data.profile;
+    const authSession: Session = {
+      user: authUser,
+      access_token: data.session.access_token,
+      expires_at: data.session.expires_at
+    };
+
+    setUser(authUser);
+    setProfile(authProfile);
+    setSession(authSession);
+
+    // Save to localStorage
+    storage.set(STORAGE_KEYS.AUTH_USER, authUser);
+    storage.set(STORAGE_KEYS.AUTH_PROFILE, authProfile);
+    storage.set(STORAGE_KEYS.AUTH_SESSION, authSession);
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
-      await mockDelay(500); // Simulate API call
-      
-      console.log('Attempting to sign in with:', email);
-      
-      // Demo admin login
-      if (email === 'ashik' && password === 'ashik123') {
-        const adminUser = staticUsers.find(u => u.email === 'ashiksiddike@gmail.com');
-        if (adminUser) {
-          const mockUser: User = {
-            id: adminUser.id,
-            email: adminUser.email,
-            user_metadata: { full_name: adminUser.full_name, role: adminUser.role }
-          };
-          
-          const mockProfile: Profile = {
-            id: adminUser.id,
-            email: adminUser.email,
-            full_name: adminUser.full_name,
-            role: adminUser.role,
-            created_at: adminUser.created_at
-          };
-          
-          const mockSession: Session = {
-            user: mockUser,
-            access_token: 'mock-token',
-            expires_at: Date.now() + 3600000
-          };
-          
-          setUser(mockUser);
-          setProfile(mockProfile);
-          setSession(mockSession);
-          
-          // Save to localStorage
-          storage.set(STORAGE_KEYS.AUTH_USER, mockUser);
-          storage.set(STORAGE_KEYS.AUTH_PROFILE, mockProfile);
-          storage.set(STORAGE_KEYS.AUTH_SESSION, mockSession);
-          
-          return { error: null };
-        }
-      }
-      
-      // Check mock users database
-      const userData = mockUsers[email.toLowerCase()];
-      
-      if (!userData || userData.password !== password) {
-        return { error: { message: 'Invalid email or password' } };
-      }
-      
-      const staticUser = userData.user;
-      
-      const mockUser: User = {
-        id: staticUser.id,
-        email: staticUser.email,
-        user_metadata: { full_name: staticUser.full_name, role: staticUser.role }
-      };
-      
-      const mockProfile: Profile = {
-        id: staticUser.id,
-        email: staticUser.email,
-        full_name: staticUser.full_name,
-        role: staticUser.role,
-        created_at: staticUser.created_at
-      };
-      
-      const mockSession: Session = {
-        user: mockUser,
-        access_token: 'mock-token',
-        expires_at: Date.now() + 3600000
-      };
-      
-      console.log('Sign in successful:', mockUser.email);
-      
-      setUser(mockUser);
-      setProfile(mockProfile);
-      setSession(mockSession);
-      
-      // Save to localStorage
-      storage.set(STORAGE_KEYS.AUTH_USER, mockUser);
-      storage.set(STORAGE_KEYS.AUTH_PROFILE, mockProfile);
-      storage.set(STORAGE_KEYS.AUTH_SESSION, mockSession);
-      
+      console.log('🔑 Signing in via MongoDB API:', email);
+      const data = await authApi.login(email, password);
+      handleAuthResponse(data);
+      console.log('✅ Sign in successful:', data.user.email);
       return { error: null };
     } catch (error: any) {
-      console.error('Unexpected error during sign in:', error);
-      return { error };
+      console.error('❌ Sign in failed:', error.message);
+      return { error: { message: error.message || 'Invalid email or password' } };
     }
   };
 
   const signUp = async (email: string, password: string, fullName: string, role: string = 'student') => {
     try {
-      await mockDelay(500); // Simulate API call
-      
-      console.log('Attempting to sign up with:', { email, fullName, role });
-      
-      // Check if user already exists
-      if (mockUsers[email.toLowerCase()]) {
-        return { error: { message: 'User with this email already exists' } };
-      }
-      
-      // Create new user
-      const newUser: StaticUser = {
-        id: `user-${Date.now()}`,
-        email: email.toLowerCase(),
-        full_name: fullName,
-        role: role as any,
-        created_at: new Date().toISOString()
-      };
-      
-      // Add to mock database
-      mockUsers[email.toLowerCase()] = {
-        password,
-        user: newUser
-      };
-      
-      // Also add to staticUsers for consistency
-      staticUsers.push(newUser);
-      
-      const mockUser: User = {
-        id: newUser.id,
-        email: newUser.email,
-        user_metadata: { full_name: newUser.full_name, role: newUser.role }
-      };
-      
-      const mockProfile: Profile = {
-        id: newUser.id,
-        email: newUser.email,
-        full_name: newUser.full_name,
-        role: newUser.role,
-        created_at: newUser.created_at
-      };
-      
-      const mockSession: Session = {
-        user: mockUser,
-        access_token: 'mock-token',
-        expires_at: Date.now() + 3600000
-      };
-      
-      console.log('Sign up successful:', newUser.email);
-      
-      setUser(mockUser);
-      setProfile(mockProfile);
-      setSession(mockSession);
-      
-      // Save to localStorage
-      storage.set(STORAGE_KEYS.AUTH_USER, mockUser);
-      storage.set(STORAGE_KEYS.AUTH_PROFILE, mockProfile);
-      storage.set(STORAGE_KEYS.AUTH_SESSION, mockSession);
-      
+      console.log('📝 Registering via MongoDB API:', { email, fullName, role });
+      const data = await authApi.register(email, password, fullName, role);
+      handleAuthResponse(data);
+      console.log('✅ Registration successful:', data.user.email);
       return { error: null };
     } catch (error: any) {
-      console.error('Unexpected error during sign up:', error);
-      return { error };
+      console.error('❌ Registration failed:', error.message);
+      return { error: { message: error.message || 'Registration failed' } };
     }
   };
 
   const signOut = async () => {
     try {
-      await mockDelay(200);
-      console.log('Signing out user');
-      
+      console.log('👋 Signing out');
       setUser(null);
       setProfile(null);
       setSession(null);
-      
-      // Clear localStorage
+
       storage.remove(STORAGE_KEYS.AUTH_USER);
       storage.remove(STORAGE_KEYS.AUTH_PROFILE);
       storage.remove(STORAGE_KEYS.AUTH_SESSION);

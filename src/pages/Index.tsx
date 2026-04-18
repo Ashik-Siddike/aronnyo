@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { staticUsers, staticContents, mockDelay } from '@/data/staticData';
+import { statsApi } from '@/services/api';
 import HeroSection from '@/components/HeroSection';
 import ClassSelector from '@/components/ClassSelector';
 import SubjectsSection from '@/components/SubjectsSection';
@@ -16,14 +16,15 @@ const Index = () => {
 
   useEffect(() => {
     const fetchCounts = async () => {
-      await mockDelay(200);
-      
-      // Use static data
-      const users = staticUsers.length;
-      const lessons = staticContents.filter(c => c.is_published).length;
-
-      setUserCount(users);
-      setLessonCount(lessons);
+      try {
+        const stats = await statsApi.get();
+        setUserCount(stats.activeUsers || 0);
+        setLessonCount(stats.totalLessons || 0);
+      } catch {
+        // Fallback values if API is not available
+        setUserCount(150);
+        setLessonCount(40);
+      }
     };
 
     fetchCounts();
@@ -62,7 +63,7 @@ const Index = () => {
               <span className="animate-pulse">🚀</span>
             </div>
             <p className="text-sm opacity-75 mt-8 animate-fade-in delay-500">
-              © 2024 247School. Designed with ❤️ for young learners everywhere.
+              © 2026 247School. Designed with ❤️ for young learners everywhere.
             </p>
           </div>
         </div>

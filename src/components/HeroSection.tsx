@@ -60,14 +60,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-eduplay-orange via-eduplay-pink to-eduplay-purple bg-clip-text text-transparent animate-bounce-gentle">
-               Kids Learning Website!
+                  247School!
                 </span>
               </h1>
 
               <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 leading-relaxed animate-fade-in delay-300">
-                Where learning becomes an amazing adventure! 🚀
+                Learning 24/7, One Lesson at a Time! 🚀
                 <br />
-                <span className="text-base lg:text-lg">Join thousands of kids having fun while learning Math, English, Bangla & Science!</span>
+                <span className="text-base lg:text-lg">শিশুদের জন্য আনন্দময় শিক্ষা — Math, English, বাংলা ও Science!</span>
               </p>
             </div>
 
