@@ -20,6 +20,19 @@ app.use(express.json({ limit: '10mb' }));
 let db;
 let client;
 
+// Ensure DB connection middleware for Serverless (Vercel)
+app.use(async (req, res, next) => {
+  if (!db) {
+    try {
+      await connectDB();
+    } catch (error) {
+      console.error('Failed to connect to DB in middleware:', error);
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
+  }
+  next();
+});
+
 async function connectDB() {
   const uri = process.env.MONGODB_URI;
   const maxRetries = 3;
