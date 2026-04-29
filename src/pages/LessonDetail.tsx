@@ -153,6 +153,7 @@ const LessonDetail = () => {
   const handleComplete = async () => {
     if (!lessonContent) return;
 
+    // Keep local tracking for UI (already-completed indicator)
     try {
       const key = `plg_completed:${subject}`;
       const raw = localStorage.getItem(key);
@@ -163,25 +164,30 @@ const LessonDetail = () => {
         localStorage.setItem(key, JSON.stringify(completedIds));
       }
     } catch (e) {
-      console.warn('Failed to persist lesson completion', e);
+      console.warn('Failed to persist lesson completion locally', e);
     }
 
-    if (user && subject && lessonContent.title) {
-      const timeSpent = Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60));
-
+    // ✅ Save to MongoDB via ActivityService
+    if (subject && lessonContent.title) {
+      const timeSpent = Math.max(
+        Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60)),
+        1
+      );
       await trackLessonComplete(
         subject.charAt(0).toUpperCase() + subject.slice(1),
         lessonContent.title,
         {
           difficulty: lessonContent.difficulty || 'medium',
           slides_completed: lessonContent.slides.length,
-          lesson_id: id
+          lesson_id: id,
+          time_spent: timeSpent
         }
       );
     }
 
     navigate(`/quiz/${subject}/${id}`);
   };
+
 
   const progress = lessonContent ? ((currentSlide + 1) / lessonContent.slides.length) * 100 : 0;
   const contentTitle = dbContent?.title || lessonContent?.title || 'Lesson';

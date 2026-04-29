@@ -99,7 +99,7 @@ const games = [
 
 const GamesSection = () => {
   return (
-    <section className="py-16 lg:py-24 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <section id="games" className="py-16 lg:py-24 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center space-y-6 mb-16">

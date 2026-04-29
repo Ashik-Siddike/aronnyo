@@ -8,6 +8,9 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { StudentActivityProvider } from "./contexts/StudentActivityContext";
 import Layout from "./components/Layout";
 import DevelopmentOverlay from "./components/DevelopmentOverlay";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { LangProvider } from "./contexts/LangContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -40,14 +43,21 @@ import ScrollToTop from "./components/ScrollToTop";
 import Leaderboard from "./pages/Leaderboard";
 import Attendance from "./pages/Attendance";
 import ReportCard from "./pages/ReportCard";
+import AdminAttendance from "./components/admin/AdminAttendance";
+import AdminReportCard from "./components/admin/AdminReportCard";
+import StudentProfile from "./pages/StudentProfile";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <StudentActivityProvider>
-        <TooltipProvider>
+    <ThemeProvider>
+      <LangProvider>
+        <NotificationProvider>
+          <AuthProvider>
+            <StudentActivityProvider>
+              <TooltipProvider>
         <Toaster />
         <Sonner />
         <DevelopmentOverlay />
@@ -85,18 +95,25 @@ const App = () => (
                 </DashboardErrorBoundary>
               } />
               <Route path="/parent" element={<ParentPanel />} />
+              <Route path="/profile" element={<StudentProfile />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/content" element={<NewContentManager />} />
               <Route path="/admin/users" element={<NewUserManager />} />
               <Route path="/admin/grades" element={<NewGradeSubjectManager />} />
+              <Route path="/admin/attendance" element={<AdminAttendance />} />
+              <Route path="/admin/report-cards" element={<AdminReportCard />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
         </BrowserRouter>
         </TooltipProvider>
-      </StudentActivityProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+              </StudentActivityProvider>
+            </AuthProvider>
+          </NotificationProvider>
+        </LangProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
 );
 
 export default App;

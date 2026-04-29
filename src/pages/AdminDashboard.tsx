@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, BookOpen, BarChart, Settings, LogOut, GraduationCap, FileText, Eye, EyeOff, Activity, ShieldCheck, Database, Server, Award, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Users, BookOpen, BarChart, Settings, LogOut, GraduationCap, FileText, Eye, EyeOff, Activity, ShieldCheck, Database, Server, Award, RefreshCw, Calendar } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -258,7 +258,7 @@ const AdminDashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-2xl font-bold text-gray-800">System Modules</h2>
-            <Badge variant="outline" className="bg-white px-3 py-1 text-sm border-blue-200 text-blue-700">3 Active Modules</Badge>
+            <Badge variant="outline" className="bg-white px-3 py-1 text-sm border-blue-200 text-blue-700">4 Active Modules</Badge>
           </div>
           
           <div className="grid sm:grid-cols-2 gap-6">
@@ -302,7 +302,7 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden sm:col-span-2">
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
               <CardContent className="p-0">
                 <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                   <div className="p-3 bg-violet-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
@@ -310,19 +310,45 @@ const AdminDashboard = () => {
                   </div>
                   <Badge className="bg-violet-100 text-violet-700 hover:bg-violet-200 border-0 shadow-none">CONFIG</Badge>
                 </div>
-                <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-800 mb-2">Curriculum Architecture</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed max-w-md">Define the structural hierarchy of grades, subjects, and categorizations across the platform.</p>
-                  </div>
-                  <Link to="/admin/grades" className="w-full sm:w-auto">
-                    <Button className="w-full sm:w-auto px-8 bg-slate-900 hover:bg-violet-600 text-white rounded-xl shadow-md transition-colors duration-300">
-                      Configure Architecture
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Curriculum Architecture</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Define the structural hierarchy of grades and subjects.</p>
+                  <Link to="/admin/grades">
+                    <Button className="w-full bg-slate-900 hover:bg-violet-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                      Configure
                     </Button>
                   </Link>
                 </div>
               </CardContent>
             </Card>
+
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="p-3 bg-orange-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-0 shadow-none">OPERATIONS</Badge>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Class Operations</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Manage daily student attendance and issue report cards.</p>
+                  <div className="flex flex-col gap-3">
+                    <Link to="/admin/attendance">
+                      <Button className="w-full bg-slate-900 hover:bg-orange-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                        Manage Attendance
+                      </Button>
+                    </Link>
+                    <Link to="/admin/report-cards">
+                      <Button variant="outline" className="w-full border-orange-200 text-orange-700 hover:bg-orange-50 rounded-xl transition-colors duration-300">
+                        Report Cards
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
           </div>
         </div>
 

@@ -1,10 +1,9 @@
-// Static StudentActivityContext - No Supabase dependency
-// Uses localStorage for student activities
-// Can be easily converted to Django API calls later
+// StudentActivityContext — Real MongoDB API via ActivityService
+// localStorage replaced with real API calls
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { storage, STORAGE_KEYS, mockDelay, StudentActivity } from '@/data/staticData';
+import { ActivityService } from '@/services/activityService';
 
 interface Activity {
   id: string;
@@ -46,274 +45,187 @@ const StudentActivityContext = createContext<StudentActivityContextType | undefi
 
 export const useStudentActivity = () => {
   const context = useContext(StudentActivityContext);
-  if (!context) {
-    throw new Error('useStudentActivity must be used within a StudentActivityProvider');
-  }
+  if (!context) throw new Error('useStudentActivity must be used within a StudentActivityProvider');
   return context;
 };
 
-interface StudentActivityProviderProps {
-  children: ReactNode;
-}
+const getLevelFromStars = (stars: number): string => {
+  if (stars >= 1000) return 'Master Scholar';
+  if (stars >= 500)  return 'Learning Champion';
+  if (stars >= 200)  return 'Rising Star';
+  if (stars >= 50)   return 'Curious Learner';
+  return 'Beginner Explorer';
+};
 
-export const StudentActivityProvider: React.FC<StudentActivityProviderProps> = ({ children }) => {
+const getSubjectColor = (subject: string) => ({
+  'Math': 'text-eduplay-blue', 'English': 'text-eduplay-green',
+  'Bangla': 'text-eduplay-orange', 'Science': 'text-eduplay-purple'
+}[subject] || 'text-gray-600');
+
+const formatTime = (minutes: number) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+};
+
+export const StudentActivityProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [stats, setStats] = useState<StudentStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load student activities from localStorage
-  const loadStudentData = async () => {
+  // ── Load from real API ────────────────────────────────────────────────────
+  const loadStudentData = useCallback(async () => {
     if (!user) return;
-
     setLoading(true);
     setError(null);
 
     try {
-      await mockDelay(200);
-      
-      // Load from localStorage
-      const storedActivities = storage.get<Activity[]>(STORAGE_KEYS.STUDENT_ACTIVITIES) || [];
-      const userActivities = storedActivities.filter(a => a.student_id === user.id);
-      
-      setActivities(userActivities);
-      await calculateStats(userActivities);
+      const [profileStats, recentActivities] = await Promise.all([
+        ActivityService.getStudentStats(),
+        ActivityService.getRecentActivities(30)
+      ]);
 
+      const acts: Activity[] = (recentActivities || []).map((a: any) => ({
+        id: a._id || a.id || String(Math.random()),
+        student_id: a.student_id || user.id,
+        activity_type: a.activity_type,
+        subject: a.subject || '',
+        lesson_name: a.lesson_name || '',
+        score: a.score || 0,
+        stars_earned: a.stars_earned || 0,
+        time_spent: a.time_spent || 0,
+        created_at: a.created_at || new Date().toISOString(),
+        metadata: a.metadata
+      }));
+      setActivities(acts);
+
+      // Build stats from profile data (from DB)
+      if (profileStats) {
+        setStats({
+          total_stars: profileStats.total_stars || 0,
+          total_lessons_completed: profileStats.lessons_completed || 0,
+          total_time_spent: Math.round((profileStats.hours_learned || 0) * 60),
+          current_streak: profileStats.streak || 0,
+          badges_earned: profileStats.badges || 0,
+          accuracy_percentage: Math.round(profileStats.accuracy || 0),
+          favorite_subject: undefined,
+          level: profileStats.level || getLevelFromStars(profileStats.total_stars || 0),
+          rank: 0
+        });
+      } else {
+        setStats({ total_stars: 0, total_lessons_completed: 0, total_time_spent: 0, current_streak: 0, badges_earned: 0, accuracy_percentage: 0, level: 'Beginner Explorer', rank: 0 });
+      }
     } catch (err: any) {
-      console.error('Error loading student data:', err);
+      console.error('Error loading student data from API:', err);
       setError(err.message);
+      // Fallback empty state
+      setStats({ total_stars: 0, total_lessons_completed: 0, total_time_spent: 0, current_streak: 0, badges_earned: 0, accuracy_percentage: 0, level: 'Beginner Explorer', rank: 0 });
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  // Calculate student statistics
-  const calculateStats = async (activitiesData: Activity[]) => {
-    if (!user || !activitiesData.length) {
-      setStats({
-        total_stars: 0,
-        total_lessons_completed: 0,
-        total_time_spent: 0,
-        current_streak: 0,
-        badges_earned: 0,
-        accuracy_percentage: 0,
-        level: 'Beginner Explorer',
-        rank: 0
-      });
-      return;
-    }
-
-    const totalStars = activitiesData.reduce((sum, activity) => sum + activity.stars_earned, 0);
-    const totalTimeSpent = activitiesData.reduce((sum, activity) => sum + activity.time_spent, 0);
-    const lessonsCompleted = activitiesData.filter(a => a.activity_type === 'lesson_completed').length;
-    const quizzes = activitiesData.filter(a => a.activity_type === 'quiz_completed');
-    const averageScore = quizzes.length > 0 
-      ? quizzes.reduce((sum, quiz) => sum + (quiz.score || 0), 0) / quizzes.length 
-      : 0;
-
-    const streak = calculateStreak(activitiesData);
-    const level = getLevelFromStars(totalStars);
-    const badges = activitiesData.filter(a => a.activity_type === 'achievement_earned').length;
-
-    const subjectCounts: { [key: string]: number } = {};
-    activitiesData.forEach(activity => {
-      if (activity.subject) {
-        subjectCounts[activity.subject] = (subjectCounts[activity.subject] || 0) + 1;
-      }
-    });
-    const favoriteSubject = Object.keys(subjectCounts).reduce((a, b) => 
-      subjectCounts[a] > subjectCounts[b] ? a : b, '');
-
-    setStats({
-      total_stars: totalStars,
-      total_lessons_completed: lessonsCompleted,
-      total_time_spent: Math.round(totalTimeSpent),
-      current_streak: streak,
-      badges_earned: badges,
-      accuracy_percentage: Math.round(averageScore),
-      favorite_subject: favoriteSubject,
-      level: level,
-      rank: 0
-    });
-  };
-
-  const calculateStreak = (activitiesData: Activity[]): number => {
-    if (!activitiesData.length) return 0;
-
-    const dates = [...new Set(activitiesData.map(a => 
-      new Date(a.created_at).toDateString()
-    ))].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-
-    let streak = 0;
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
-
-    if (dates[0] === today || dates[0] === yesterday) {
-      streak = 1;
-      let currentDate = new Date(dates[0]);
-      
-      for (let i = 1; i < dates.length; i++) {
-        const prevDate = new Date(currentDate);
-        prevDate.setDate(prevDate.getDate() - 1);
-        
-        if (dates[i] === prevDate.toDateString()) {
-          streak++;
-          currentDate = new Date(dates[i]);
-        } else {
-          break;
-        }
-      }
-    }
-
-    return streak;
-  };
-
-  const getLevelFromStars = (stars: number): string => {
-    if (stars >= 2000) return 'Master Scholar';
-    if (stars >= 1500) return 'Advanced Explorer';
-    if (stars >= 1000) return 'Knowledge Seeker';
-    if (stars >= 500) return 'Learning Champion';
-    if (stars >= 200) return 'Rising Star';
-    if (stars >= 50) return 'Curious Learner';
-    return 'Beginner Explorer';
-  };
-
+  // ── addActivity — sends to real API ──────────────────────────────────────
   const addActivity = async (activityData: Omit<Activity, 'id' | 'student_id' | 'created_at'>) => {
     if (!user) return;
-
     try {
-      await mockDelay(200);
-      
+      if (activityData.activity_type === 'lesson_completed') {
+        await ActivityService.trackLessonCompletion(
+          activityData.subject,
+          activityData.lesson_name || 'Lesson',
+          activityData.time_spent,
+          activityData.metadata
+        );
+      } else if (activityData.activity_type === 'quiz_completed') {
+        const total = activityData.metadata?.total_questions || 10;
+        const correct = activityData.metadata?.correct_answers || Math.round(((activityData.score || 0) / 100) * total);
+        await ActivityService.submitQuiz(
+          activityData.subject,
+          activityData.lesson_name || 'Quiz',
+          activityData.score || 0,
+          correct, total,
+          activityData.time_spent,
+          activityData.metadata
+        );
+      } else {
+        await ActivityService.trackGameCompletion(
+          activityData.lesson_name || activityData.subject,
+          activityData.score || 0,
+          activityData.time_spent,
+          activityData.metadata
+        );
+      }
+
+      // Optimistically update local state
       const newActivity: Activity = {
         ...activityData,
-        id: `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `activity-${Date.now()}`,
         student_id: user.id,
         created_at: new Date().toISOString()
       };
-
-      // Load existing activities
-      const storedActivities = storage.get<Activity[]>(STORAGE_KEYS.STUDENT_ACTIVITIES) || [];
-      const updatedActivities = [newActivity, ...storedActivities];
-      
-      // Save to localStorage
-      storage.set(STORAGE_KEYS.STUDENT_ACTIVITIES, updatedActivities);
-      
-      // Update state
       setActivities(prev => [newActivity, ...prev]);
-      await calculateStats([newActivity, ...activities]);
 
+      // Refresh stats from DB
+      await loadStudentData();
     } catch (err: any) {
-      console.error('Error adding activity:', err);
-      setError(err.message);
+      console.error('Error adding activity to API:', err);
     }
   };
 
+  // ── getWeeklyActivity from loaded activities ───────────────────────────
   const getWeeklyActivity = () => {
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
-    const weekData = [];
-
-    for (let i = 6; i >= 0; i--) {
+    return Array.from({ length: 7 }, (_, i) => {
       const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const dayName = weekDays[date.getDay()];
-      
-      const dayActivities = activities.filter(activity => {
-        const activityDate = new Date(activity.created_at);
-        return activityDate.toDateString() === date.toDateString();
-      });
-
-      const lessons = dayActivities.filter(a => a.activity_type === 'lesson_completed').length;
-      const stars = dayActivities.reduce((sum, a) => sum + a.stars_earned, 0);
-      const minutes = dayActivities.reduce((sum, a) => sum + a.time_spent, 0);
-
-      weekData.push({
-        day: dayName,
-        lessons,
-        stars,
-        minutes
-      });
-    }
-
-    return weekData;
+      date.setDate(date.getDate() - (6 - i));
+      const dayActivities = activities.filter(a =>
+        new Date(a.created_at).toDateString() === date.toDateString()
+      );
+      return {
+        day: weekDays[date.getDay()],
+        lessons: dayActivities.filter(a => a.activity_type === 'lesson_completed').length,
+        stars: dayActivities.reduce((s, a) => s + a.stars_earned, 0),
+        minutes: dayActivities.reduce((s, a) => s + a.time_spent, 0)
+      };
+    });
   };
 
+  // ── getSubjectProgress from loaded activities ──────────────────────────
   const getSubjectProgress = () => {
-    const subjects = ['Math', 'English', 'Bangla', 'Science'];
-    const subjectIcons = {
-      'Math': '🔢',
-      'English': '📖', 
-      'Bangla': '🇧🇩',
-      'Science': '🔬'
-    };
-
-    return subjects.map(subject => {
-      const subjectActivities = activities.filter(a => a.subject === subject);
-      const lessonsCompleted = subjectActivities.filter(a => a.activity_type === 'lesson_completed').length;
-      const quizzes = subjectActivities.filter(a => a.activity_type === 'quiz_completed');
-      const averageScore = quizzes.length > 0 
-        ? quizzes.reduce((sum, quiz) => sum + (quiz.score || 0), 0) / quizzes.length 
-        : 0;
-      const timeSpent = subjectActivities.reduce((sum, a) => sum + a.time_spent, 0);
-      
-      const progress = Math.min((lessonsCompleted / 20) * 100, 100);
-
+    const subjectDefs = [
+      { name: 'Math', icon: '🔢' }, { name: 'English', icon: '📖' },
+      { name: 'Bangla', icon: '🇧🇩' }, { name: 'Science', icon: '🔬' }
+    ];
+    return subjectDefs.map(({ name, icon }) => {
+      const subActivities = activities.filter(a => a.subject === name);
+      const lessonsCompleted = subActivities.filter(a => a.activity_type === 'lesson_completed').length;
+      const quizzes = subActivities.filter(a => a.activity_type === 'quiz_completed');
+      const avgScore = quizzes.length > 0 ? Math.round(quizzes.reduce((s, q) => s + (q.score || 0), 0) / quizzes.length) : 0;
+      const timeSpent = subActivities.reduce((s, a) => s + a.time_spent, 0);
       return {
-        name: subject,
-        progress: Math.round(progress),
-        icon: subjectIcons[subject as keyof typeof subjectIcons],
-        color: getSubjectColor(subject),
+        name, icon,
+        color: getSubjectColor(name),
+        progress: Math.min(Math.round((lessonsCompleted / 20) * 100), 100),
         lessonsCompleted,
         totalLessons: 20,
-        lastScore: Math.round(averageScore),
+        lastScore: avgScore,
         timeSpent: formatTime(timeSpent)
       };
     });
   };
 
-  const getSubjectColor = (subject: string) => {
-    const colors = {
-      'Math': 'text-eduplay-blue',
-      'English': 'text-eduplay-green',
-      'Bangla': 'text-eduplay-orange',
-      'Science': 'text-eduplay-purple'
-    };
-    return colors[subject as keyof typeof colors] || 'text-gray-600';
-  };
-
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  };
-
-  const refreshStats = async () => {
-    await loadStudentData();
-  };
+  const refreshStats = async () => { await loadStudentData(); };
 
   useEffect(() => {
-    if (user) {
-      loadStudentData();
-    } else {
-      setActivities([]);
-      setStats(null);
-    }
-  }, [user]);
-
-  const value: StudentActivityContextType = {
-    activities,
-    stats,
-    loading,
-    error,
-    addActivity,
-    getWeeklyActivity,
-    getSubjectProgress,
-    refreshStats
-  };
+    if (user) loadStudentData();
+    else { setActivities([]); setStats(null); }
+  }, [user, loadStudentData]);
 
   return (
-    <StudentActivityContext.Provider value={value}>
+    <StudentActivityContext.Provider value={{ activities, stats, loading, error, addActivity, getWeeklyActivity, getSubjectProgress, refreshStats }}>
       {children}
     </StudentActivityContext.Provider>
   );

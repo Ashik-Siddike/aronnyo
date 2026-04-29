@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { ActivityService } from '@/services/activityService';
-import { useStudentActivity } from '@/contexts/StudentActivityContext';
 import { useToast } from '@/hooks/use-toast';
 
 interface LessonProgressHook {
@@ -14,59 +13,48 @@ interface LessonProgressHook {
 export const useLessonProgress = (): LessonProgressHook => {
   const [isTracking, setIsTracking] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
-  const { refreshStats } = useStudentActivity();
   const { toast } = useToast();
 
   const trackLessonStart = useCallback((subject: string, lessonName: string) => {
     setStartTime(new Date());
-    console.log(`Started lesson: ${lessonName} in ${subject}`);
+    console.log(`📖 Started: ${lessonName} in ${subject}`);
   }, []);
 
+  // ── Lesson Complete → MongoDB via ActivityService ────────────────────────
   const trackLessonComplete = useCallback(async (
-    subject: string, 
-    lessonName: string, 
+    subject: string,
+    lessonName: string,
     metadata?: any
   ) => {
-    if (isTracking) return; // Prevent duplicate tracking
-    
+    if (isTracking) return;
     setIsTracking(true);
-    
+
     try {
-      const timeSpent = startTime 
-        ? Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60)) 
-        : 10; // Default 10 minutes if start time not tracked
+      const timeSpent = startTime
+        ? Math.max(Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60)), 1)
+        : 10;
 
-      await ActivityService.trackLessonCompletion(
-        subject,
-        lessonName,
-        Math.max(timeSpent, 1), // Minimum 1 minute
-        metadata
-      );
+      await ActivityService.trackLessonCompletion(subject, lessonName, timeSpent, metadata);
 
-      // Refresh stats to update dashboard
-      await refreshStats();
-
-      // Show success message
       toast({
-        title: "Lesson Completed! 🎉",
-        description: `Great job completing "${lessonName}"! You earned stars for your progress.`,
+        title: "পাঠ সম্পন্ন! 🎉",
+        description: `"${lessonName}" সফলভাবে শেষ করেছো! Stars অর্জিত হয়েছে।`,
       });
 
-      console.log(`Lesson completed: ${lessonName} in ${subject}, Time: ${timeSpent} minutes`);
-      
+      console.log(`✅ Lesson saved to MongoDB: ${lessonName} | ${timeSpent}min`);
     } catch (error) {
-      console.error('Error tracking lesson completion:', error);
+      console.error('Lesson tracking error:', error);
       toast({
-        title: "Progress Saved",
-        description: "Your lesson progress has been recorded.",
-        variant: "default",
+        title: "পাঠ সম্পন্ন!",
+        description: "তোমার অগ্রগতি সংরক্ষিত হয়েছে।",
       });
     } finally {
       setIsTracking(false);
       setStartTime(null);
     }
-  }, [isTracking, startTime, refreshStats, toast]);
+  }, [isTracking, startTime, toast]);
 
+  // ── Quiz Complete → MongoDB via ActivityService ──────────────────────────
   const trackQuizComplete = useCallback(async (
     subject: string,
     quizName: string,
@@ -75,90 +63,68 @@ export const useLessonProgress = (): LessonProgressHook => {
     metadata?: any
   ) => {
     if (isTracking) return;
-    
     setIsTracking(true);
-    
+
     try {
-      const timeSpent = startTime 
-        ? Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60)) 
-        : 5; // Default 5 minutes for quiz
+      const timeSpent = startTime
+        ? Math.max(Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60)), 1)
+        : 5;
 
-      await ActivityService.trackQuizCompletion(
-        subject,
-        quizName,
-        score,
-        totalQuestions,
-        Math.max(timeSpent, 1),
-        metadata
-      );
+      const correctAnswers = metadata?.correct_answers ?? Math.round((score / 100) * totalQuestions);
+      await ActivityService.submitQuiz(subject, quizName, score, correctAnswers, totalQuestions, timeSpent, metadata);
 
-      // Refresh stats
-      await refreshStats();
-
-      // Show success message with score
-      const correctAnswers = Math.round((score / 100) * totalQuestions);
+      const emoji = score >= 80 ? '🌟' : '👍';
       toast({
-        title: `Quiz Completed! ${score >= 80 ? '🌟' : '👍'}`,
-        description: `You scored ${score}% (${correctAnswers}/${totalQuestions} correct) on "${quizName}"!`,
+        title: `Quiz সম্পন্ন! ${emoji}`,
+        description: `Score: ${score}% (${correctAnswers}/${totalQuestions}) — Profile আপডেট হয়েছে!`,
       });
 
-      console.log(`Quiz completed: ${quizName}, Score: ${score}%, Time: ${timeSpent} minutes`);
-      
+      console.log(`✅ Quiz saved to MongoDB: ${quizName} | ${score}%`);
     } catch (error) {
-      console.error('Error tracking quiz completion:', error);
+      console.error('Quiz tracking error:', error);
       toast({
-        title: "Quiz Results Saved",
-        description: `Your quiz score of ${score}% has been recorded.`,
+        title: "Quiz সম্পন্ন!",
+        description: `Score ${score}% সংরক্ষিত হয়েছে।`,
       });
     } finally {
       setIsTracking(false);
       setStartTime(null);
     }
-  }, [isTracking, startTime, refreshStats, toast]);
+  }, [isTracking, startTime, toast]);
 
+  // ── Game Complete → MongoDB via ActivityService ──────────────────────────
   const trackGameComplete = useCallback(async (
     gameName: string,
     score: number,
     metadata?: any
   ) => {
     if (isTracking) return;
-    
     setIsTracking(true);
-    
+
     try {
-      const timeSpent = startTime 
-        ? Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60)) 
-        : 3; // Default 3 minutes for games
+      const timeSpent = startTime
+        ? Math.max(Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60)), 1)
+        : 3;
 
-      await ActivityService.trackGameCompletion(
-        gameName,
-        score,
-        Math.max(timeSpent, 1),
-        metadata
-      );
+      await ActivityService.trackGameCompletion(gameName, score, timeSpent, metadata);
 
-      // Refresh stats
-      await refreshStats();
-
-      // Show success message
       toast({
-        title: "Game Completed! 🎮",
-        description: `Awesome! You scored ${score} points in "${gameName}".`,
+        title: "Game শেষ! 🎮",
+        description: `দারুণ! "${gameName}" এ ${score} পয়েন্ট পেয়েছো।`,
       });
 
-      console.log(`Game completed: ${gameName}, Score: ${score}, Time: ${timeSpent} minutes`);
-      
+      console.log(`✅ Game saved to MongoDB: ${gameName} | ${score}pts`);
     } catch (error) {
-      console.error('Error tracking game completion:', error);
+      console.error('Game tracking error:', error);
       toast({
-        title: "Game Progress Saved",
-        description: `Your game score of ${score} points has been recorded.`,
+        title: "Game সম্পন্ন!",
+        description: `${score} পয়েন্ট সংরক্ষিত হয়েছে।`,
       });
     } finally {
       setIsTracking(false);
       setStartTime(null);
     }
-  }, [isTracking, startTime, refreshStats, toast]);
+  }, [isTracking, startTime, toast]);
 
   return {
     isTracking,

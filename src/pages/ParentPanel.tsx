@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { dashboardApi } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -15,11 +17,13 @@ const ParentPanel = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  const [period, setPeriod] = useState('week'); // 'today', 'week', 'month', 'session'
+
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
         setLoading(true);
-        const data = await dashboardApi.getParentDashboard(user?.id);
+        const data = await dashboardApi.getParentDashboard(user?.id, period);
         setChildData(data);
       } catch (err: any) {
         console.error('Failed to fetch dashboard:', err);
@@ -29,7 +33,7 @@ const ParentPanel = () => {
       }
     };
     fetchDashboard();
-  }, [user]);
+  }, [user, period]);
 
   if (loading) {
     return (
@@ -78,27 +82,43 @@ const ParentPanel = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Time Period Filter */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">Performance Summary</h2>
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-[180px] bg-white">
+              <SelectValue placeholder="Select Time Period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="session">This Session</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Weekly Overview */}
         <Card className="mb-8 border-0 playful-shadow">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Calendar className="w-6 h-6 text-eduplay-blue" />
-              <span>This Week's Summary</span>
-              <Badge className="bg-eduplay-green text-white">{childData.weeklyStats.improvement} improvement</Badge>
+              <span className="capitalize">Summary ({period})</span>
+              <Badge className="bg-eduplay-green text-white">{childData.periodStats.improvement} improvement</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-eduplay-blue">{childData.weeklyStats.lessonsThisWeek}</div>
+                <div className="text-3xl font-bold text-eduplay-blue">{childData.periodStats.lessonsCompleted}</div>
                 <div className="text-sm text-gray-600">Lessons Completed</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-eduplay-orange">{childData.weeklyStats.starsEarned}</div>
+                <div className="text-3xl font-bold text-eduplay-orange">{childData.periodStats.starsEarned}</div>
                 <div className="text-sm text-gray-600">Stars Earned</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-eduplay-green">{childData.weeklyStats.timeSpent}</div>
+                <div className="text-3xl font-bold text-eduplay-green">{childData.periodStats.timeSpent}</div>
                 <div className="text-sm text-gray-600">Time Spent</div>
               </div>
               <div className="text-center">
@@ -110,8 +130,41 @@ const ParentPanel = () => {
         </Card>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Subject Performance */}
+          {/* Main Column */}
           <div className="lg:col-span-2 space-y-8">
+            
+            {/* Performance Graph */}
+            <Card className="border-0 playful-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <TrendingUp className="w-6 h-6 text-eduplay-blue" />
+                  <span className="capitalize">Activity Chart ({period})</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={childData.timeData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tickMargin={10} />
+                      <YAxis axisLine={false} tickLine={false} tickMargin={10} />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      />
+                      <Area type="monotone" dataKey="score" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorScore)" name="Score/Stars" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Subject Performance */}
             <Card className="border-0 playful-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">

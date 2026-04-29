@@ -1,9 +1,11 @@
-
 import { useState } from 'react';
-import { Menu, X, Home, BookOpen, BarChart3, GraduationCap, Trophy, Users, Calendar, Award, ChevronDown } from 'lucide-react';
+import { Menu, X, Home, BookOpen, BarChart3, GraduationCap, Trophy, Users, Calendar, Award, ChevronDown, Moon, Sun, Languages, Gamepad2, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import UserProfileButton from '@/components/UserProfileButton';
+import NotificationBell from '@/components/NotificationBell';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useLang } from '@/contexts/LangContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,305 +17,243 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
-  const navItems = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/subjects", label: "Subjects", icon: BookOpen },
-    { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
-  ];
+  const { isDark, toggleTheme } = useTheme();
+  const { lang, setLang, t } = useLang();
 
   const standards = [
-    'Nursery',
-    '1st Standard', '2nd Standard', '3rd Standard', '4th Standard', '5th Standard'
+    'Nursery', '1st Standard', '2nd Standard', '3rd Standard', '4th Standard', '5th Standard'
   ];
 
   const isActive = (href: string) => {
-    if (href === "/") {
-      return location.pathname === "/" && !location.hash;
-    }
-    if (href === "/#hero-section") {
-      return location.pathname === "/" && (!location.hash || location.hash === "#hero-section");
-    }
+    if (href === "/") return location.pathname === "/" && !location.hash;
+    if (href === "/#hero-section") return location.pathname === "/" && (!location.hash || location.hash === "#hero-section");
     return location.pathname.includes(href.replace("#", ""));
-  };
-
-  const handleSubjectsClick = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    if (location.pathname === "/") {
-      const subjectsSection = document.getElementById('subjects');
-      if (subjectsSection) {
-        subjectsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      navigate('/#subjects');
-    }
-  };
-
-
-
-  const handleStandardSelect = (standard: string) => {
-    const standardNumber = standard.split(' ')[0];
-    navigate(`/class/${standardNumber}`);
-  };
-
-  const handleClassDropdownSelect = (standard: string) => {
-    if (standard === 'Nursery') {
-      handleSubjectsClick();
-    } else {
-      handleStandardSelect(standard);
-    }
   };
 
   const handleHomeClick = (e: React.MouseEvent) => {
     if (location.pathname === "/") {
       e.preventDefault();
-      const heroSection = document.getElementById('hero-section');
-      if (heroSection) {
-        heroSection.scrollIntoView({ behavior: 'smooth' });
-      }
+      document.getElementById('hero-section')?.scrollIntoView({ behavior: 'smooth' });
     } else {
       navigate('/#hero-section');
     }
   };
 
+  const handleSubjectsClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (location.pathname === "/") {
+      document.getElementById('subjects')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/#subjects');
+    }
+  };
+
+  const handleGamesClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (location.pathname === "/") {
+      document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/#games');
+    }
+  };
+
+  const handleStandardSelect = (standard: string) => {
+    if (standard === 'Nursery') handleSubjectsClick();
+    else navigate(`/class/${standard.split(' ')[0]}`);
+  };
+
+  const NavItemStyles = (active: boolean) =>
+    `text-lg font-bold transition-all duration-300 hover:scale-105 flex items-center space-x-2 px-4 py-2 rounded-xl ${
+      active
+        ? 'text-eduplay-purple bg-eduplay-purple/10 shadow-sm'
+        : 'text-gray-600 dark:text-gray-300 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
+    }`;
+
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b-2 border-eduplay-purple/20 sticky top-0 z-50 shadow-lg">
-      <div className="container mx-auto px-4 py-3 lg:py-4">
+    <header className="bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b-2 border-eduplay-purple/20 sticky top-0 z-50 shadow-sm">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/#hero-section" className="flex items-center space-x-2 animate-scale-in">
-            <img 
-              src="/assets/logo-2.png" 
-              alt="247School Logo"
-              className="h-8 lg:h-10 animate-bounce-gentle"
-            />
+          
+          {/* 1. Logo (Left) */}
+          <Link to="/#hero-section" onClick={handleHomeClick} className="flex items-center space-x-2 animate-scale-in">
+            <div className="bg-eduplay-purple text-white p-2 rounded-xl shadow-md rotate-3 hover:rotate-0 transition-transform">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <span className="text-2xl font-black bg-gradient-to-r from-eduplay-purple to-eduplay-blue bg-clip-text text-transparent hidden sm:block">
+              247School
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6">
-            {/* Home */}
-            <Link
-              to="/#hero-section"
-              onClick={handleHomeClick}
-              className={`text-lg font-semibold transition-all duration-300 hover:scale-105 animate-fade-in flex items-center space-x-1 px-3 py-2 rounded-lg ${
-                isActive("/#hero-section")
-                  ? 'text-eduplay-purple bg-eduplay-purple/10'
-                  : 'text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
-              }`}
-            >
-              <Home className="w-4 h-4" />
-              <span>Home</span>
-            </Link>
+          {/* 2. Main Navigation (Center) - Desktop */}
+          <nav className="hidden lg:flex items-center space-x-2">
             
-            {/* Classes Dropdown */}
+            {/* Home */}
+            <Link to="/#hero-section" onClick={handleHomeClick} className={NavItemStyles(isActive("/#hero-section"))}>
+              <Home className="w-5 h-5 text-eduplay-orange" />
+              <span>{t.home}</span>
+            </Link>
+
+            {/* Learn Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="text-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-1 px-3 py-2 rounded-lg text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5"
-                >
-                  <GraduationCap className="w-4 h-4" />
-                  <span>Classes</span>
-                </Button>
+                <button className={NavItemStyles(isActive("/subjects") || location.pathname.includes('/class/'))}>
+                  <BookOpen className="w-5 h-5 text-eduplay-green" />
+                  <span>{t.learn}</span>
+                  <ChevronDown className="w-4 h-4 opacity-50" />
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white border border-gray-200 shadow-lg">
-                {standards.map((standard) => (
-                  <DropdownMenuItem
-                    key={standard}
-                    onClick={() => handleClassDropdownSelect(standard)}
-                    className="cursor-pointer hover:bg-eduplay-purple/10"
-                  >
-                    {standard}
+              <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900 border-2 border-eduplay-green/20 rounded-xl p-2 shadow-xl">
+                <div className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">{t.subjects}</div>
+                <DropdownMenuItem onClick={() => handleSubjectsClick()} className="cursor-pointer rounded-lg hover:bg-eduplay-green/10 text-base font-semibold py-2">
+                  <BookOpen className="w-5 h-5 mr-3 text-eduplay-green" /> All Subjects
+                </DropdownMenuItem>
+                <div className="my-1 border-t border-gray-100 dark:border-slate-800"></div>
+                <div className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">{t.classes}</div>
+                {standards.map((s) => (
+                  <DropdownMenuItem key={s} onClick={() => handleStandardSelect(s)} className="cursor-pointer rounded-lg hover:bg-eduplay-purple/10 text-base font-medium py-2">
+                    <GraduationCap className="w-4 h-4 mr-3 text-eduplay-purple opacity-70" /> {s}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Subjects */}
-            <Link
-              to="/#subjects"
-              onClick={handleSubjectsClick}
-              className={`text-lg font-semibold transition-all duration-300 hover:scale-105 animate-fade-in flex items-center space-x-1 px-3 py-2 rounded-lg ${
-                isActive("/subjects")
-                  ? 'text-eduplay-purple bg-eduplay-purple/10'
-                  : 'text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Subjects</span>
+            {/* Games */}
+            <Link to="/#games" onClick={handleGamesClick} className={NavItemStyles(isActive("/#games"))}>
+              <Gamepad2 className="w-5 h-5 text-pink-500" />
+              <span>{t.games}</span>
             </Link>
 
-            {/* Dashboard */}
-            <Link
-              to="/dashboard"
-              className={`text-lg font-semibold transition-all duration-300 hover:scale-105 animate-fade-in flex items-center space-x-1 px-3 py-2 rounded-lg ${
-                isActive("/dashboard")
-                  ? 'text-eduplay-purple bg-eduplay-purple/10'
-                  : 'text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
-              }`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Dashboard</span>
-            </Link>
-            {/* More Dropdown */}
+            {/* Progress Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="text-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-1 px-3 py-2 rounded-lg text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5"
-                >
-                  <span>More</span>
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
+                <button className={NavItemStyles(location.pathname === "/dashboard" || location.pathname === "/profile" || location.pathname === "/leaderboard")}>
+                  <Trophy className="w-5 h-5 text-yellow-500" />
+                  <span>{t.progressMenu}</span>
+                  <ChevronDown className="w-4 h-4 opacity-50" />
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-52 bg-white border border-gray-200 shadow-lg">
-                <DropdownMenuItem onClick={() => navigate('/leaderboard')} className="cursor-pointer hover:bg-eduplay-purple/10">
-                  <Trophy className="w-4 h-4 mr-2 text-eduplay-orange" />
-                  Leaderboard 🏆
+              <DropdownMenuContent className="w-52 bg-white dark:bg-slate-900 border-2 border-yellow-500/20 rounded-xl p-2 shadow-xl">
+                <DropdownMenuItem onClick={() => navigate('/dashboard')} className="cursor-pointer rounded-lg hover:bg-yellow-500/10 text-base font-semibold py-2">
+                  <BarChart3 className="w-5 h-5 mr-3 text-eduplay-blue" /> {t.dashboard}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/attendance')} className="cursor-pointer hover:bg-eduplay-purple/10">
-                  <Calendar className="w-4 h-4 mr-2 text-eduplay-blue" />
-                  Attendance 📋
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer rounded-lg hover:bg-yellow-500/10 text-base font-semibold py-2">
+                  <UserCircle className="w-5 h-5 mr-3 text-eduplay-purple" /> {t.profile}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/report-card')} className="cursor-pointer hover:bg-eduplay-purple/10">
-                  <Award className="w-4 h-4 mr-2 text-eduplay-green" />
-                  Report Card 📄
+                <DropdownMenuItem onClick={() => navigate('/leaderboard')} className="cursor-pointer rounded-lg hover:bg-yellow-500/10 text-base font-semibold py-2">
+                  <Trophy className="w-5 h-5 mr-3 text-yellow-500" /> {t.leaderboard}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/teams')} className="cursor-pointer hover:bg-eduplay-purple/10">
-                  <Users className="w-4 h-4 mr-2 text-eduplay-purple" />
-                  Teams 👥
+                <div className="my-1 border-t border-gray-100 dark:border-slate-800"></div>
+                <DropdownMenuItem onClick={() => navigate('/attendance')} className="cursor-pointer rounded-lg hover:bg-yellow-500/10 text-base font-semibold py-2">
+                  <Calendar className="w-5 h-5 mr-3 text-eduplay-orange" /> {t.attendance}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/parent')} className="cursor-pointer hover:bg-eduplay-purple/10">
-                  <Users className="w-4 h-4 mr-2 text-eduplay-pink" />
-                  Parent Panel 👪
+                <DropdownMenuItem onClick={() => navigate('/report-card')} className="cursor-pointer rounded-lg hover:bg-yellow-500/10 text-base font-semibold py-2">
+                  <Award className="w-5 h-5 mr-3 text-emerald-500" /> {t.reportCard}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Parent */}
+            <Link to="/parent" className={NavItemStyles(isActive("/parent"))}>
+              <Users className="w-5 h-5 text-eduplay-blue" />
+              <span>{t.parentPanel}</span>
+            </Link>
           </nav>
 
-          {/* User Actions - Desktop */}
-          <div className="hidden lg:flex items-center animate-fade-in delay-700">
-            <UserProfileButton />
+          {/* 3. Right Actions */}
+          <div className="hidden lg:flex items-center gap-3 animate-fade-in delay-700">
+            {/* Interactive Bell */}
+            <div className="bg-gray-100 dark:bg-slate-800 rounded-full p-1 hover:bg-gray-200 dark:hover:bg-slate-700 transition">
+              <NotificationBell />
+            </div>
+
+            {/* Language Toggle */}
+            <button
+              onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-gray-100 dark:bg-slate-800 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all shadow-inner"
+              title="Change Language"
+            >
+              <Languages className="w-4 h-4 text-eduplay-purple" />
+              {lang === 'bn' ? 'EN' : 'বাং'}
+            </button>
+
+            {/* Dark Mode */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all shadow-inner"
+              title="Toggle Dark Mode"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
+            <div className="pl-2 border-l border-gray-200 dark:border-slate-700">
+              <UserProfileButton />
+            </div>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle */}
           <button
-            className="lg:hidden p-2 rounded-lg bg-eduplay-purple/10 hover:bg-eduplay-purple/20 transition-all duration-300 hover:scale-110"
+            className="lg:hidden p-2 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle mobile menu"
           >
-            {isMenuOpen ? (
-              <X className="w-6 h-6 text-eduplay-purple animate-spin" />
-            ) : (
-              <Menu className="w-6 h-6 text-eduplay-purple animate-pulse" />
-            )}
+            {isMenuOpen ? <X className="w-6 h-6 text-eduplay-purple" /> : <Menu className="w-6 h-6 text-eduplay-purple" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* 4. Mobile Navigation Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden mt-4 p-4 bg-white rounded-2xl playful-shadow animate-scale-in border border-eduplay-purple/10">
-            <nav className="flex flex-col space-y-1">
-              {/* Home */}
-              <Link
-                to="/#hero-section"
-                onClick={(e) => {
-                  handleHomeClick(e);
-                  setIsMenuOpen(false);
-                }}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-lg font-semibold transition-all duration-300 animate-fade-in ${
-                  isActive("/#hero-section")
-                    ? 'text-eduplay-purple bg-eduplay-purple/10'
-                    : 'text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
-                }`}
-              >
-                <Home className="w-5 h-5" />
-                <span>Home</span>
+          <div className="lg:hidden mt-4 p-4 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border-2 border-eduplay-purple/10 animate-scale-in">
+            <nav className="flex flex-col space-y-2">
+              <Link to="/#hero-section" onClick={(e) => { handleHomeClick(e); setIsMenuOpen(false); }} className={NavItemStyles(isActive("/#hero-section"))}>
+                <Home className="w-5 h-5 text-eduplay-orange" /> <span>{t.home}</span>
               </Link>
               
-              {/* Mobile Classes Section */}
-              <div className="pt-2 border-t border-gray-200 mt-2">
-                <div className="flex items-center space-x-3 px-4 py-2 text-lg font-semibold text-gray-700">
-                  <GraduationCap className="w-5 h-5" />
-                  <span>Classes</span>
-                </div>
-                <div className="pl-8 space-y-1">
-                  {standards.map((standard) => (
-                    <button
-                      key={standard}
-                      onClick={() => {
-                        handleClassDropdownSelect(standard);
-                        setIsMenuOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-600 hover:text-eduplay-purple hover:bg-eduplay-purple/5 rounded transition-colors duration-200"
-                    >
-                      {standard}
+              <div className="pt-2">
+                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{t.learn}</p>
+                <Link to="/#subjects" onClick={(e) => { handleSubjectsClick(e); setIsMenuOpen(false); }} className={NavItemStyles(false)}>
+                  <BookOpen className="w-5 h-5 text-eduplay-green" /> <span>{t.subjects}</span>
+                </Link>
+                <div className="pl-6 mt-1 space-y-1 border-l-2 border-gray-100 dark:border-slate-800 ml-6">
+                  {standards.slice(0, 3).map(s => (
+                    <button key={s} onClick={() => { handleStandardSelect(s); setIsMenuOpen(false); }} className="w-full text-left py-2 px-4 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-eduplay-purple">
+                      {s}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Subjects */}
-              <Link
-                to="/#subjects"
-                onClick={(e) => {
-                  handleSubjectsClick(e);
-                  setIsMenuOpen(false);
-                }}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-lg font-semibold transition-all duration-300 animate-fade-in ${
-                  isActive("/subjects")
-                    ? 'text-eduplay-purple bg-eduplay-purple/10'
-                    : 'text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
-                }`}
-              >
-                <BookOpen className="w-5 h-5" />
-                <span>Subjects</span>
-              </Link>
-
-              {/* Dashboard */}
-              <Link
-                to="/dashboard"
-                onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-lg font-semibold transition-all duration-300 animate-fade-in ${
-                  isActive("/dashboard")
-                    ? 'text-eduplay-purple bg-eduplay-purple/10'
-                    : 'text-gray-700 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
-                }`}
-              >
-                <BarChart3 className="w-5 h-5" />
-                <span>Dashboard</span>
-              </Link>
-
-              {/* More Section */}
-              <div className="pt-2 border-t border-gray-200 mt-2">
-                <div className="flex items-center space-x-3 px-4 py-2 text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                  <span>More Features</span>
-                </div>
-                {[
-                  { to: '/leaderboard', label: 'Leaderboard 🏆', icon: Trophy },
-                  { to: '/attendance', label: 'Attendance 📋', icon: Calendar },
-                  { to: '/report-card', label: 'Report Card 📄', icon: Award },
-                  { to: '/teams', label: 'Teams 👥', icon: Users },
-                  { to: '/parent', label: 'Parent Panel 👪', icon: Users },
-                ].map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg text-base font-medium transition-all duration-200 ${
-                      isActive(item.to)
-                        ? 'text-eduplay-purple bg-eduplay-purple/10'
-                        : 'text-gray-600 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                ))}
+              <div className="pt-2">
+                <Link to="/#games" onClick={(e) => { handleGamesClick(e); setIsMenuOpen(false); }} className={NavItemStyles(isActive("/#games"))}>
+                  <Gamepad2 className="w-5 h-5 text-pink-500" /> <span>{t.games}</span>
+                </Link>
               </div>
 
-              {/* Mobile User Actions */}
-              <div className="pt-4 mt-4 border-t border-gray-200 animate-fade-in delay-500">
+              <div className="pt-2">
+                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{t.progressMenu}</p>
+                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className={NavItemStyles(location.pathname === "/dashboard")}>
+                  <BarChart3 className="w-5 h-5 text-eduplay-blue" /> <span>{t.dashboard}</span>
+                </Link>
+                <Link to="/profile" onClick={() => setIsMenuOpen(false)} className={NavItemStyles(location.pathname === "/profile")}>
+                  <UserCircle className="w-5 h-5 text-eduplay-purple" /> <span>{t.profile}</span>
+                </Link>
+                <Link to="/leaderboard" onClick={() => setIsMenuOpen(false)} className={NavItemStyles(location.pathname === "/leaderboard")}>
+                  <Trophy className="w-5 h-5 text-yellow-500" /> <span>{t.leaderboard}</span>
+                </Link>
+              </div>
+
+              {/* Mobile Quick Toggles */}
+              <div className="pt-4 mt-2 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between px-2">
+                <NotificationBell />
+                <div className="flex gap-2">
+                  <button onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')} className="flex items-center gap-1 px-4 py-2 rounded-xl bg-gray-100 dark:bg-slate-800 font-bold text-sm">
+                    <Languages className="w-4 h-4 text-eduplay-purple" /> {lang === 'bn' ? 'EN' : 'বাং'}
+                  </button>
+                  <button onClick={toggleTheme} className="p-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-yellow-500">
+                    {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-4 mt-2 border-t border-gray-100 dark:border-slate-800">
                 <UserProfileButton isMobile={true} onMenuClose={() => setIsMenuOpen(false)} />
               </div>
             </nav>

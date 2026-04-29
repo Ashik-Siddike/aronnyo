@@ -212,9 +212,11 @@ export const dashboardApi = {
     const query = userId ? `?userId=${userId}` : '';
     return fetchApi<any>(`/student-dashboard${query}`);
   },
-  getParentDashboard: (userId?: string) => {
-    const query = userId ? `?userId=${userId}` : '';
-    return fetchApi<any>(`/parent-dashboard${query}`);
+  getParentDashboard: (userId?: string, period?: string) => {
+    const query = new URLSearchParams();
+    if (userId) query.append('userId', userId);
+    if (period) query.append('period', period);
+    return fetchApi<any>(`/parent-dashboard?${query.toString()}`);
   },
   getLeaderboard: () => {
     return fetchApi<any>(`/leaderboard`);
