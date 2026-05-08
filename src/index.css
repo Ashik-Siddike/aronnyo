@@ -84,6 +84,11 @@
   body {
     @apply bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-foreground;
     font-family: 'Comic Neue', cursive, system-ui, -apple-system, sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .dark body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%) !important;
   }
 
   /* Mobile-first responsive container */
@@ -281,4 +286,244 @@
 button:focus-visible,
 a:focus-visible {
   @apply outline-2 outline-offset-2 outline-eduplay-purple;
+}
+
+/* ═══════════════════════════════════════════════════
+   DARK MODE — Global Overrides
+   ═══════════════════════════════════════════════════ */
+
+/* ── Base page backgrounds ── */
+.dark .min-h-screen,
+.dark .min-h-\[100dvh\],
+.dark main {
+  background: linear-gradient(135deg, #0f172a 0%, #1a1040 50%, #0f172a 100%) !important;
+}
+
+/* ── All white/light cards → dark cards ── */
+.dark .bg-white,
+.dark .bg-white\/50,
+.dark .bg-white\/80,
+.dark .bg-white\/85,
+.dark .bg-white\/90,
+.dark .bg-white\/95 {
+  background-color: rgba(30, 27, 75, 0.85) !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+.dark [class*="bg-gray-50"],
+.dark [class*="bg-slate-50"],
+.dark .bg-gradient-to-b.from-white,
+.dark .bg-gradient-to-br.from-white {
+  background: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* ── Text colors ── */
+.dark .text-gray-800,
+.dark .text-gray-900,
+.dark .text-slate-800,
+.dark .text-slate-900 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-gray-700,
+.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-gray-600,
+.dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-slate-500 {
+  color: #64748b !important;
+}
+
+.dark .text-gray-400,
+.dark .text-slate-400 {
+  color: #475569 !important;
+}
+
+/* ── Borders ── */
+.dark .border,
+.dark .border-b,
+.dark .border-t,
+.dark [class*="border-gray"],
+.dark [class*="border-slate"] {
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* ── Sections with light gradients → dark ── */
+.dark section,
+.dark .py-16,
+.dark .py-24 {
+  background: transparent !important;
+}
+
+.dark .bg-gradient-to-b.from-white.to-blue-50\/30,
+.dark .bg-gradient-to-br.from-purple-50,
+.dark .bg-gradient-to-b.from-white.via-blue-50\/30 {
+  background: linear-gradient(180deg, rgba(15,23,42,0) 0%, rgba(15,23,42,0.5) 100%) !important;
+}
+
+/* ── Cards ── */
+.dark .card,
+.dark [class*="Card"],
+.dark .rounded-2xl:not([class*="bg-gradient"]):not([class*="from-"]) {
+  background-color: rgba(30, 27, 75, 0.6) !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* ── Inputs ── */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #1e1b4b !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: #f1f5f9 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* ── Header / Nav ── */
+.dark header,
+.dark nav {
+  background: rgba(15, 23, 42, 0.97) !important;
+  border-bottom-color: rgba(139, 92, 246, 0.25) !important;
+}
+
+/* ── Hero Section ── */
+.dark #hero-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
+}
+
+/* ── Subject Cards ── */
+.dark .subject-card,
+.dark [class*="from-blue-100"],
+.dark [class*="from-green-100"],
+.dark [class*="from-orange-100"],
+.dark [class*="from-purple-100"] {
+  background: rgba(30, 27, 75, 0.8) !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+.dark .subject-card .text-gray-800,
+.dark .subject-card .text-gray-600 {
+  color: #e2e8f0 !important;
+}
+
+/* ── Footer ── */
+.dark footer,
+.dark [class*="bg-gradient-to-r from-eduplay"] {
+  opacity: 1 !important;
+}
+
+/* ── Dashboard sections ── */
+.dark .bg-gradient-to-b.from-white.via-blue-50 {
+  background: linear-gradient(180deg, #0f172a 0%, #1a1040 100%) !important;
+}
+
+/* ── Leaderboard ── */
+.dark .bg-gradient-to-br.from-blue-50.to-purple-50,
+.dark .bg-gradient-to-br.from-green-50.to-blue-50,
+.dark .bg-gradient-to-br.from-orange-50.to-pink-50 {
+  background: rgba(30, 27, 75, 0.6) !important;
+}
+
+/* ── Game cards (GamesSection) ── */
+.dark .bg-white\/90 {
+  background-color: rgba(30, 27, 75, 0.85) !important;
+}
+
+/* ── Index page footer ── */
+.dark .from-eduplay-purple.via-eduplay-blue.to-eduplay-green {
+  opacity: 1 !important;
+}
+
+/* ── Specific page backgrounds ── */
+.dark .bg-gradient-to-br.from-purple-50.via-pink-50.to-blue-50 {
+  background: linear-gradient(135deg, #0f172a 0%, #1a0a2e 50%, #0f172a 100%) !important;
+}
+
+/* ── Transparent / backdrop elements ── */
+.dark .backdrop-blur-md,
+.dark .backdrop-blur-lg,
+.dark .backdrop-blur-xl,
+.dark .backdrop-blur-2xl {
+  --tw-backdrop-blur: blur(16px);
+}
+
+/* ── Feature boxes ── */
+.dark .from-blue-50,
+.dark .from-green-50,
+.dark .from-orange-50,
+.dark .from-yellow-50,
+.dark .from-pink-50,
+.dark .from-purple-50,
+.dark .from-emerald-50,
+.dark .from-cyan-50 {
+  background: rgba(30, 27, 75, 0.5) !important;
+}
+
+/* ── Assignments / Timetable rows ── */
+.dark tr:nth-child(even) {
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+.dark tr {
+  border-bottom-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+.dark th {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: #a78bfa !important;
+}
+
+/* ── Badge / pill elements ── */
+.dark .bg-green-100 { background-color: rgba(16, 185, 129, 0.15) !important; }
+.dark .bg-blue-100  { background-color: rgba(74, 144, 226, 0.15) !important; }
+.dark .bg-red-100   { background-color: rgba(239, 68, 68, 0.15) !important;  }
+.dark .bg-yellow-100 { background-color: rgba(251, 191, 36, 0.15) !important; }
+.dark .bg-purple-100 { background-color: rgba(139, 92, 246, 0.15) !important; }
+.dark .bg-pink-100   { background-color: rgba(236, 72, 153, 0.15) !important; }
+.dark .bg-orange-100 { background-color: rgba(249, 115, 22, 0.15) !important; }
+.dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.15) !important; }
+.dark .bg-gray-100  { background-color: rgba(148, 163, 184, 0.1) !important;  }
+.dark .bg-slate-100 { background-color: rgba(148, 163, 184, 0.1) !important;  }
+
+/* ── Text in light-color badges → keep readable ── */
+.dark .text-green-700  { color: #34d399 !important; }
+.dark .text-blue-700   { color: #60a5fa !important; }
+.dark .text-red-700    { color: #f87171 !important; }
+.dark .text-yellow-700 { color: #fbbf24 !important; }
+.dark .text-purple-700 { color: #c084fc !important; }
+.dark .text-pink-700   { color: #f472b6 !important; }
+.dark .text-orange-700 { color: #fb923c !important; }
+.dark .text-gray-700   { color: #94a3b8 !important; }
+
+/* ── Dividers ── */
+.dark hr {
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* ── Smooth color transitions on all elements ── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+/* Exclude animation properties from transition reset */
+.animate-bounce-gentle,
+.animate-wiggle,
+.animate-float,
+.animate-scale-bounce,
+.animate-fade-in,
+.animate-ping,
+.animate-spin {
+  transition: none !important;
 }

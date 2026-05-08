@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Gamepad2, Target, Zap, Star } from 'lucide-react';
+import { useLang } from '@/contexts/LangContext';
 
 const games = [
   {
@@ -98,6 +99,19 @@ const games = [
 ];
 
 const GamesSection = () => {
+  const { t } = useLang();
+
+  const games = [
+    { id:'counting',        titleKey:'countingGame'      as const, descKey:'mathDesc'      as const, emoji:'🔢', path:'/counting-game',      color:'from-blue-500 to-purple-600',   bgColor:'bg-blue-50',    difficulty:'Easy',   category:'Math'     },
+    { id:'addition',        titleKey:'additionGame'      as const, descKey:'mathDesc'      as const, emoji:'➕',    path:'/addition-game',      color:'from-green-500 to-blue-600',   bgColor:'bg-green-50',   difficulty:'Easy',   category:'Math'     },
+    { id:'subtraction',     titleKey:'subtractionGame'   as const, descKey:'mathDesc'      as const, emoji:'➖',    path:'/subtraction-game',   color:'from-orange-500 to-red-600',   bgColor:'bg-orange-50',  difficulty:'Medium', category:'Math'     },
+    { id:'multiplication',  titleKey:'multiplicationGame' as const, descKey:'mathDesc'     as const, emoji:'✖️',    path:'/multiplication-game',color:'from-purple-500 to-pink-600',   bgColor:'bg-purple-50',  difficulty:'Hard',   category:'Math'     },
+    { id:'spelling-wizard', titleKey:'spellingWizard'    as const, descKey:'englishDesc'   as const, emoji:'🪄', path:'/spelling-wizard',    color:'from-pink-500 to-purple-500',  bgColor:'bg-pink-50',    difficulty:'Easy',   category:'Language' },
+    { id:'animal-quiz',     titleKey:'animalQuiz'        as const, descKey:'scienceDesc'   as const, emoji:'🐾', path:'/animal-quiz',         color:'from-green-500 to-blue-600',   bgColor:'bg-green-50',   difficulty:'Easy',   category:'Science', isNew:true },
+    { id:'plant-explorer',  titleKey:'plantExplorer'     as const, descKey:'scienceDesc'   as const, emoji:'🌱', path:'/plant-explorer',      color:'from-emerald-500 to-teal-600', bgColor:'bg-emerald-50', difficulty:'Medium', category:'Science', isNew:true },
+    { id:'memory-match',    titleKey:'memoryMatch'       as const, descKey:'mathDesc'      as const, emoji:'🧠', path:'/memory-match',        color:'from-blue-500 to-purple-600',  bgColor:'bg-blue-50',    difficulty:'Easy',   category:'Memory',  isNew:true },
+  ];
+
   return (
     <section id="games" className="py-16 lg:py-24 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       <div className="container mx-auto px-4">
@@ -105,17 +119,17 @@ const GamesSection = () => {
         <div className="text-center space-y-6 mb-16">
           <h2 className="text-4xl md:text-5xl font-bold">
             <span className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green bg-clip-text text-transparent">
-              ইন্টারঅ্যাক্টিভ গেমস 🎮
+              {t.gamesTitle} 🎮
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            মজার গেম খেলে শিখো! প্রতিটি গেম তোমার দক্ষতা বাড়াবে এবং জ্ঞান বৃদ্ধি করবে 🌟
+            {t.gamesSubtitle}
           </p>
         </div>
 
         {/* Games Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {games.map((game, index) => (
+          {games.map((game) => (
             <Card 
               key={game.id} 
               className="border-0 playful-shadow bg-white/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group relative"
@@ -123,7 +137,7 @@ const GamesSection = () => {
               {game.isNew && (
                 <div className="absolute -top-2 -right-2 z-10">
                   <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-bounce">
-                    নতুন! 🎉
+                    {t.new} 🎉
                   </div>
                 </div>
               )}
@@ -135,7 +149,7 @@ const GamesSection = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-gray-800 group-hover:text-eduplay-purple transition-colors">
-                      {game.title}
+                      {t[game.titleKey]}
                     </h3>
                     <div className="flex items-center space-x-2 text-sm text-gray-500">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -143,16 +157,16 @@ const GamesSection = () => {
                         game.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-red-100 text-red-700'
                       }`}>
-                        {game.difficulty}
+                        {t[game.difficulty.toLowerCase() as keyof typeof t] || game.difficulty}
                       </span>
                       <span className="text-gray-400">•</span>
-                      <span>{game.category}</span>
+                      <span>{t[game.category.toLowerCase() as keyof typeof t] || game.category}</span>
                     </div>
                   </div>
                 </div>
                 
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  {game.description}
+                  {t[game.descKey]}
                 </p>
 
                 <Link to={game.path} className="block">
@@ -160,7 +174,7 @@ const GamesSection = () => {
                     className={`w-full bg-gradient-to-r ${game.color} hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-white font-semibold`}
                   >
                     <Gamepad2 className="w-4 h-4 mr-2" />
-                    খেলো!
+                    {t.playNow}
                   </Button>
                 </Link>
               </CardContent>

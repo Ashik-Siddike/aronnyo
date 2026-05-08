@@ -2,8 +2,10 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Home, ArrowLeft, Search, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useLang } from '@/contexts/LangContext';
 
 const NotFound = () => {
+  const { t } = useLang();
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const [stars, setStars] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
 
@@ -68,11 +70,10 @@ const NotFound = () => {
         {/* Message */}
         <div className="mb-8 animate-fade-in">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
-            ওহ না! পৃষ্ঠাটি খুঁজে পাওয়া যাচ্ছে না! 😮
+            {t.notFound} 😮
           </h2>
           <p className="text-gray-600 text-lg leading-relaxed">
-            মনে হচ্ছে তুমি একটু হারিয়ে গেছো! চিন্তা নেই — 
-            চলো আবার শেখার অ্যাডভেঞ্চারে ফিরে যাই! 🚀
+            {t.notFoundDesc}
           </p>
         </div>
 
@@ -93,7 +94,7 @@ const NotFound = () => {
               className="bg-gradient-to-r from-eduplay-purple to-eduplay-blue hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-lg px-8 py-6 rounded-2xl w-full"
             >
               <Home className="w-5 h-5 mr-2" />
-              হোমে ফিরে যাও
+              {t.goHome}
             </Button>
           </Link>
           <Button
@@ -103,7 +104,7 @@ const NotFound = () => {
             className="border-2 border-eduplay-purple text-eduplay-purple hover:bg-eduplay-purple hover:text-white text-lg px-8 py-6 rounded-2xl transition-all duration-300 w-full"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            আগের পৃষ্ঠায় যাও
+            {t.back}
           </Button>
         </div>
       </div>

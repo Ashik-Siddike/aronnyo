@@ -8,9 +8,11 @@ import SubjectsSection from '@/components/SubjectsSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import GamesSection from '@/components/GamesSection';
 import DashboardPreview from '@/components/DashboardPreview';
+import { useLang } from '@/contexts/LangContext';
 
 const Index = () => {
   const location = useLocation();
+  const { t } = useLang();
   const [userCount, setUserCount] = useState(0);
   const [lessonCount, setLessonCount] = useState(0);
 
@@ -54,7 +56,7 @@ const Index = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="text-white space-y-4">
             <h3 className="text-3xl font-bold animate-bounce-gentle">247School</h3>
-            <p className="text-lg opacity-90 animate-slide-in-right">Learning 24/7, One Lesson at a Time! 🌟</p>
+            <p className="text-lg opacity-90 animate-slide-in-right">{t.footerTagline}</p>
             <div className="flex justify-center space-x-6 text-4xl">
               <span className="animate-bounce-gentle">🎓</span>
               <span className="animate-wiggle">📚</span>
@@ -63,7 +65,7 @@ const Index = () => {
               <span className="animate-pulse">🚀</span>
             </div>
             <p className="text-sm opacity-75 mt-8 animate-fade-in delay-500">
-              © 2026 247School. Designed with ❤️ for young learners everywhere.
+              {t.footerCopy}
             </p>
           </div>
         </div>

@@ -204,6 +204,22 @@ export const activityApi = {
 };
 
 // ==========================================
+// DAILY CHALLENGE API
+// ==========================================
+
+export const dailyChallengeApi = {
+  getToday: (userId?: string) => {
+    const query = userId ? `?userId=${userId}` : '';
+    return fetchApi<any>(`/daily-challenge${query}`);
+  },
+  complete: (userId: string, challengeId: string, rewardStars: number) =>
+    fetchApi<any>('/daily-challenge/complete', {
+      method: 'POST',
+      body: JSON.stringify({ userId, challengeId, rewardStars }),
+    }),
+};
+
+// ==========================================
 // DASHBOARD API
 // ==========================================
 
@@ -218,8 +234,12 @@ export const dashboardApi = {
     if (period) query.append('period', period);
     return fetchApi<any>(`/parent-dashboard?${query.toString()}`);
   },
-  getLeaderboard: () => {
-    return fetchApi<any>(`/leaderboard`);
+  getLeaderboard: (subject?: string, grade?: string) => {
+    const query = new URLSearchParams();
+    if (subject) query.append('subject', subject);
+    if (grade) query.append('grade', grade);
+    const queryString = query.toString() ? `?${query.toString()}` : '';
+    return fetchApi<any>(`/leaderboard${queryString}`);
   }
 };
 
@@ -258,6 +278,7 @@ export default {
   contents: contentsApi,
   teams: teamsApi,
   activity: activityApi,
+  dailyChallenge: dailyChallengeApi,
   dashboard: dashboardApi,
   stats: statsApi,
   health: healthApi,

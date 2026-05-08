@@ -1131,11 +1131,16 @@ app.get('/api/parent-dashboard', async (req, res) => {
 
 app.get('/api/leaderboard', async (req, res) => {
   try {
-    const { subject } = req.query; // optional filter
+    const { subject, grade } = req.query; // optional filter
+
+    let profileFilter = {};
+    if (grade) {
+      profileFilter.grade = grade;
+    }
 
     const [users, profiles] = await Promise.all([
       getCollection('users').find({ role: 'student' }).toArray(),
-      getCollection('profiles').find({}).toArray()
+      getCollection('profiles').find(profileFilter).toArray()
     ]);
 
     const avatarEmojis = ['👦', '👧', '🧒', '👶', '🧑', '👩', '👨', '🧒‍♀️', '🧒‍♂️', '🧑‍🎓'];
@@ -1291,6 +1296,171 @@ app.get('/api/stats', async (req, res) => {
     });
   } catch (error) {
     console.error('Get stats error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==========================================
+// DAILY CHALLENGE ROUTES
+// ==========================================
+
+app.get('/api/daily-challenge', async (req, res) => {
+  try {
+    const studentId = req.query.userId || 'student-1';
+    const today = new Date().toISOString().split('T')[0];
+
+    const challenges = [
+      { id: 'dc1', type: 'math', title: 'গণিত স্পিড রান', description: '৫টি যোগের অংক ১ মিনিটে সমাধান করো', rewardStars: 50, taskType: 'quiz' },
+      { id: 'dc2', type: 'english', title: 'Word Master', description: '৩টি নতুন ইংরেজি শব্দের অর্থ লেখো', rewardStars: 30, taskType: 'input' },
+      { id: 'dc3', type: 'science', title: 'বিজ্ঞান কুইজ', description: 'সৌরজগত সম্পর্কে ছোট কুইজটি খেলো', rewardStars: 40, taskType: 'quiz' },
+    ];
+    const dayIndex = new Date().getDate() % challenges.length;
+    const challenge = challenges[dayIndex];
+
+    const completed = await getCollection('activity').findOne({
+      student_id: studentId,
+      activity_type: 'daily_challenge_completed',
+      created_at: { $regex: `^${today}` }
+    });
+
+    res.json({
+      challenge: challenge,
+      isCompleted: !!completed,
+      completedAt: completed ? completed.created_at : null
+    });
+  } catch (error) {
+    console.error('Daily challenge GET error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/daily-challenge/complete', async (req, res) => {
+  try {
+    const { userId, challengeId, rewardStars } = req.body;
+    const today = new Date().toISOString().split('T')[0];
+
+    const existing = await getCollection('activity').findOne({
+      student_id: userId,
+      activity_type: 'daily_challenge_completed',
+      created_at: { $regex: `^${today}` }
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: 'Already completed today' });
+    }
+
+    await getCollection('activity').insertOne({
+      student_id: userId,
+      subject: 'Daily Challenge',
+      activity_type: 'daily_challenge_completed',
+      score: 100,
+      stars_earned: rewardStars || 50,
+      time_spent: 5,
+      created_at: new Date().toISOString()
+    });
+
+    await getCollection('profiles').updateOne(
+      { user_id: userId },
+      { $inc: { total_stars: rewardStars || 50 } }
+    );
+
+    res.json({ success: true, rewardStars: rewardStars || 50 });
+  } catch (error) {
+    console.error('Daily challenge POST error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==========================================
+// ASSIGNMENT SYSTEM ROUTES
+// ==========================================
+
+app.get('/api/assignments', async (req, res) => {
+  try {
+    const { studentId } = req.query;
+    const filter = studentId ? { $or: [{ student_id: studentId }, { is_global: true }] } : {};
+    const assignments = await getCollection('assignments').find(filter).sort({ due_date: 1 }).toArray();
+    res.json(assignments);
+  } catch (error) {
+    console.error('Assignments GET error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/assignments', async (req, res) => {
+  try {
+    const data = req.body;
+    data.created_at = new Date().toISOString();
+    await getCollection('assignments').insertOne(data);
+    res.json({ success: true, message: 'Assignment created successfully' });
+  } catch (error) {
+    console.error('Assignments POST error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/assignments/submit', async (req, res) => {
+  try {
+    const { assignmentId, studentId, studentName, fileUrl, notes } = req.body;
+    await getCollection('assignment_submissions').insertOne({
+      assignment_id: assignmentId,
+      student_id: studentId,
+      student_name: studentName,
+      file_url: fileUrl,
+      notes: notes,
+      status: 'submitted',
+      submitted_at: new Date().toISOString()
+    });
+    
+    await getCollection('assignments').updateOne(
+      { _id: new ObjectId(assignmentId) },
+      { $addToSet: { submitted_by: studentId } }
+    );
+    
+    res.json({ success: true, message: 'Assignment submitted successfully' });
+  } catch (error) {
+    console.error('Assignments submit POST error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==========================================
+// CHAT / MESSAGE ROUTES
+// ==========================================
+
+app.get('/api/messages', async (req, res) => {
+  try {
+    const { userId, role } = req.query; // 'parent' or 'teacher/admin'
+    // Simplified logic: If parent, fetch messages for this parent. 
+    // If teacher, fetch all or specific conversation.
+    const filter = role === 'teacher' || role === 'admin' ? {} : { 
+      $or: [{ sender_id: userId }, { receiver_id: userId }] 
+    };
+    
+    const messages = await getCollection('messages').find(filter).sort({ timestamp: 1 }).toArray();
+    res.json(messages);
+  } catch (error) {
+    console.error('Messages GET error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/messages', async (req, res) => {
+  try {
+    const { senderId, senderName, senderRole, receiverId, text } = req.body;
+    const msg = {
+      sender_id: senderId,
+      sender_name: senderName,
+      sender_role: senderRole,
+      receiver_id: receiverId,
+      text: text,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    await getCollection('messages').insertOne(msg);
+    res.json({ success: true, message: msg });
+  } catch (error) {
+    console.error('Messages POST error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

@@ -9,7 +9,9 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "graph": "python -m graphify update .",
+    "graph:watch": "python -m graphify watch ."
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

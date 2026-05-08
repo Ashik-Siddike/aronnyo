@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, BookOpen, BarChart, Settings, LogOut, GraduationCap, FileText, Eye, EyeOff, Activity, ShieldCheck, Database, Server, Award, RefreshCw, Calendar } from 'lucide-react';
+import { ArrowLeft, Users, BookOpen, BarChart, Settings, LogOut, GraduationCap, FileText, Eye, EyeOff, Activity, ShieldCheck, Database, Server, Award, RefreshCw, Calendar, TrendingUp, Upload, FileCheck, Save } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -258,7 +258,7 @@ const AdminDashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-2xl font-bold text-gray-800">System Modules</h2>
-            <Badge variant="outline" className="bg-white px-3 py-1 text-sm border-blue-200 text-blue-700">4 Active Modules</Badge>
+            <Badge variant="outline" className="bg-white px-3 py-1 text-sm border-blue-200 text-blue-700">8 Active Modules</Badge>
           </div>
           
           <div className="grid sm:grid-cols-2 gap-6">
@@ -345,6 +345,86 @@ const AdminDashboard = () => {
                       </Button>
                     </Link>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="p-3 bg-indigo-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-0 shadow-none">DATA</Badge>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Analytics Dashboard</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Monitor daily active users, subject popularity, and retention rates.</p>
+                  <Link to="/admin/analytics">
+                    <Button className="w-full bg-slate-900 hover:bg-indigo-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                      View Analytics
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="p-3 bg-pink-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                    <Upload className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-pink-100 text-pink-700 hover:bg-pink-200 border-0 shadow-none">TOOLS</Badge>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Bulk User Import</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Import students and teachers seamlessly via CSV files.</p>
+                  <Link to="/admin/import">
+                    <Button className="w-full bg-slate-900 hover:bg-pink-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                      Import Data
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="p-3 bg-teal-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                    <FileCheck className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-teal-100 text-teal-700 hover:bg-teal-200 border-0 shadow-none">REVIEW</Badge>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Content Approval</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Review and approve content submitted by teachers before publishing.</p>
+                  <Link to="/admin/approvals">
+                    <Button className="w-full bg-slate-900 hover:bg-teal-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                      Review Pending
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="p-3 bg-amber-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                    <Save className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-0 shadow-none">SYSTEM</Badge>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Backup & Export</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Create database backups and export MongoDB collections.</p>
+                  <Link to="/admin/backup">
+                    <Button className="w-full bg-slate-900 hover:bg-amber-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                      Manage Backups
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>

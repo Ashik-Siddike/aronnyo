@@ -57,11 +57,17 @@ const ParentPanel = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-eduplay-purple to-eduplay-blue text-white py-8">
         <div className="container mx-auto px-4">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center justify-between mb-6">
             <Link to="/" className="mr-4">
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
+              </Button>
+            </Link>
+            <Link to="/messages">
+              <Button variant="outline" size="sm" className="bg-white/10 text-white border-white/20 hover:bg-white/30">
+                <User className="w-4 h-4 mr-2" />
+                Chat with Teacher
               </Button>
             </Link>
           </div>

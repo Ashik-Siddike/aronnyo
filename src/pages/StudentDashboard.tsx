@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { dashboardApi } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
+import DailyChallenge from '@/components/DailyChallenge';
 
 const StudentDashboard = () => {
   const [studentData, setStudentData] = useState<any>(null);
@@ -54,11 +55,17 @@ const StudentDashboard = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green text-white py-8">
         <div className="container mx-auto px-4">
-          <div className="flex items-center mb-6">
+          <div className="flex items-center justify-between mb-6">
             <Link to="/" className="mr-4">
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
+              </Button>
+            </Link>
+            <Link to="/certificate">
+              <Button variant="outline" size="sm" className="bg-white/10 text-white border-white/20 hover:bg-white/30">
+                <Award className="w-4 h-4 mr-2" />
+                View Certificate
               </Button>
             </Link>
           </div>
@@ -88,6 +95,11 @@ const StudentDashboard = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Daily Challenge */}
+        <div className="mb-8">
+          <DailyChallenge />
+        </div>
+
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="border-0 playful-shadow bg-gradient-to-br from-eduplay-blue/10 to-eduplay-purple/10">

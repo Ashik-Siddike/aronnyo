@@ -4,8 +4,10 @@ import { Trophy, Medal, Star, Crown, TrendingUp, Flame, ArrowLeft, Sparkles, Ref
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { dashboardApi } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLang } from '@/contexts/LangContext';
 
 interface LeaderboardEntry {
   rank: number;
@@ -56,12 +58,14 @@ const Leaderboard = () => {
   const [allTimeLeaders, setAllTimeLeaders] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [selectedClass, setSelectedClass] = useState<string>('all');
   const { user } = useAuth();
+  const { t } = useLang();
 
   const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await dashboardApi.getLeaderboard();
+      const data = await dashboardApi.getLeaderboard(undefined, selectedClass === 'all' ? undefined : selectedClass);
 
       // Mark the current user
       const markCurrentUser = (list: LeaderboardEntry[]) =>
@@ -91,7 +95,7 @@ const Leaderboard = () => {
       <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-purple-50/30 flex items-center justify-center">
         <div className="text-center space-y-4">
           <RefreshCw className="w-10 h-10 animate-spin text-eduplay-purple mx-auto" />
-          <p className="text-gray-500">Loading rankings from database...</p>
+          <p className="text-gray-500">{t.loading}</p>
         </div>
       </div>
     );
@@ -105,7 +109,7 @@ const Leaderboard = () => {
         <div className="flex items-center justify-between mb-6">
           <Link to="/" className="inline-flex items-center text-gray-600 hover:text-eduplay-purple transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            {t.back}
           </Link>
           <div className="flex items-center gap-3">
             {lastUpdated && (
@@ -120,7 +124,7 @@ const Leaderboard = () => {
               className="gap-2 text-eduplay-purple border-eduplay-purple/30 hover:bg-eduplay-purple/10"
             >
               <RefreshCw className="w-3 h-3" />
-              Refresh
+              {t.search}
             </Button>
           </div>
         </div>
@@ -133,10 +137,10 @@ const Leaderboard = () => {
           </div>
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
             <span className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green bg-clip-text text-transparent">
-              🏆 Top Learners
+              🏆 {t.topLearners}
             </span>
           </h1>
-          <p className="text-gray-600 text-lg">দেখো কে সবচেয়ে বেশি শিখেছে! তুমিও পারবে! 💪</p>
+          <p className="text-gray-600 text-lg">{t.leaderboardSubtitle}</p>
         </div>
 
         {/* Tabs */}
@@ -150,7 +154,7 @@ const Leaderboard = () => {
             }`}
           >
             <Flame className="w-4 h-4 mr-2" />
-            এই সপ্তাহ
+            {t.thisWeek}
           </Button>
           <Button
             onClick={() => setActiveTab('allTime')}
@@ -161,8 +165,25 @@ const Leaderboard = () => {
             }`}
           >
             <Star className="w-4 h-4 mr-2" />
-            সর্বকালের সেরা
+            {t.allTime}
           </Button>
+        </div>
+
+        {/* Class Filter */}
+        <div className="flex justify-center mb-8">
+          <Select value={selectedClass} onValueChange={(val) => { setSelectedClass(val); }}>
+            <SelectTrigger className="w-[200px] bg-white border-2 border-eduplay-purple/20 text-eduplay-purple font-semibold rounded-full">
+              <SelectValue placeholder={t.allGrades} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t.allGrades}</SelectItem>
+              <SelectItem value="play">Play Group</SelectItem>
+              <SelectItem value="nursery">{t.nursery}</SelectItem>
+              <SelectItem value="kg">Kindergarten</SelectItem>
+              <SelectItem value="1">{t.class1}</SelectItem>
+              <SelectItem value="2">{t.class2}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Top 3 Podium */}

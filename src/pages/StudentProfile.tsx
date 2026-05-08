@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { ActivityService } from '@/services/activityService';
 
@@ -44,6 +45,20 @@ const StudentProfile = () => {
   const [stats, setStats] = useState<any>(null);
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [avatar, setAvatar] = useState('🧒');
+
+  const avatars = ['🧒', '👧', '👨‍🚀', '👩‍🚀', '🦸‍♂️', '🦸‍♀️', '🧙‍♂️', '🧚‍♀️', '🦁', '🐯', '🐻', '🐼', '🦊', '🦄'];
+
+  useEffect(() => {
+    // Load saved avatar
+    const savedAvatar = localStorage.getItem(`avatar_${user?.id}`);
+    if (savedAvatar) setAvatar(savedAvatar);
+  }, [user]);
+
+  const handleAvatarChange = (newAvatar: string) => {
+    setAvatar(newAvatar);
+    localStorage.setItem(`avatar_${user?.id}`, newAvatar);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,17 +106,40 @@ const StudentProfile = () => {
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
           </Link>
           <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-4xl border-4 border-white/40 shadow-xl">
-              {user?.email?.charAt(0).toUpperCase() || '🧒'}
-            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-4xl border-4 border-white/40 shadow-xl cursor-pointer hover:bg-white/30 transition-all relative group">
+                  {avatar}
+                  <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-xs font-bold text-white uppercase tracking-wider text-center">Edit<br/>Avatar</span>
+                  </div>
+                </div>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Choose Your Avatar</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 py-4">
+                  {avatars.map(a => (
+                    <button
+                      key={a}
+                      onClick={() => handleAvatarChange(a)}
+                      className={`text-4xl p-2 rounded-xl transition-transform hover:scale-110 ${avatar === a ? 'bg-eduplay-purple/20 border-2 border-eduplay-purple shadow-sm' : 'hover:bg-gray-100'}`}
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
             <div className="flex-1">
               <h1 className="text-3xl font-bold">{stats?.full_name || user?.email || 'শিক্ষার্থী'}</h1>
               <div className="flex items-center gap-3 mt-2">
                 <Badge className="bg-white/20 text-white border-white/30 text-sm">
                   <Award className="w-3 h-3 mr-1" />{level.name}
                 </Badge>
-                <Badge className="bg-white/20 text-white border-white/30 text-sm">
-                  🔥 {stats?.streak || 0} day streak
+                <Badge className={`border-white/30 text-sm ${stats?.streak >= 7 ? 'bg-gradient-to-r from-orange-400 to-red-500 shadow-lg border-none text-white' : 'bg-white/20 text-white'}`}>
+                  🔥 {stats?.streak || 0} day streak {stats?.streak >= 7 && '🏆'}
                 </Badge>
               </div>
               {/* Level progress */}

@@ -2,6 +2,7 @@
 import { Play, Sparkles, BookOpen, Heart, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useLang } from '@/contexts/LangContext';
 
 interface HeroSectionProps {
   userCount: number;
@@ -10,6 +11,7 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => {
   const navigate = useNavigate();
+  const { t } = useLang();
 
   const handleStartLearning = () => {
     const subjectsSection = document.getElementById('subjects');
@@ -51,12 +53,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
             <div className="space-y-4">
               <div className="inline-flex items-center bg-gradient-to-r from-eduplay-purple/10 to-eduplay-blue/10 px-3 lg:px-4 py-2 rounded-full border border-eduplay-purple/20 animate-scale-in">
                 <Sparkles className="w-4 lg:w-5 h-4 lg:h-5 text-eduplay-purple mr-2 animate-pulse" />
-                <span className="text-eduplay-purple font-semibold text-sm lg:text-base">Kids Learning Made Fun!</span>
+                <span className="text-eduplay-purple font-semibold text-sm lg:text-base">{t.heroTag}</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight animate-fade-in">
                 <span className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green bg-clip-text text-transparent animate-slide-in-right">
-                  Welcome to
+                  {t.heroWelcome}
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-eduplay-orange via-eduplay-pink to-eduplay-purple bg-clip-text text-transparent animate-bounce-gentle">
@@ -65,9 +67,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
               </h1>
 
               <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 leading-relaxed animate-fade-in delay-300">
-                Learning 24/7, One Lesson at a Time! 🚀
+                {t.heroSubtitle} 🚀
                 <br />
-                <span className="text-base lg:text-lg">শিশুদের জন্য আনন্দময় শিক্ষা — Math, English, বাংলা ও Science!</span>
+                <span className="text-base lg:text-lg">{t.heroDesc}</span>
               </p>
             </div>
 
@@ -78,7 +80,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                 className="bg-gradient-to-r from-eduplay-green to-eduplay-blue hover:shadow-xl transform hover:scale-110 transition-all duration-500 text-lg lg:text-xl py-4 lg:py-6 px-6 lg:px-8 rounded-2xl animate-wiggle hover:animate-scale-bounce w-full sm:w-auto"
               >
                 <Play className="w-5 lg:w-6 h-5 lg:h-6 mr-2 lg:mr-3 animate-spin" />
-                Start Learning
+                {t.heroStart}
               </Button>
               <Button
                 variant="outline"
@@ -87,7 +89,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                 className="border-2 border-eduplay-purple text-eduplay-purple hover:bg-eduplay-purple hover:text-white text-lg lg:text-xl py-4 lg:py-6 px-6 lg:px-8 rounded-2xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
               >
                 <BookOpen className="w-5 lg:w-6 h-5 lg:h-6 mr-2 lg:mr-3 animate-wiggle" />
-                Explore Subjects
+                {t.heroExplore}
               </Button>
             </div>
 
@@ -97,15 +99,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
             <div className="grid grid-cols-3 gap-2 lg:gap-4 pt-6 lg:pt-8 animate-fade-in delay-700">
               <div className="text-center p-3 lg:p-4 bg-white/50 rounded-2xl playful-shadow hover:scale-105 transition-all duration-300 animate-float cursor-pointer">
                 <div className="text-lg lg:text-2xl font-bold text-eduplay-purple">{formatCount(userCount)}</div>
-                <div className="text-xs lg:text-sm text-gray-600">Happy Students</div>
+                <div className="text-xs lg:text-sm text-gray-600">{t.heroStudents}</div>
               </div>
               <div className="text-center p-3 lg:p-4 bg-white/50 rounded-2xl playful-shadow hover:scale-105 transition-all duration-300 animate-bounce-gentle cursor-pointer">
                 <div className="text-lg lg:text-2xl font-bold text-eduplay-green">{formatCount(lessonCount)}</div>
-                <div className="text-xs lg:text-sm text-gray-600">Fun Lessons</div>
+                <div className="text-xs lg:text-sm text-gray-600">{t.heroLessons}</div>
               </div>
               <div className="text-center p-3 lg:p-4 bg-white/50 rounded-2xl playful-shadow hover:scale-105 transition-all duration-300 animate-wiggle cursor-pointer">
                 <div className="text-lg lg:text-2xl font-bold text-eduplay-orange">99%</div>
-                <div className="text-xs lg:text-sm text-gray-600">Love Rate</div>
+                <div className="text-xs lg:text-sm text-gray-600">{t.heroFree}</div>
               </div>
             </div>
           </div>
