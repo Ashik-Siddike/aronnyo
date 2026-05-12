@@ -14,15 +14,32 @@ dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 import express from 'express';
 import cors from 'cors';
+import bcrypt from 'bcryptjs';
 import { MongoClient, ObjectId } from 'mongodb';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// Middleware — allow production Vercel + local dev
+const ALLOWED_ORIGINS = [
+  'https://247-school.vercel.app',
+  'https://play-learn-grow-kids.vercel.app',
+  'http://localhost:8080',
+  'http://localhost:8081',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:3001',
+];
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:8081', 'http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    // Allow any vercel.app subdomain for preview deployments
+    if (/\.vercel\.app$/.test(origin)) return callback(null, true);
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 
@@ -94,76 +111,61 @@ const getCollection = (name) => db.collection(name);
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });
     }
 
-    const user = await getCollection('users').findOne({ email: email.toLowerCase() });
-    
+    // Allow username shortcut for admin quick-access (demo mode)
+    const lookupEmail = email === 'ashik' ? 'ashiksiddike@gmail.com' : email.toLowerCase();
+
+    const user = await getCollection('users').findOne({ email: lookupEmail });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // For demo purposes: simple password check
-    // In production, use bcrypt hashing
-    const validPasswords = {
-      'ashiksiddike@gmail.com': 'ashik1234',
-      'admin@school.com': 'admin123',
-      'demo@school.com': 'demo123',
-      'teacher@school.com': 'teacher123',
-      'parent@school.com': 'parent123',
-      'virifat01@gmail.com': 'rifat123'
-    };
-
-    // Also allow shortcut login
-    if (email === 'ashik' && password === 'ashik123') {
-      const adminUser = await getCollection('users').findOne({ email: 'ashiksiddike@gmail.com' });
-      if (adminUser) {
-        return res.json({
-          user: {
-            id: adminUser._id,
-            email: adminUser.email,
-            user_metadata: { full_name: adminUser.full_name, role: adminUser.role || 'admin' }
-          },
-          profile: {
-            id: adminUser._id,
-            email: adminUser.email,
-            full_name: adminUser.full_name,
-            role: adminUser.role || 'admin',
-            created_at: adminUser.created_at
-          },
-          session: {
-            access_token: `token-${Date.now()}`,
-            expires_at: Date.now() + 3600000
-          }
-        });
+    // ── Password verification ──
+    // Priority 1: bcrypt hash stored in DB
+    if (user.password_hash) {
+      const valid = await bcrypt.compare(password, user.password_hash);
+      if (!valid) return res.status(401).json({ error: 'Invalid email or password' });
+    } else {
+      // Priority 2: Migration fallback — plain password still in DB
+      if (user.password && user.password !== password) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+      // Opportunistically upgrade to hashed password
+      if (user.password === password) {
+        const hashed = await bcrypt.hash(password, 12);
+        await getCollection('users').updateOne(
+          { _id: user._id },
+          { $set: { password_hash: hashed }, $unset: { password: '' } }
+        );
       }
     }
 
-    const storedPassword = validPasswords[email.toLowerCase()];
-    if (!storedPassword || storedPassword !== password) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    res.json({
+    const buildResponse = (u) => ({
       user: {
-        id: user._id,
-        email: user.email,
-        user_metadata: { full_name: user.full_name, role: user.role }
+        id: u._id,
+        email: u.email,
+        user_metadata: { full_name: u.full_name, role: u.role || 'student' }
       },
       profile: {
-        id: user._id,
-        email: user.email,
-        full_name: user.full_name,
-        role: user.role,
-        created_at: user.created_at
+        id: u._id,
+        email: u.email,
+        full_name: u.full_name,
+        role: u.role || 'student',
+        grade: u.grade || null,
+        avatar: u.avatar || null,
+        created_at: u.created_at
       },
       session: {
-        access_token: `token-${Date.now()}`,
+        access_token: `token-${Date.now()}-${u._id}`,
         expires_at: Date.now() + 3600000
       }
     });
+
+    res.json(buildResponse(user));
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -184,10 +186,14 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(409).json({ error: 'User with this email already exists' });
     }
 
+    const SALT_ROUNDS = 12;
+    const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
+
     const newUser = {
       _id: `user-${Date.now()}`,
       email: email.toLowerCase(),
       full_name: fullName,
+      password_hash,           // ← hashed, never plaintext
       role,
       email_verified: false,
       is_anonymous: false,
@@ -1372,6 +1378,92 @@ app.post('/api/daily-challenge/complete', async (req, res) => {
 });
 
 // ==========================================
+// STORY MODE PROGRESS ROUTES
+// ==========================================
+
+// GET /api/story-progress/:userId — load full progress map for a user
+app.get('/api/story-progress/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const doc = await getCollection('story_progress').findOne({ user_id: userId });
+    if (!doc) return res.json({ user_id: userId, levels: {} });
+    res.json(doc);
+  } catch (error) {
+    console.error('Story progress GET error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/story-progress/:userId/level/:levelId — save/update one level result
+app.post('/api/story-progress/:userId/level/:levelId', async (req, res) => {
+  try {
+    const { userId, levelId } = req.params;
+    const { stars, done } = req.body;
+
+    if (stars === undefined || done === undefined) {
+      return res.status(400).json({ error: 'stars and done are required' });
+    }
+
+    const key = `levels.${levelId}`;
+    await getCollection('story_progress').updateOne(
+      { user_id: userId },
+      {
+        $set: {
+          [key]: { stars: Number(stars), done: Boolean(done) },
+          updated_at: new Date().toISOString(),
+        },
+        $setOnInsert: { user_id: userId, created_at: new Date().toISOString() },
+      },
+      { upsert: true }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Story progress POST error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==========================================
+// VIDEO WATCH HISTORY ROUTES
+// ==========================================
+
+// GET /api/video-history/:userId — get list of watched videoIds
+app.get('/api/video-history/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const doc = await getCollection('video_history').findOne({ user_id: userId });
+    if (!doc) return res.json({ watched: [] });
+    res.json({ watched: doc.watched || [] });
+  } catch (error) {
+    console.error('Video history GET error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/video-history/:userId — mark a video as watched
+app.post('/api/video-history/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { videoId } = req.body;
+    if (!videoId) return res.status(400).json({ error: 'videoId is required' });
+
+    await getCollection('video_history').updateOne(
+      { user_id: userId },
+      {
+        $addToSet: { watched: videoId },
+        $set: { updated_at: new Date().toISOString() },
+        $setOnInsert: { user_id: userId, created_at: new Date().toISOString() },
+      },
+      { upsert: true }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Video history POST error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==========================================
 // ASSIGNMENT SYSTEM ROUTES
 // ==========================================
 
@@ -1395,6 +1487,41 @@ app.post('/api/assignments', async (req, res) => {
     res.json({ success: true, message: 'Assignment created successfully' });
   } catch (error) {
     console.error('Assignments POST error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /api/assignments/:id — edit an assignment (Admin)
+app.put('/api/assignments/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = { ...req.body, updated_at: new Date().toISOString() };
+    delete updates._id;
+
+    let filter;
+    try { filter = { _id: new ObjectId(id) }; } catch { filter = { _id: id }; }
+
+    const result = await getCollection('assignments').updateOne(filter, { $set: updates });
+    if (result.matchedCount === 0) return res.status(404).json({ error: 'Assignment not found' });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Assignments PUT error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/assignments/:id — delete an assignment (Admin)
+app.delete('/api/assignments/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    let filter;
+    try { filter = { _id: new ObjectId(id) }; } catch { filter = { _id: id }; }
+
+    const result = await getCollection('assignments').deleteOne(filter);
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'Assignment not found' });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Assignments DELETE error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -1447,21 +1574,536 @@ app.get('/api/messages', async (req, res) => {
 
 app.post('/api/messages', async (req, res) => {
   try {
-    const { senderId, senderName, senderRole, receiverId, text } = req.body;
+    // Accept both camelCase (senderId) and snake_case (sender_id) from frontend
+    const body = req.body;
     const msg = {
-      sender_id: senderId,
-      sender_name: senderName,
-      sender_role: senderRole,
-      receiver_id: receiverId,
-      text: text,
-      timestamp: new Date().toISOString(),
+      sender_id:   body.sender_id   || body.senderId,
+      sender_name: body.sender_name || body.senderName,
+      sender_role: body.sender_role || body.senderRole,
+      receiver_id: body.receiver_id || body.receiverId,
+      text:        body.text,
+      timestamp:   body.timestamp   || new Date().toISOString(),
       read: false
     };
+    if (!msg.sender_id || !msg.text) {
+      return res.status(400).json({ error: 'sender_id and text are required' });
+    }
     await getCollection('messages').insertOne(msg);
     res.json({ success: true, message: msg });
   } catch (error) {
     console.error('Messages POST error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==========================================
+// TIMETABLE ROUTES
+// ==========================================
+
+// GET /api/timetable — fetch all schedule entries (optionally filter by gradeId)
+app.get('/api/timetable', async (req, res) => {
+  try {
+    const { gradeId } = req.query;
+    const filter = gradeId ? { grade_id: gradeId } : {};
+    const schedule = await getCollection('timetable')
+      .find(filter)
+      .sort({ day_index: 1, time: 1 })
+      .toArray();
+    res.json(schedule);
+  } catch (error) {
+    console.error('Timetable GET error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/timetable — create a new schedule entry (Admin only)
+app.post('/api/timetable', async (req, res) => {
+  try {
+    const { day, day_index, time, subject, teacher, room, color, grade_id } = req.body;
+    if (!day || time === undefined || !subject || !teacher) {
+      return res.status(400).json({ error: 'day, time, subject, and teacher are required' });
+    }
+    const entry = {
+      day,
+      day_index: day_index ?? 0,
+      time,
+      subject,
+      teacher,
+      room:     room    || '',
+      color:    color   || 'bg-blue-100 text-blue-700 border-blue-200',
+      grade_id: grade_id || null,
+      created_at: new Date().toISOString(),
+    };
+    const result = await getCollection('timetable').insertOne(entry);
+    res.status(201).json({ success: true, id: result.insertedId, entry });
+  } catch (error) {
+    console.error('Timetable POST error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /api/timetable/:id — update a schedule entry (Admin only)
+app.put('/api/timetable/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = { ...req.body, updated_at: new Date().toISOString() };
+    delete updates._id;
+
+    let filter;
+    try { filter = { _id: new ObjectId(id) }; } catch { filter = { _id: id }; }
+
+    const result = await getCollection('timetable').updateOne(filter, { $set: updates });
+    if (result.matchedCount === 0) return res.status(404).json({ error: 'Entry not found' });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Timetable PUT error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/timetable/:id — delete a schedule entry (Admin only)
+app.delete('/api/timetable/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    let filter;
+    try { filter = { _id: new ObjectId(id) }; } catch { filter = { _id: id }; }
+
+    const result = await getCollection('timetable').deleteOne(filter);
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'Entry not found' });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Timetable DELETE error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==========================================
+// ATTENDANCE ROUTES
+// ==========================================
+
+// GET /api/attendance?student_id=xxx&month=5&year=2026
+app.get('/api/attendance', async (req, res) => {
+  try {
+    const { student_id, month, year } = req.query;
+    const filter = {};
+    if (student_id) filter.student_id = student_id;
+    if (month && year) {
+      const start = new Date(Number(year), Number(month) - 1, 1);
+      const end   = new Date(Number(year), Number(month), 0, 23, 59, 59);
+      filter.date = { $gte: start.toISOString().split('T')[0], $lte: end.toISOString().split('T')[0] };
+    }
+    const records = await getCollection('attendance').find(filter).sort({ date: -1 }).toArray();
+    res.json(records);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/attendance — mark attendance (admin)
+app.post('/api/attendance', async (req, res) => {
+  try {
+    const { student_id, date, status, notes } = req.body;
+    if (!student_id || !date || !status) {
+      return res.status(400).json({ error: 'student_id, date, status required' });
+    }
+    const validStatuses = ['present', 'absent', 'late', 'holiday'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+    const result = await getCollection('attendance').updateOne(
+      { student_id, date },
+      { $set: { student_id, date, status, notes: notes || '', updated_at: new Date() } },
+      { upsert: true }
+    );
+    res.json({ success: true, upserted: result.upsertedCount > 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/attendance/summary?student_id=xxx
+app.get('/api/attendance/summary', async (req, res) => {
+  try {
+    const { student_id } = req.query;
+    const filter = student_id ? { student_id } : {};
+    const records = await getCollection('attendance').find(filter).toArray();
+    const summary = {
+      total:   records.length,
+      present: records.filter(r => r.status === 'present').length,
+      absent:  records.filter(r => r.status === 'absent').length,
+      late:    records.filter(r => r.status === 'late').length,
+      holiday: records.filter(r => r.status === 'holiday').length,
+    };
+    summary.rate = summary.total > 0
+      ? Math.round(((summary.present + summary.late * 0.5) / (summary.total - summary.holiday)) * 100)
+      : 0;
+    res.json(summary);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/attendance/students — list all students with attendance stats
+app.get('/api/attendance/students', async (req, res) => {
+  try {
+    const students = await getCollection('users')
+      .find({ role: 'student' }, { projection: { password: 0, password_hash: 0 } })
+      .toArray();
+
+    const enriched = await Promise.all(students.map(async (s) => {
+      const records = await getCollection('attendance').find({ student_id: String(s._id) }).toArray();
+      const total   = records.filter(r => r.status !== 'holiday').length;
+      const present = records.filter(r => r.status === 'present').length;
+      const absent  = records.filter(r => r.status === 'absent').length;
+      const late    = records.filter(r => r.status === 'late').length;
+      return { ...s, attendance: { total, present, absent, late, rate: total > 0 ? Math.round((present / total) * 100) : 0 } };
+    }));
+
+    res.json(enriched);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// RESULTS / REPORT CARD ROUTES
+// ==========================================
+
+// GET /api/results?student_id=xxx&exam=Annual&year=2026
+app.get('/api/results', async (req, res) => {
+  try {
+    const { student_id, exam, year } = req.query;
+    const filter = {};
+    if (student_id) filter.student_id = student_id;
+    if (exam)  filter.exam = exam;
+    if (year)  filter.year = year;
+    const results = await getCollection('results').find(filter).sort({ created_at: -1 }).toArray();
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/results — admin creates/updates result
+app.post('/api/results', async (req, res) => {
+  try {
+    const { student_id, student_name, class: cls, section, roll, exam, year, subjects, attendance, teacher_comment, principal_comment } = req.body;
+    if (!student_id || !exam || !subjects) {
+      return res.status(400).json({ error: 'student_id, exam, subjects required' });
+    }
+    const doc = {
+      student_id, student_name, class: cls, section, roll: Number(roll) || 0,
+      exam, year: year || new Date().getFullYear().toString(),
+      subjects, attendance: attendance || { present: 0, total: 0 },
+      teacher_comment: teacher_comment || '',
+      principal_comment: principal_comment || '',
+      updated_at: new Date(),
+    };
+    const existing = await getCollection('results').findOne({ student_id, exam, year: doc.year });
+    if (existing) {
+      await getCollection('results').updateOne({ _id: existing._id }, { $set: doc });
+      return res.json({ success: true, _id: existing._id, action: 'updated' });
+    }
+    doc.created_at = new Date();
+    const inserted = await getCollection('results').insertOne(doc);
+    res.json({ success: true, _id: inserted.insertedId, action: 'created' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/results/:id — update specific result
+app.put('/api/results/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const update = { ...req.body, updated_at: new Date() };
+    delete update._id;
+    await getCollection('results').updateOne({ _id: new ObjectId(id) }, { $set: update });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/results/:id
+app.delete('/api/results/:id', async (req, res) => {
+  try {
+    await getCollection('results').deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// QUIZ SUBMIT — save score to DB
+// ==========================================
+
+// POST /api/quiz/submit
+app.post('/api/quiz/submit', async (req, res) => {
+  try {
+    const { student_id, subject, score, total, accuracy, time_spent } = req.body;
+    if (!student_id || !subject) return res.status(400).json({ error: 'student_id and subject required' });
+
+    const stars = Math.round((score / total) * 10);
+    const record = {
+      student_id, subject, score, total, accuracy: accuracy || 0,
+      stars, time_spent: time_spent || 0, submitted_at: new Date(),
+    };
+    await getCollection('quiz_results').insertOne(record);
+
+    // Update student stats
+    await getCollection('users').updateOne(
+      { _id: new ObjectId(student_id) },
+      {
+        $inc: {
+          total_stars: stars,
+          quizzes_completed: 1,
+        },
+        $set: { last_active: new Date() },
+      }
+    );
+
+    res.json({ success: true, stars_earned: stars });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/quiz/history?student_id=xxx
+app.get('/api/quiz/history', async (req, res) => {
+  try {
+    const { student_id } = req.query;
+    const filter = student_id ? { student_id } : {};
+    const history = await getCollection('quiz_results').find(filter).sort({ submitted_at: -1 }).limit(50).toArray();
+    res.json(history);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// USER PROFILE UPDATE
+// ==========================================
+
+// PUT /api/users/:id — update profile (name, avatar, bio, class)
+app.put('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const allowedFields = ['name', 'avatar', 'bio', 'class', 'age', 'school', 'phone'];
+    const update = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) update[field] = req.body[field];
+    }
+    if (Object.keys(update).length === 0) return res.status(400).json({ error: 'No valid fields to update' });
+    update.updated_at = new Date();
+
+    await getCollection('users').updateOne({ _id: new ObjectId(id) }, { $set: update });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// TEAMS ROUTES
+// ==========================================
+
+// GET /api/teams
+app.get('/api/teams', async (req, res) => {
+  try {
+    const teams = await getCollection('teams').find({}).sort({ created_at: -1 }).toArray();
+    res.json(teams);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/teams — create team
+app.post('/api/teams', async (req, res) => {
+  try {
+    const { name, description, created_by, avatar, subject } = req.body;
+    if (!name || !created_by) return res.status(400).json({ error: 'name and created_by required' });
+    const team = {
+      name, description: description || '', avatar: avatar || '👥',
+      subject: subject || 'General', created_by,
+      members: [created_by], member_count: 1,
+      total_stars: 0, created_at: new Date(), updated_at: new Date(),
+    };
+    const result = await getCollection('teams').insertOne(team);
+    res.json({ success: true, _id: result.insertedId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/teams/:id/join
+app.post('/api/teams/:id/join', async (req, res) => {
+  try {
+    const { user_id } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'user_id required' });
+    const result = await getCollection('teams').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $addToSet: { members: user_id }, $inc: { member_count: 1 }, $set: { updated_at: new Date() } }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/teams/:id/leave
+app.post('/api/teams/:id/leave', async (req, res) => {
+  try {
+    const { user_id } = req.body;
+    await getCollection('teams').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $pull: { members: user_id }, $inc: { member_count: -1 }, $set: { updated_at: new Date() } }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/teams/:id
+app.delete('/api/teams/:id', async (req, res) => {
+  try {
+    await getCollection('teams').deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// DAILY CHALLENGE
+// ==========================================
+
+// GET /api/daily-challenge — return today's challenge
+app.get('/api/daily-challenge', async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    let challenge = await getCollection('daily_challenges').findOne({ date: today });
+    if (!challenge) {
+      // Auto-pick from question bank
+      const bank = await getCollection('question_bank')
+        .aggregate([{ $sample: { size: 5 } }]).toArray();
+      if (bank.length > 0) {
+        challenge = {
+          date: today,
+          questions: bank,
+          reward_stars: 5,
+          created_at: new Date(),
+        };
+        await getCollection('daily_challenges').insertOne(challenge);
+      } else {
+        // Fallback questions if question bank is empty
+        challenge = {
+          date: today,
+          questions: [
+            { q: 'What is 7 × 8?', options: ['52', '56', '58', '54'], answer: '56', subject: 'Math' },
+            { q: 'How many vowels are in English?', options: ['4', '5', '6', '7'], answer: '5', subject: 'English' },
+            { q: 'What is the capital of Bangladesh?', options: ['Chittagong', 'Dhaka', 'Sylhet', 'Rajshahi'], answer: 'Dhaka', subject: 'GK' },
+          ],
+          reward_stars: 5,
+          created_at: new Date(),
+        };
+      }
+    }
+    res.json(challenge);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/daily-challenge — admin creates today's challenge
+app.post('/api/daily-challenge', async (req, res) => {
+  try {
+    const { date, questions, reward_stars } = req.body;
+    const today = date || new Date().toISOString().split('T')[0];
+    const doc = { date: today, questions, reward_stars: reward_stars || 5, created_at: new Date() };
+    await getCollection('daily_challenges').replaceOne({ date: today }, doc, { upsert: true });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/daily-challenge/submit
+app.post('/api/daily-challenge/submit', async (req, res) => {
+  try {
+    const { student_id, date, answers, score, total } = req.body;
+    const today = date || new Date().toISOString().split('T')[0];
+    const alreadyDone = await getCollection('daily_challenge_submissions')
+      .findOne({ student_id, date: today });
+    if (alreadyDone) return res.json({ success: false, message: 'Already submitted today', stars: 0 });
+
+    const challenge = await getCollection('daily_challenges').findOne({ date: today });
+    const stars = Math.round((score / total) * (challenge?.reward_stars || 5));
+    await getCollection('daily_challenge_submissions').insertOne({
+      student_id, date: today, answers, score, total, stars, submitted_at: new Date(),
+    });
+    await getCollection('users').updateOne(
+      { _id: new ObjectId(student_id) },
+      { $inc: { total_stars: stars }, $set: { last_active: new Date() } }
+    );
+    res.json({ success: true, stars });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// NOTIFICATIONS
+// ==========================================
+
+// GET /api/notifications?user_id=xxx
+app.get('/api/notifications', async (req, res) => {
+  try {
+    const { user_id, limit = 20 } = req.query;
+    const filter = user_id
+      ? { $or: [{ recipient_id: user_id }, { recipient_id: 'all' }] }
+      : { recipient_id: 'all' };
+    const notifications = await getCollection('notifications')
+      .find(filter)
+      .sort({ created_at: -1 })
+      .limit(Number(limit))
+      .toArray();
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/notifications — admin sends notification
+app.post('/api/notifications', async (req, res) => {
+  try {
+    const { title, body, type, recipient_id, icon } = req.body;
+    if (!title || !body) return res.status(400).json({ error: 'title and body required' });
+    const doc = {
+      title, body, type: type || 'info',
+      recipient_id: recipient_id || 'all',
+      icon: icon || '🔔', read: false,
+      created_at: new Date(),
+    };
+    const result = await getCollection('notifications').insertOne(doc);
+    res.json({ success: true, _id: result.insertedId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/notifications/:id/read
+app.patch('/api/notifications/:id/read', async (req, res) => {
+  try {
+    await getCollection('notifications').updateOne(
+      { _id: new ObjectId(req.params.id) },
+      { $set: { read: true, read_at: new Date() } }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Users, BookOpen, BarChart, Settings, LogOut, GraduationCap, FileText, Eye, EyeOff, Activity, ShieldCheck, Database, Server, Award, RefreshCw, Calendar, TrendingUp, Upload, FileCheck, Save } from 'lucide-react';
+import { ArrowLeft, Users, BookOpen, BarChart, Settings, LogOut, GraduationCap, FileText, Eye, EyeOff, Activity, ShieldCheck, Database, Server, Award, RefreshCw, Calendar, TrendingUp, Upload, FileCheck, Save, MessageCircle, ClipboardList } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -258,7 +258,7 @@ const AdminDashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-2xl font-bold text-gray-800">System Modules</h2>
-            <Badge variant="outline" className="bg-white px-3 py-1 text-sm border-blue-200 text-blue-700">8 Active Modules</Badge>
+            <Badge variant="outline" className="bg-white px-3 py-1 text-sm border-blue-200 text-blue-700">11 Active Modules</Badge>
           </div>
           
           <div className="grid sm:grid-cols-2 gap-6">
@@ -423,6 +423,69 @@ const AdminDashboard = () => {
                   <Link to="/admin/backup">
                     <Button className="w-full bg-slate-900 hover:bg-amber-600 text-white rounded-xl shadow-md transition-colors duration-300">
                       Manage Backups
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* NEW: Assignments Manager */}
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="p-3 bg-orange-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                    <ClipboardList className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-0 shadow-none">TASKS</Badge>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Assignments Manager</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Create, edit and delete homework assignments for students.</p>
+                  <Link to="/admin/assignments">
+                    <Button className="w-full bg-slate-900 hover:bg-orange-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                      Manage Assignments
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* NEW: Timetable Manager */}
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="p-3 bg-purple-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 border-0 shadow-none">SCHEDULE</Badge>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Timetable Manager</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">Add, edit and remove class schedules per day and subject.</p>
+                  <Link to="/admin/timetable">
+                    <Button className="w-full bg-slate-900 hover:bg-purple-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                      Manage Timetable
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* NEW: Messages & Broadcast */}
+            <Card className="border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="p-3 bg-green-500 rounded-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                    <MessageCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-0 shadow-none">COMMS</Badge>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Messages & Broadcast</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">View all messages and send announcements to all students.</p>
+                  <Link to="/admin/messages">
+                    <Button className="w-full bg-slate-900 hover:bg-green-600 text-white rounded-xl shadow-md transition-colors duration-300">
+                      Open Messages
                     </Button>
                   </Link>
                 </div>

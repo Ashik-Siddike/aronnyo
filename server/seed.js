@@ -15,7 +15,7 @@ async function seed() {
   await db.collection('contents').deleteMany({});
   await db.collection('chapters').deleteMany({});
   // Keep existing real users, add demo students
-  await db.collection('users').deleteMany({ role: 'student', migrated_from: { $ne: 'supabase' } });
+  await db.collection('users').deleteMany({ role: 'student' });
   await db.collection('profiles').deleteMany({});
   await db.collection('activity').deleteMany({});
   await db.collection('achievements').deleteMany({});

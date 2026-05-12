@@ -1,6 +1,6 @@
-// Static Data for Play Learn Grow Kids
-// This file contains all static data that will be used instead of Supabase
-// Later, this can be easily converted to Django API calls
+// Static Data for 247School
+// Fallback/seed data used by NewContentManager UI.
+// All live data is served via MongoDB through the Express API (server/server.js).
 
 export interface Grade {
   id: number;

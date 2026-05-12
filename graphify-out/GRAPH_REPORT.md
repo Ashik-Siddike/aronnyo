@@ -1,4 +1,4 @@
-# Graph Report - play-learn-grow-kids  (2026-05-05)
+# Graph Report - play-learn-grow-kids  (2026-05-08)
 
 ## Corpus Check
 - 138 files · ~231,427 words
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d9d70b85`
+- Built from commit: `6f582c8c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

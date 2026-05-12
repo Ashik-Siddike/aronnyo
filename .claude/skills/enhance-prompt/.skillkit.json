@@ -1,0 +1,10 @@
+{
+  "name": "enhance-prompt",
+  "description": "",
+  "source": "google-labs-code/stitch-skills",
+  "sourceType": "github",
+  "subpath": "enhance-prompt",
+  "installedAt": "2026-05-10T08:33:09.673Z",
+  "enabled": true,
+  "checksum": "822e45444f6190b7"
+}

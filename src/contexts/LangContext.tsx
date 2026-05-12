@@ -112,6 +112,41 @@ const translations = {
     // ── Video Lessons ──
     videoLessonsTitle: 'Video Lessons', watchLesson: 'Watch Lesson',
     duration: 'Duration', views: 'Views', allSubjects: 'All Subjects',
+    markWatched: 'Mark as Watched', alreadyWatched: 'Completed ✓',
+    upNext: 'Up Next', videoStars: 'Stars Earned',
+    watchedCount: 'Watched', outOf: 'of',
+
+    // ── Certificate ──
+    certificateTitle: 'Certificate of Achievement',
+    certificateDesc: 'This certifies that the student has completed the learning journey.',
+    downloadCert: 'Download Certificate', printCert: 'Print',
+    issuedOn: 'Issued on', studentName: 'Student Name',
+
+    // ── Assignments (extra) ──
+    allAssignments: 'All', pendingLabel: 'Active', overdueLabel: 'Overdue',
+    assignmentsTitle: 'Assignments', dueDate: 'Due Date', submitAssignment: 'Submit Assignment',
+    completed: 'Submitted', assignmentDesc: 'Description', noDescription: 'No description provided.',
+    submitSuccess: 'Assignment submitted! 🎉', submitFailed: 'Submit failed, try again.',
+    fileRequired: 'Please attach a file', confirmSubmit: 'Submit this assignment?',
+    noAssignments: 'No assignments found.',
+
+    // ── Messages (extra) ──
+    inbox: 'Inbox', broadcast: 'Announcement', announcement: '📢 Announcement',
+    sendReply: 'Reply', online: 'Online', adminReply: 'Admin',
+    broadcastSent: 'Announcement sent!', noInbox: 'No messages yet.',
+    messageFrom: 'Message from', messagesTitle: 'Messages', typeMessage: 'Type a message…',
+
+    // ── Timetable (extra) ──
+    teacherLabel: 'Teacher', todaySchedule: "Today's Schedule",
+    classCount: 'classes', noClassToday: 'No class scheduled today.',
+    allDays: 'All Days', dbLive: 'Live from DB', fallbackData: 'Sample data',
+    timetableTitle: 'Class Timetable',
+
+    // ── Admin ──
+    adminPanel: 'Admin Panel', systemModules: 'System Modules',
+    activeModules: 'Active Modules', manageUsers: 'Manage Users',
+    manageContent: 'Content Library', syncData: 'Sync Data',
+    terminateSession: 'Sign Out',
 
     // ── Report Card ──
     reportCardTitle: 'Report Card', grade: 'Grade', percentage: 'Percentage',
@@ -252,6 +287,38 @@ const translations = {
     // ── Video Lessons ──
     videoLessonsTitle: 'ভিডিও পাঠ', watchLesson: 'পাঠ দেখো',
     duration: 'সময়কাল', views: 'দেখা হয়েছে', allSubjects: 'সব বিষয়',
+    markWatched: 'দেখা হয়েছে', alreadyWatched: 'সম্পন্ন ✓',
+    upNext: 'পরের পাঠ', videoStars: 'অর্জিত তারা',
+    watchedCount: 'দেখেছি', outOf: 'এর মধ্যে',
+
+    // ── Certificate ──
+    certificateTitle: 'অর্জনের সনদ',
+    certificateDesc: 'এই সনদপত্রে প্রমাণিত হয় যে শিক্ষার্থী শেখার যাত্রা সম্পন্ন করেছে।',
+    downloadCert: 'সনদ ডাউনলোড করো', printCert: 'প্রিন্ট করো',
+    issuedOn: 'প্রদানের তারিখ', studentName: 'শিক্ষার্থীর নাম',
+
+    // ── Assignments (extra) ──
+    allAssignments: 'সব', pendingLabel: 'সক্রিয়', overdueLabel: 'মেয়াদ শেষ',
+    assignmentDesc: 'বিবরণ', noDescription: 'কোনো বিবরণ দেওয়া হয়নি।',
+    submitSuccess: 'অ্যাসাইনমেন্ট জমা হয়েছে! 🎉', submitFailed: 'জমা হয়নি, আবার চেষ্টা করো।',
+    fileRequired: 'একটি ফাইল সংযুক্ত করো', confirmSubmit: 'এই অ্যাসাইনমেন্ট জমা দেবে?',
+
+    // ── Messages (extra) ──
+    inbox: 'ইনবক্স', broadcast: 'ঘোষণা', announcement: '📢 ঘোষণা',
+    sendReply: 'উত্তর দাও', online: 'অনলাইন', adminReply: 'অ্যাডমিন',
+    broadcastSent: 'ঘোষণা পাঠানো হয়েছে!', noInbox: 'এখনো কোনো বার্তা নেই।',
+    messageFrom: 'বার্তা থেকে',
+
+    // ── Timetable (extra) ──
+    teacherLabel: 'শিক্ষক', todaySchedule: 'আজকের সময়সূচি',
+    classCount: 'ক্লাস', noClassToday: 'আজ কোনো ক্লাস নেই।',
+    allDays: 'সব দিন', dbLive: 'DB থেকে সরাসরি', fallbackData: 'নমুনা ডেটা',
+
+    // ── Admin ──
+    adminPanel: 'অ্যাডমিন প্যানেল', systemModules: 'সিস্টেম মডিউল',
+    activeModules: 'সক্রিয় মডিউল', manageUsers: 'ব্যবহারকারী ব্যবস্থাপনা',
+    manageContent: 'কন্টেন্ট লাইব্রেরি', syncData: 'ডেটা সিঙ্ক করো',
+    terminateSession: 'সাইন আউট',
 
     // ── Report Card ──
     reportCardTitle: 'রিপোর্ট কার্ড', percentage: 'শতাংশ',
@@ -281,6 +348,7 @@ const translations = {
     footerTagline: '২৪/৭ শিখতে থাকো, একটি পাঠ একটি পাঠ করে! 🌟',
     footerCopy: '© ২০২৬ ২৪৭স্কুল। বাংলাদেশের ছোটদের জন্য ❤️ দিয়ে তৈরি।',
     new: 'নতুন',
+
   },
 } as const;
 

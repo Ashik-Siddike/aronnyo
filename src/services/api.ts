@@ -263,11 +263,78 @@ export const statsApi = {
 };
 
 // ==========================================
+// STORY MODE PROGRESS API
+// ==========================================
+
+export interface StoryLevel { stars: number; done: boolean; }
+export interface StoryProgress { user_id: string; levels: Record<string, StoryLevel>; }
+
+export const storyProgressApi = {
+  load: (userId: string) =>
+    fetchApi<StoryProgress>(`/story-progress/${userId}`),
+  saveLevel: (userId: string, levelId: number, data: StoryLevel) =>
+    fetchApi<{ success: boolean }>(`/story-progress/${userId}/level/${levelId}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+};
+
+// ==========================================
+// VIDEO WATCH HISTORY API
+// ==========================================
+
+export const videoHistoryApi = {
+  getWatched: (userId: string) =>
+    fetchApi<{ watched: string[] }>(`/video-history/${userId}`),
+  markWatched: (userId: string, videoId: string) =>
+    fetchApi<{ success: boolean }>(`/video-history/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify({ videoId }),
+    }),
+};
+
+// ==========================================
 // HEALTH CHECK
 // ==========================================
 
 export const healthApi = {
   check: () => fetchApi<{ status: string; database: string }>('/health'),
+};
+
+// ==========================================
+// TIMETABLE API
+// ==========================================
+
+export interface TimetableEntry {
+  _id?: string;
+  day: string;
+  day_index: number;
+  time: string;
+  subject: string;
+  teacher: string;
+  room: string;
+  color: string;
+  grade_id?: string | null;
+  created_at?: string;
+}
+
+export const timetableApi = {
+  getAll: (gradeId?: string) => {
+    const query = gradeId ? `?gradeId=${gradeId}` : '';
+    return fetchApi<TimetableEntry[]>(`/timetable${query}`);
+  },
+  create: (entry: Omit<TimetableEntry, '_id' | 'created_at'>) =>
+    fetchApi<{ success: boolean; id: string; entry: TimetableEntry }>('/timetable', {
+      method: 'POST',
+      body: JSON.stringify(entry),
+    }),
+  update: (id: string, data: Partial<TimetableEntry>) =>
+    fetchApi<{ success: boolean }>(`/timetable/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    fetchApi<{ success: boolean }>(`/timetable/${id}`, { method: 'DELETE' }),
 };
 
 export default {
@@ -282,4 +349,7 @@ export default {
   dashboard: dashboardApi,
   stats: statsApi,
   health: healthApi,
+  timetable: timetableApi,
+  storyProgress: storyProgressApi,
+  videoHistory: videoHistoryApi,
 };

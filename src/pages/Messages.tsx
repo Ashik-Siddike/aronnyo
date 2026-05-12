@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLang } from '@/contexts/LangContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MessageCircle, Send, ArrowLeft, UserCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+
 export default function Messages() {
   const { user } = useAuth();
+  const { t } = useLang();
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
@@ -17,7 +21,7 @@ export default function Messages() {
   const fetchMessages = async () => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/messages?userId=${user.id}&role=${user.role}`);
+      const res = await fetch(`${API}/messages?userId=${user.id}&role=${user.role}`);
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
@@ -59,7 +63,7 @@ export default function Messages() {
     setInputText('');
 
     try {
-      await fetch('/api/messages', {
+      await fetch(`${API}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(tempMsg)
@@ -82,7 +86,7 @@ export default function Messages() {
               </Button>
             </Link>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <MessageCircle className="w-6 h-6" /> Messages
+              <MessageCircle className="w-6 h-6" /> {t.messagesTitle}
             </h1>
           </div>
           <p className="opacity-90 ml-14">Chat directly with {user?.role === 'admin' ? 'Parents' : 'Teachers'}.</p>
@@ -99,7 +103,7 @@ export default function Messages() {
                 <CardTitle className="text-lg">
                   {user?.role === 'admin' ? 'Parent Support' : 'Teacher / Admin'}
                 </CardTitle>
-                <p className="text-xs text-green-500 font-bold">Online</p>
+                <p className="text-xs text-green-500 font-bold">{t.online}</p>
               </div>
             </div>
           </CardHeader>
@@ -110,7 +114,7 @@ export default function Messages() {
                 <div className="text-center text-gray-500 my-auto">Loading messages...</div>
               ) : messages.length === 0 ? (
                 <div className="text-center text-gray-500 my-auto bg-white/80 p-4 rounded-xl">
-                  No messages yet. Say hello! 👋
+                  {t.noInbox} 👋
                 </div>
               ) : (
                 messages.map((msg) => (
@@ -147,7 +151,7 @@ export default function Messages() {
               <Input 
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Type a message..." 
+                placeholder={t.typeMessage} 
                 className="flex-1 rounded-full bg-gray-100 dark:bg-slate-700 border-transparent focus-visible:ring-eduplay-green"
               />
               <Button type="submit" className="rounded-full w-10 h-10 p-0 bg-eduplay-green hover:bg-green-600 text-white shrink-0">

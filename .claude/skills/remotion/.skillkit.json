@@ -1,0 +1,10 @@
+{
+  "name": "remotion",
+  "description": "",
+  "source": "google-labs-code/stitch-skills",
+  "sourceType": "github",
+  "subpath": "remotion",
+  "installedAt": "2026-05-10T08:33:09.698Z",
+  "enabled": true,
+  "checksum": "6ef8b00e37baa27e"
+}

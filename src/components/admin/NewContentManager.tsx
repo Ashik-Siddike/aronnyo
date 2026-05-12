@@ -471,21 +471,19 @@ const NewContentManager = () => {
                     </Button>
                     <Button
                         onClick={async () => {
-                            console.log('Testing direct database connection...');
+                            console.log('Testing MongoDB API connection...');
                             try {
-                                const { data, error } = await supabase
-                                    .from('grades')
-                                    .select('id, name, order_index, created_at')
-                                    .order('order_index');
-                                console.log('Direct test result:', { data, error });
+                                const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+                                const res = await fetch(`${API}/health`);
+                                const data = await res.json();
                                 toast({
-                                    title: "Database Test",
-                                    description: `Found ${data?.length || 0} grades. Check console for details.`,
+                                    title: "✅ MongoDB Connection OK",
+                                    description: `Database: ${data.database} | Time: ${data.timestamp}`,
                                 });
-                            } catch (err) {
-                                console.error('Direct test error:', err);
+                            } catch (err: any) {
+                                console.error('API test error:', err);
                                 toast({
-                                    title: "Database Test Failed",
+                                    title: "❌ API Connection Failed",
                                     description: err.message,
                                     variant: "destructive",
                                 });

@@ -102,6 +102,42 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   Architecture
                 </Button>
               </Link>
+              <Link to="/admin/assignments">
+                <Button 
+                  variant="ghost"
+                  size="sm" 
+                  className={`text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-4 py-2 h-auto ${
+                    isActive('/admin/assignments') ? 'bg-orange-600/20 text-orange-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] border border-orange-500/20 font-medium' : ''
+                  }`}
+                >
+                  <Home className={`w-4 h-4 mr-2 ${isActive('/admin/assignments') ? 'text-orange-400' : ''}`} />
+                  Tasks
+                </Button>
+              </Link>
+              <Link to="/admin/timetable">
+                <Button 
+                  variant="ghost"
+                  size="sm" 
+                  className={`text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-4 py-2 h-auto ${
+                    isActive('/admin/timetable') ? 'bg-violet-600/20 text-violet-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] border border-violet-500/20 font-medium' : ''
+                  }`}
+                >
+                  <BarChart className={`w-4 h-4 mr-2 ${isActive('/admin/timetable') ? 'text-violet-400' : ''}`} />
+                  Schedule
+                </Button>
+              </Link>
+              <Link to="/admin/messages">
+                <Button 
+                  variant="ghost"
+                  size="sm" 
+                  className={`text-slate-300 hover:text-white hover:bg-white/10 transition-all duration-300 rounded-xl px-4 py-2 h-auto ${
+                    isActive('/admin/messages') ? 'bg-emerald-600/20 text-emerald-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] border border-emerald-500/20 font-medium' : ''
+                  }`}
+                >
+                  <Users className={`w-4 h-4 mr-2 ${isActive('/admin/messages') ? 'text-emerald-400' : ''}`} />
+                  Messages
+                </Button>
+              </Link>
             </nav>
           </div>
         </div>

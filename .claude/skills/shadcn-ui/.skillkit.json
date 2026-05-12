@@ -1,0 +1,10 @@
+{
+  "name": "shadcn-ui",
+  "description": "",
+  "source": "google-labs-code/stitch-skills",
+  "sourceType": "github",
+  "subpath": "shadcn-ui",
+  "installedAt": "2026-05-10T08:33:09.709Z",
+  "enabled": true,
+  "checksum": "d4d76696c3ecead8"
+}

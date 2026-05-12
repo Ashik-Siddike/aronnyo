@@ -50,6 +50,9 @@ import AdminAnalytics from "./components/admin/AdminAnalytics";
 import AdminBulkImport from "./components/admin/AdminBulkImport";
 import AdminContentApproval from "./components/admin/AdminContentApproval";
 import AdminBackup from "./components/admin/AdminBackup";
+import AdminAssignments from "./components/admin/AdminAssignments";
+import AdminTimetable from "./components/admin/AdminTimetable";
+import AdminMessages from "./components/admin/AdminMessages";
 import StudentProfile from "./pages/StudentProfile";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Certificate from "./pages/Certificate";
@@ -123,6 +126,9 @@ const App = () => (
                         <Route path="/admin/import" element={<AdminBulkImport />} />
                         <Route path="/admin/approvals" element={<AdminContentApproval />} />
                         <Route path="/admin/backup" element={<AdminBackup />} />
+                        <Route path="/admin/assignments" element={<AdminAssignments />} />
+                        <Route path="/admin/timetable" element={<AdminTimetable />} />
+                        <Route path="/admin/messages" element={<AdminMessages />} />
                         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>

@@ -1,0 +1,10 @@
+{
+  "name": "stitch-loop",
+  "description": "",
+  "source": "google-labs-code/stitch-skills",
+  "sourceType": "github",
+  "subpath": "stitch-loop",
+  "installedAt": "2026-05-10T08:33:09.730Z",
+  "enabled": true,
+  "checksum": "5df1b0bb98ae27e7"
+}
