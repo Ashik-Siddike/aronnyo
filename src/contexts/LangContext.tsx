@@ -122,14 +122,6 @@ const translations = {
     downloadCert: 'Download Certificate', printCert: 'Print',
     issuedOn: 'Issued on', studentName: 'Student Name',
 
-    // ── Assignments (extra) ──
-    // ── Assignments (extra) ──
-    allAssignments: 'All', pendingLabel: 'Active', overdueLabel: 'Overdue',
-    completed: 'Submitted', assignmentDesc: 'Description', noDescription: 'No description provided.',
-    submitSuccess: 'Assignment submitted! 🎉', submitFailed: 'Submit failed, try again.',
-    fileRequired: 'Please attach a file', confirmSubmit: 'Submit this assignment?',
-    noAssignments: 'No assignments found.',
-
     // ── Messages (extra) ──
     inbox: 'Inbox', broadcast: 'Announcement', announcement: '📢 Announcement',
     sendReply: 'Reply', online: 'Online', adminReply: 'Admin',
