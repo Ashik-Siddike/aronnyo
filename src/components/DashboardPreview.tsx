@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 const DashboardPreview = () => {
   return (
-    <section id="dashboard" className="py-16 lg:py-24">
+    <section id="dashboard" className="py-12 lg:py-16">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <motion.div 

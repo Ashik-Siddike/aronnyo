@@ -69,7 +69,7 @@ const SubjectsSection = () => {
   };
 
   return (
-    <section id="subjects" className="py-16 lg:py-24 bg-gradient-to-b from-white to-blue-50/30">
+    <section id="subjects" className="py-12 lg:py-16 bg-gradient-to-b from-white to-blue-50/30">
       <div className="container mx-auto px-4">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}

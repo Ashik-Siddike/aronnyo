@@ -19,7 +19,7 @@ const ClassSelector = () => {
   };
 
   return (
-    <section id="class-selector" className="py-12 lg:py-28 bg-gradient-to-b from-white via-purple-50/40 to-blue-50/50 relative overflow-hidden">
+    <section id="class-selector" className="py-10 lg:py-16 bg-gradient-to-b from-white via-purple-50/40 to-blue-50/50 relative overflow-hidden">
       {/* decorative */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-6 text-4xl animate-float opacity-20">✨</div>

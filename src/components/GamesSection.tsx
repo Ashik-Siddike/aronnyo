@@ -24,7 +24,7 @@ const GamesSection = () => {
     'bg-red-100 text-red-700';
 
   return (
-    <section id="games-section" className="py-12 lg:py-24 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <section id="games-section" className="py-12 lg:py-16 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       <div className="container mx-auto px-4">
 
         {/* ── Section Header ── */}
