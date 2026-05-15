@@ -141,11 +141,47 @@ async function connectDB() {
 const getCollection = (name) => db.collection(name);
 
 // ==========================================
-// TEXT-TO-SPEECH (Google Cloud TTS)
+// TEXT-TO-SPEECH  (Google Translate TTS — Free, No billing)
 // ==========================================
 
-// Simple in-memory cache: Map<cacheKey, base64AudioString>
+// In-memory cache: cacheKey → Buffer (MP3 binary)
 const ttsCache = new Map();
+
+/**
+ * Split text into chunks ≤200 chars at sentence/word boundaries
+ * (Google Translate TTS silently truncates above ~200 chars)
+ */
+function splitText(text, maxLen = 190) {
+  const chunks = [];
+  const sentences = text.split(/(?<=[।.!?])\s+|(?<=\n)/);
+  let current = '';
+  for (const sentence of sentences) {
+    if ((current + sentence).length <= maxLen) {
+      current += (current ? ' ' : '') + sentence;
+    } else {
+      if (current) chunks.push(current.trim());
+      // If single sentence is too long, split by words
+      if (sentence.length > maxLen) {
+        const words = sentence.split(' ');
+        let wordChunk = '';
+        for (const word of words) {
+          if ((wordChunk + ' ' + word).trim().length <= maxLen) {
+            wordChunk += (wordChunk ? ' ' : '') + word;
+          } else {
+            if (wordChunk) chunks.push(wordChunk.trim());
+            wordChunk = word;
+          }
+        }
+        if (wordChunk) current = wordChunk;
+        else current = '';
+      } else {
+        current = sentence;
+      }
+    }
+  }
+  if (current.trim()) chunks.push(current.trim());
+  return chunks.filter(Boolean);
+}
 
 // POST /api/tts  { text, lang }
 app.post('/api/tts', async (req, res) => {
@@ -156,67 +192,66 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'text is required' });
     }
 
-    const apiKey = process.env.GOOGLE_TTS_API_KEY;
-    if (!apiKey) {
-      return res.status(503).json({ error: 'TTS API key not configured' });
-    }
-
-    // Truncate to 5000 chars (Google Cloud TTS limit per request)
-    const safeText = text.trim().slice(0, 5000);
+    const safeText = text.trim().slice(0, 3000);
     const cacheKey = `${lang}:${safeText}`;
 
     // Return cached audio if available
     if (ttsCache.has(cacheKey)) {
-      return res.json({ audioContent: ttsCache.get(cacheKey), cached: true });
+      const cached = ttsCache.get(cacheKey);
+      res.set('Content-Type', 'audio/mpeg');
+      res.set('X-TTS-Cache', 'hit');
+      return res.send(cached);
     }
 
-    // Choose voice based on language
-    const voiceConfig = {
-      bn: { languageCode: 'bn-IN', name: 'bn-IN-Wavenet-A', ssmlGender: 'FEMALE' },
-      en: { languageCode: 'en-US', name: 'en-US-Neural2-C', ssmlGender: 'FEMALE' },
-    };
-    const voice = voiceConfig[lang] || voiceConfig['bn'];
+    // Split into ≤190-char chunks
+    const chunks = splitText(safeText, 190);
+    const audioParts = [];
 
-    const ttsRes = await fetch(
-      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          input: { text: safeText },
-          voice,
-          audioConfig: {
-            audioEncoding: 'MP3',
-            speakingRate: lang === 'bn' ? 0.90 : 0.95,
-            pitch: 0.0,
-            effectsProfileId: ['headphone-class-device'],
-          },
-        }),
+    for (const chunk of chunks) {
+      const encoded = encodeURIComponent(chunk);
+      const gtUrl =
+        `https://translate.google.com/translate_tts` +
+        `?ie=UTF-8&tl=${lang}&client=tw-ob&ttsspeed=0.9&q=${encoded}`;
+
+      const gtRes = await fetch(gtUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36',
+          'Referer': 'https://translate.google.com/',
+        },
+      });
+
+      if (!gtRes.ok) {
+        console.error(`Google Translate TTS chunk failed: ${gtRes.status} — "${chunk}"`);
+        continue; // skip failed chunk, don't crash
       }
-    );
 
-    if (!ttsRes.ok) {
-      const errBody = await ttsRes.text();
-      console.error('Google TTS error:', ttsRes.status, errBody);
-      return res.status(502).json({ error: 'TTS upstream error', details: errBody });
+      const buf = Buffer.from(await gtRes.arrayBuffer());
+      audioParts.push(buf);
     }
 
-    const data = await ttsRes.json();
-    const audioContent = data.audioContent; // base64 MP3
-
-    // Cache (keep max 200 entries to avoid memory bloat)
-    if (ttsCache.size >= 200) {
-      const firstKey = ttsCache.keys().next().value;
-      ttsCache.delete(firstKey);
+    if (audioParts.length === 0) {
+      return res.status(502).json({ error: 'TTS upstream returned no audio' });
     }
-    ttsCache.set(cacheKey, audioContent);
 
-    return res.json({ audioContent });
+    // Concatenate all MP3 chunks
+    const combined = Buffer.concat(audioParts);
+
+    // Cache (max 150 entries)
+    if (ttsCache.size >= 150) {
+      ttsCache.delete(ttsCache.keys().next().value);
+    }
+    ttsCache.set(cacheKey, combined);
+
+    res.set('Content-Type', 'audio/mpeg');
+    res.set('Cache-Control', 'public, max-age=86400'); // browser cache 24h
+    return res.send(combined);
+
   } catch (err) {
     console.error('TTS route error:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // ==========================================
 // AUTH / USERS ROUTES
