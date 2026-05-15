@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, Home, BookOpen, BarChart3, GraduationCap, Trophy, Users, Calendar, Award, ChevronDown, Moon, Sun, Languages, Gamepad2, UserCircle, Play, FileText, Map, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -15,10 +15,18 @@ import {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled]   = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
   const { lang, setLang, t } = useLang();
+
+  // Track scroll position for sticky visual upgrade
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const standards = [
     'Nursery', '1st Standard', '2nd Standard', '3rd Standard', '4th Standard', '5th Standard'
@@ -63,7 +71,15 @@ const Header = () => {
     }`;
 
   return (
-    <header className="bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b-2 border-eduplay-purple/20 sticky top-0 z-50 shadow-sm">
+    <header className={`
+      sticky top-0 z-50 border-b-2 border-eduplay-purple/20
+      transition-all duration-300 ease-in-out
+      ${
+        scrolled
+          ? 'bg-white/98 dark:bg-slate-950/98 backdrop-blur-xl shadow-lg shadow-purple-500/10 py-0'
+          : 'bg-white/95 dark:bg-slate-950/95 backdrop-blur-md shadow-sm'
+      }
+    `}>
       <div className="container mx-auto px-4 py-2 lg:py-3">
         <div className="flex items-center justify-between">
           
