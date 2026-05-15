@@ -37,7 +37,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
   };
 
   return (
-    <section id="hero-section" className="relative py-8 sm:py-12 lg:py-24 overflow-hidden bg-gradient-to-b from-white via-purple-50/50 to-blue-50/30">
+    <section id="hero-section" className="relative py-8 sm:py-12 lg:py-24 overflow-hidden bg-gradient-to-b from-white via-purple-50/50 to-blue-50/30 w-full max-w-full">
       {/* Background Elements - Adjusted for mobile */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div 

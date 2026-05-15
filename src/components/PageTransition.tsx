@@ -12,6 +12,7 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
+      style={{ overflow: 'hidden', width: '100%' }}
     >
       {children}
     </motion.div>

@@ -148,7 +148,7 @@ const App = () => (
                   <PWAInstallBanner />
                   <ScrollToTop />
                   <OfflineFallback>
-                    <div className="min-h-screen pb-20 lg:pb-0">
+                    <div className="min-h-screen pb-20 lg:pb-0 overflow-x-hidden w-full">
                       <Layout>
                         <AnimatedRoutes />
                       </Layout>
