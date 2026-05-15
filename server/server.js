@@ -141,6 +141,84 @@ async function connectDB() {
 const getCollection = (name) => db.collection(name);
 
 // ==========================================
+// TEXT-TO-SPEECH (Google Cloud TTS)
+// ==========================================
+
+// Simple in-memory cache: Map<cacheKey, base64AudioString>
+const ttsCache = new Map();
+
+// POST /api/tts  { text, lang }
+app.post('/api/tts', async (req, res) => {
+  try {
+    const { text, lang = 'bn' } = req.body;
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ error: 'text is required' });
+    }
+
+    const apiKey = process.env.GOOGLE_TTS_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ error: 'TTS API key not configured' });
+    }
+
+    // Truncate to 5000 chars (Google Cloud TTS limit per request)
+    const safeText = text.trim().slice(0, 5000);
+    const cacheKey = `${lang}:${safeText}`;
+
+    // Return cached audio if available
+    if (ttsCache.has(cacheKey)) {
+      return res.json({ audioContent: ttsCache.get(cacheKey), cached: true });
+    }
+
+    // Choose voice based on language
+    const voiceConfig = {
+      bn: { languageCode: 'bn-IN', name: 'bn-IN-Wavenet-A', ssmlGender: 'FEMALE' },
+      en: { languageCode: 'en-US', name: 'en-US-Neural2-C', ssmlGender: 'FEMALE' },
+    };
+    const voice = voiceConfig[lang] || voiceConfig['bn'];
+
+    const ttsRes = await fetch(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          input: { text: safeText },
+          voice,
+          audioConfig: {
+            audioEncoding: 'MP3',
+            speakingRate: lang === 'bn' ? 0.90 : 0.95,
+            pitch: 0.0,
+            effectsProfileId: ['headphone-class-device'],
+          },
+        }),
+      }
+    );
+
+    if (!ttsRes.ok) {
+      const errBody = await ttsRes.text();
+      console.error('Google TTS error:', ttsRes.status, errBody);
+      return res.status(502).json({ error: 'TTS upstream error', details: errBody });
+    }
+
+    const data = await ttsRes.json();
+    const audioContent = data.audioContent; // base64 MP3
+
+    // Cache (keep max 200 entries to avoid memory bloat)
+    if (ttsCache.size >= 200) {
+      const firstKey = ttsCache.keys().next().value;
+      ttsCache.delete(firstKey);
+    }
+    ttsCache.set(cacheKey, audioContent);
+
+    return res.json({ audioContent });
+  } catch (err) {
+    console.error('TTS route error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ==========================================
 // AUTH / USERS ROUTES
 // ==========================================
 
