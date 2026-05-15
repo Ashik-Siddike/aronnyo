@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '@/contexts/LangContext';
+import { motion } from 'framer-motion';
 
 const subjects = [
   {
@@ -70,71 +71,78 @@ const SubjectsSection = () => {
   return (
     <section id="subjects" className="py-16 lg:py-24 bg-gradient-to-b from-white to-blue-50/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12 lg:mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 mb-4 animate-fade-in">
-            {t.subjectsTitle}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12 lg:mb-16"
+        >
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-800 mb-6 tracking-tight">
+            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+              {t.subjectsTitle}
+            </span>
           </h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto animate-fade-in delay-150">
+          <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto font-medium">
             {t.subjectsSubtitle}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-8">
           {subjects.map((subject, index) => (
-            <Card
+            <motion.div
               key={subject.id}
-              className={`${subject.color} border-0 playful-shadow subject-card cursor-pointer animate-fade-in hover:scale-105 transition-all duration-300`}
-              style={{ animationDelay: `${index * 150}ms` }}
-              onClick={() => handleSubjectClick(subject.route)}
+              initial={{ opacity: 0, y: 40, rotate: -2 }}
+              whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, delay: index * 0.1, type: 'spring', bounce: 0.4 }}
+              className="h-full"
             >
-              <CardHeader className="text-center pb-4">
-                <div className="text-6xl mb-4 animate-bounce-gentle">{subject.emoji}</div>
-                <CardTitle className="text-xl lg:text-2xl font-bold text-gray-800 mb-2">
-                  {t[subject.titleKey]}
-                </CardTitle>
-                <p className="text-gray-600 text-sm lg:text-base">{t[subject.descKey]}</p>
-              </CardHeader>
-              
-              <CardContent className="pt-0">
-                <Button 
-                  className={`w-full ${subject.buttonColor} text-white hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-base lg:text-lg py-3`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSubjectClick(subject.route);
-                  }}
-                >
-                  {t.startLearning}
-                  <ArrowRight className="w-4 h-4 ml-2 animate-pulse" />
-                </Button>
-                
-                <div className="mt-4 flex items-center justify-center space-x-4 text-sm text-gray-600">
-                  <span className="flex items-center">
-                    <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                    Interactive
-                  </span>
-                  <span className="flex items-center">
-                    <span className="w-2 h-2 bg-yellow-400 rounded-full mr-2 animate-pulse"></span>
-                    Fun
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+              <Card
+                className={`${subject.color} border-0 playful-shadow subject-card cursor-pointer hover:scale-105 transition-transform duration-300 h-full flex flex-col active:scale-95`}
+                onClick={() => handleSubjectClick(subject.route)}
+              >
+                <CardHeader className="text-center pb-2 pt-5 px-3">
+                  <div className="text-4xl sm:text-6xl mb-2 sm:mb-4 animate-bounce-gentle">{subject.emoji}</div>
+                  <CardTitle className="text-base sm:text-xl lg:text-2xl font-bold text-gray-800 mb-1">
+                    {t[subject.titleKey]}
+                  </CardTitle>
+                  <p className="text-gray-600 text-xs sm:text-sm font-medium hidden sm:block">{t[subject.descKey]}</p>
+                </CardHeader>
+
+                <CardContent className="pt-0 mt-auto px-3 pb-4">
+                  <Button
+                    className={`w-full ${subject.buttonColor} text-white text-xs sm:text-base py-4 sm:py-6 font-bold rounded-xl`}
+                    onClick={(e) => { e.stopPropagation(); handleSubjectClick(subject.route); }}
+                  >
+                    {t.startLearning}
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
 
 
 
-        <div className="text-center mt-12 lg:mt-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="text-center mt-12 lg:mt-16"
+        >
           <Button 
             variant="outline" 
             size="lg" 
             onClick={() => navigate('/dashboard')}
-            className="border-2 border-eduplay-purple text-eduplay-purple hover:bg-eduplay-purple hover:text-white text-lg px-8 py-4 rounded-2xl transition-all duration-300 hover:scale-105 animate-fade-in delay-700"
+            className="bg-white/80 backdrop-blur-md border-2 border-eduplay-purple text-eduplay-purple hover:bg-eduplay-purple hover:text-white text-lg lg:text-xl px-10 py-6 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl font-bold"
           >
             View Progress Dashboard
-            <ArrowRight className="w-5 h-5 ml-2" />
+            <ArrowRight className="w-6 h-6 ml-3" />
           </Button>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

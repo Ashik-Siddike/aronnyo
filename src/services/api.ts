@@ -1,6 +1,8 @@
 // MongoDB API Client for Play Learn Grow
 // Replaces static data with real MongoDB API calls
 
+import { toast } from 'sonner';
+
 const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 
 class ApiError extends Error {
@@ -12,26 +14,70 @@ class ApiError extends Error {
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
+    let token = '';
+    try {
+      const sessionStr = localStorage.getItem('play_learn_grow_auth_session');
+      if (sessionStr) {
+        const session = JSON.parse(sessionStr);
+        if (session && session.access_token) {
+          token = session.access_token;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse auth session for token');
+    }
+
+    const headers: Record<string, string> = {};
+    
+    // Only set application/json if body is not FormData
+    if (!(options?.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
       headers: {
-        'Content-Type': 'application/json',
+        ...headers,
         ...options?.headers,
       },
-      ...options,
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Network error' }));
-      throw new ApiError(errorData.error || 'Request failed', response.status);
+      const errorMsg = errorData.error || 'Request failed';
+      if (response.status >= 500) {
+        toast.error(`Server Error: ${errorMsg}`);
+      }
+      throw new ApiError(errorMsg, response.status);
     }
 
     return response.json();
   } catch (error) {
     if (error instanceof ApiError) throw error;
     console.error(`API call failed for ${endpoint}:`, error);
+    toast.error('Network Error: Please check your internet connection or try again later.');
     throw new ApiError('Network error - is the API server running?', 0);
   }
 }
+
+// ==========================================
+// UPLOAD API
+// ==========================================
+
+export const uploadApi = {
+  uploadFile: async (file: File): Promise<{ url: string; format: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetchApi('/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+};
 
 // ==========================================
 // AUTH API

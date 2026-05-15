@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download, Printer, Star, Award, TrendingUp, BookOpen, Sparkles, ChevronDown, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 interface SubjectResult {
   name: string;
@@ -90,180 +91,178 @@ const ReportCard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-purple-50/30 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Back */}
-        <Link to="/" className="inline-flex items-center text-gray-600 hover:text-eduplay-purple transition-colors mb-6 print:hidden">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
-        </Link>
+    <div className="min-h-screen bg-slate-900 py-10 px-4 print:bg-white print:py-0 print:text-black relative overflow-hidden">
+      {/* Background decorations for screen */}
+      <div className="absolute inset-0 pointer-events-none print:hidden z-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
 
-        {/* Header */}
-        <div className="text-center mb-8 print:hidden">
-          <div className="inline-flex items-center bg-gradient-to-r from-eduplay-purple/10 to-eduplay-blue/10 px-4 py-2 rounded-full border border-eduplay-purple/20 mb-4 animate-fade-in">
-            <Award className="w-5 h-5 text-eduplay-purple mr-2" />
-            <span className="text-eduplay-purple font-semibold">Report Card System</span>
-          </div>
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-800 mb-4 animate-fade-in">
-            <span className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green bg-clip-text text-transparent">
-              📄 প্রগ্রেস রিপোর্ট কার্ড
+      <div className="container mx-auto px-4 max-w-5xl relative z-10">
+        {/* Controls */}
+        <div className="flex justify-between items-center mb-8 print:hidden">
+          <Link to="/" className="inline-flex items-center text-slate-400 hover:text-white transition-colors bg-slate-800 px-4 py-2 rounded-full border border-slate-700">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Base
+          </Link>
+          <Button onClick={handlePrint} className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/30 rounded-full px-6">
+            <Printer className="w-4 h-4 mr-2" /> Print Stats
+          </Button>
+        </div>
+
+        {/* Header - Screen */}
+        <div className="text-center mb-10 print:hidden">
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="inline-flex items-center bg-indigo-500/10 px-4 py-2 rounded-full border border-indigo-500/30 mb-4"
+          >
+            <Sparkles className="w-5 h-5 text-indigo-400 mr-2" />
+            <span className="text-indigo-300 font-bold uppercase tracking-widest text-sm">Official Player Stats</span>
+          </motion.div>
+          <h1 className="text-4xl lg:text-6xl font-black text-white mb-4 drop-shadow-md">
+            <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              PROGRESS REPORT
             </span>
           </h1>
-          <p className="text-gray-600 text-lg animate-fade-in delay-150">
-            ছাত্রছাত্রীদের পরীক্ষার ফলাফল এবং মূল্যায়ন রিপোর্ট
+          <p className="text-slate-400 text-lg font-medium">
+            Detailed breakdown of your learning adventures
           </p>
         </div>
 
-        {/* Student Selector */}
-        <div className="flex flex-wrap gap-3 justify-center mb-8 print:hidden">
+        {/* Header - Print */}
+        <div className="hidden print:block text-center mb-8 border-b-2 border-gray-800 pb-4">
+          <h1 className="text-3xl font-bold uppercase tracking-widest mb-2">247School</h1>
+          <h2 className="text-xl font-semibold text-gray-700">Official Progress Report</h2>
+        </div>
+
+        {/* Student Selector (Screen only) */}
+        <div className="flex flex-wrap gap-3 justify-center mb-10 print:hidden">
           {sampleStudents.map((student) => (
             <Button
               key={student.id}
               onClick={() => setSelectedStudent(student)}
-              className={`rounded-full px-5 py-3 transition-all duration-300 ${
+              className={`rounded-full px-6 py-4 transition-all duration-300 font-bold border-2 ${
                 selectedStudent.id === student.id
-                  ? 'bg-gradient-to-r from-eduplay-purple to-eduplay-blue text-white shadow-lg scale-105'
-                  : 'bg-white text-gray-600 hover:bg-eduplay-purple/5 border'
+                  ? 'bg-slate-800 border-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)] scale-105'
+                  : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white'
               }`}
             >
-              <span className="mr-2">{student.avatar}</span>
+              <span className="mr-2 text-xl">{student.avatar}</span>
               {student.name}
             </Button>
           ))}
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 mb-6 print:hidden">
-          <Button variant="outline" onClick={handlePrint} className="border-eduplay-purple/30 text-eduplay-purple hover:bg-eduplay-purple/5">
-            <Printer className="w-4 h-4 mr-2" /> প্রিন্ট করুন
-          </Button>
-        </div>
-
         {/* Report Card */}
         <div ref={reportRef}>
-          <Card className="border-0 playful-shadow overflow-hidden print:shadow-none print:border">
-            {/* School Header */}
-            <div className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green p-6 text-center text-white">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <img src="/assets/logo-2.png" alt="Logo" className="h-10 bg-white/20 rounded-lg p-1" />
-                <h2 className="text-2xl font-bold">247School</h2>
-              </div>
-              <p className="text-white/80 text-sm">শিশুদের জন্য আনন্দময় শিক্ষা প্ল্যাটফর্ম</p>
-              <div className="mt-3 inline-block bg-white/20 px-4 py-1.5 rounded-full text-sm font-bold">
-                📋 {selectedStudent.exam} — {selectedStudent.year}
-              </div>
-            </div>
-
-            {/* Student Info */}
-            <div className="p-6 bg-gradient-to-r from-eduplay-purple/5 to-eduplay-blue/5 border-b">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-[32px] overflow-hidden shadow-2xl print:shadow-none print:border-none print:bg-transparent print:rounded-none"
+          >
+            {/* Student Info Banner */}
+            <div className="bg-slate-800/50 p-6 md:p-8 border-b border-slate-700 print:bg-gray-100 print:border-gray-300 print:p-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                 <div>
-                  <span className="text-gray-500">ছাত্র/ছাত্রীর নাম:</span>
-                  <p className="font-bold text-gray-800 flex items-center gap-1">
-                    <span className="text-xl">{selectedStudent.avatar}</span> {selectedStudent.name}
+                  <span className="text-slate-400 font-bold uppercase text-xs print:text-gray-500">Player Name</span>
+                  <p className="font-black text-xl text-white mt-1 print:text-black flex items-center gap-2">
+                    <span className="text-2xl print:hidden">{selectedStudent.avatar}</span> {selectedStudent.name}
                   </p>
                 </div>
                 <div>
-                  <span className="text-gray-500">শ্রেণী:</span>
-                  <p className="font-bold text-gray-800">{selectedStudent.class} ({selectedStudent.section})</p>
+                  <span className="text-slate-400 font-bold uppercase text-xs print:text-gray-500">Guild (Class)</span>
+                  <p className="font-bold text-lg text-white mt-1 print:text-black">{selectedStudent.class} ({selectedStudent.section})</p>
                 </div>
                 <div>
-                  <span className="text-gray-500">রোল নং:</span>
-                  <p className="font-bold text-gray-800">{selectedStudent.roll}</p>
+                  <span className="text-slate-400 font-bold uppercase text-xs print:text-gray-500">ID / Roll</span>
+                  <p className="font-bold text-lg text-white mt-1 print:text-black">{selectedStudent.roll}</p>
                 </div>
                 <div>
-                  <span className="text-gray-500">মেধা ক্রম:</span>
-                  <p className="font-bold text-eduplay-purple">{selectedStudent.rank}/{selectedStudent.totalStudents}</p>
+                  <span className="text-slate-400 font-bold uppercase text-xs print:text-gray-500">Global Rank</span>
+                  <p className="font-black text-xl text-indigo-400 mt-1 print:text-black">#{selectedStudent.rank} <span className="text-sm text-slate-500">of {selectedStudent.totalStudents}</span></p>
                 </div>
               </div>
             </div>
 
             {/* Overall Stats */}
-            <div className="p-6 border-b">
+            <div className="p-6 md:p-8 border-b border-slate-700 print:border-gray-300">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="border border-eduplay-green/20 bg-eduplay-green/5">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-3xl font-black text-eduplay-green">{percentage}%</div>
-                    <div className="text-xs text-gray-600 mt-1">সর্বমোট শতাংশ</div>
-                  </CardContent>
-                </Card>
-                <Card className="border border-eduplay-purple/20 bg-eduplay-purple/5">
-                  <CardContent className="p-4 text-center">
-                    <div className={`text-3xl font-black ${overallGrade.color}`}>{overallGrade.grade}</div>
-                    <div className="text-xs text-gray-600 mt-1">সামগ্রিক গ্রেড</div>
-                  </CardContent>
-                </Card>
-                <Card className="border border-eduplay-blue/20 bg-eduplay-blue/5">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-3xl font-black text-eduplay-blue">{totalMarks}/{totalPossible}</div>
-                    <div className="text-xs text-gray-600 mt-1">মোট নম্বর</div>
-                  </CardContent>
-                </Card>
-                <Card className="border border-eduplay-orange/20 bg-eduplay-orange/5">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-3xl font-black text-eduplay-orange">{attendanceRate}%</div>
-                    <div className="text-xs text-gray-600 mt-1">উপস্থিতি</div>
-                  </CardContent>
-                </Card>
+                <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-5 text-center shadow-[0_0_15px_rgba(16,185,129,0.1)] print:border-gray-300 print:shadow-none print:bg-white">
+                  <div className="text-4xl font-black text-emerald-400 print:text-black mb-1">{percentage}%</div>
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest print:text-gray-600">Total Score</div>
+                </div>
+                <div className="bg-slate-900 border border-purple-500/30 rounded-2xl p-5 text-center shadow-[0_0_15px_rgba(168,85,247,0.1)] print:border-gray-300 print:shadow-none print:bg-white">
+                  <div className={`text-4xl font-black ${overallGrade.color} print:text-black mb-1`}>{overallGrade.grade}</div>
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest print:text-gray-600">Final Grade</div>
+                </div>
+                <div className="bg-slate-900 border border-blue-500/30 rounded-2xl p-5 text-center shadow-[0_0_15px_rgba(59,130,246,0.1)] print:border-gray-300 print:shadow-none print:bg-white">
+                  <div className="text-4xl font-black text-blue-400 print:text-black mb-1">{totalMarks}<span className="text-xl text-slate-600">/{totalPossible}</span></div>
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest print:text-gray-600">XP Earned</div>
+                </div>
+                <div className="bg-slate-900 border border-orange-500/30 rounded-2xl p-5 text-center shadow-[0_0_15px_rgba(249,115,22,0.1)] print:border-gray-300 print:shadow-none print:bg-white">
+                  <div className="text-4xl font-black text-orange-400 print:text-black mb-1">{attendanceRate}%</div>
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest print:text-gray-600">Stamina (Attendance)</div>
+                </div>
               </div>
             </div>
 
             {/* Subject-wise Results */}
-            <div className="p-6 border-b">
-              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-eduplay-purple" />
-                বিষয়ভিত্তিক ফলাফল
+            <div className="p-6 md:p-8 border-b border-slate-700 print:border-gray-300">
+              <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2 print:text-black">
+                <BookOpen className="w-6 h-6 text-indigo-400 print:text-black" />
+                Mission Logs
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gradient-to-r from-eduplay-purple/10 to-eduplay-blue/10">
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 rounded-tl-xl">বিষয়</th>
-                      <th className="text-center py-3 px-4 font-bold text-gray-700">প্রাপ্ত নম্বর</th>
-                      <th className="text-center py-3 px-4 font-bold text-gray-700">মোট</th>
-                      <th className="text-center py-3 px-4 font-bold text-gray-700">শতাংশ</th>
-                      <th className="text-center py-3 px-4 font-bold text-gray-700">গ্রেড</th>
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 rounded-tr-xl hidden md:table-cell">মন্তব্য</th>
+                    <tr className="bg-slate-900/80 text-slate-400 print:bg-gray-100 print:text-black uppercase text-xs tracking-wider">
+                      <th className="text-left py-4 px-4 font-bold rounded-tl-xl">Subject</th>
+                      <th className="text-center py-4 px-4 font-bold">Marks</th>
+                      <th className="text-center py-4 px-4 font-bold">Total</th>
+                      <th className="text-center py-4 px-4 font-bold">Progress</th>
+                      <th className="text-center py-4 px-4 font-bold">Grade</th>
+                      <th className="text-left py-4 px-4 font-bold rounded-tr-xl hidden md:table-cell">Feedback</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="text-slate-300 print:text-black font-medium">
                     {selectedStudent.subjects.map((subject, i) => {
                       const pct = Math.round((subject.marks / subject.total) * 100);
                       return (
-                        <tr key={i} className="border-b border-gray-50 hover:bg-eduplay-purple/5 transition-colors">
-                          <td className="py-3 px-4 font-medium text-gray-800">
-                            <span className="mr-2">{subject.icon}</span>{subject.name}
+                        <tr key={i} className="border-b border-slate-700 hover:bg-slate-700/50 transition-colors print:border-gray-200">
+                          <td className="py-4 px-4 text-white print:text-black font-bold">
+                            <span className="mr-2 text-lg print:hidden">{subject.icon}</span>{subject.name}
                           </td>
-                          <td className="py-3 px-4 text-center font-bold text-gray-800">{subject.marks}</td>
-                          <td className="py-3 px-4 text-center text-gray-500">{subject.total}</td>
-                          <td className="py-3 px-4 text-center">
+                          <td className="py-4 px-4 text-center font-bold">{subject.marks}</td>
+                          <td className="py-4 px-4 text-center text-slate-500 print:text-gray-500">{subject.total}</td>
+                          <td className="py-4 px-4 text-center w-40">
                             <div className="flex items-center justify-center gap-2">
-                              <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden print:bg-gray-200">
                                 <div
-                                  className="h-full bg-gradient-to-r from-eduplay-purple to-eduplay-blue rounded-full transition-all duration-500"
+                                  className="h-full bg-indigo-500 print:bg-black rounded-full"
                                   style={{ width: `${pct}%` }}
                                 />
                               </div>
-                              <span className="text-xs font-bold text-gray-600">{pct}%</span>
+                              <span className="text-xs font-bold text-slate-400 print:text-black w-8">{pct}%</span>
                             </div>
                           </td>
-                          <td className="py-3 px-4 text-center">
-                            <span className={`font-black text-lg ${subject.gradeColor}`}>{subject.grade}</span>
+                          <td className="py-4 px-4 text-center">
+                            <span className={`font-black text-lg ${subject.gradeColor} print:text-black`}>{subject.grade}</span>
                           </td>
-                          <td className="py-3 px-4 text-xs text-gray-500 hidden md:table-cell">{subject.comment}</td>
+                          <td className="py-4 px-4 text-xs text-slate-400 print:text-gray-600 hidden md:table-cell">{subject.comment}</td>
                         </tr>
                       );
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="bg-gradient-to-r from-eduplay-purple/10 to-eduplay-blue/10 font-bold">
-                      <td className="py-3 px-4 text-gray-800 rounded-bl-xl">সর্বমোট</td>
-                      <td className="py-3 px-4 text-center text-eduplay-purple">{totalMarks}</td>
-                      <td className="py-3 px-4 text-center text-gray-600">{totalPossible}</td>
-                      <td className="py-3 px-4 text-center text-eduplay-purple">{percentage}%</td>
-                      <td className="py-3 px-4 text-center">
-                        <span className={`text-xl ${overallGrade.color}`}>{overallGrade.grade}</span>
+                    <tr className="bg-slate-900/80 text-white print:bg-gray-100 print:text-black font-black text-base">
+                      <td className="py-4 px-4 rounded-bl-xl">OVERALL</td>
+                      <td className="py-4 px-4 text-center text-indigo-400 print:text-black">{totalMarks}</td>
+                      <td className="py-4 px-4 text-center text-slate-500 print:text-gray-500">{totalPossible}</td>
+                      <td className="py-4 px-4 text-center text-indigo-400 print:text-black">{percentage}%</td>
+                      <td className="py-4 px-4 text-center">
+                        <span className={`text-2xl ${overallGrade.color} print:text-black`}>{overallGrade.grade}</span>
                       </td>
-                      <td className="py-3 px-4 rounded-br-xl hidden md:table-cell"></td>
+                      <td className="py-4 px-4 rounded-br-xl hidden md:table-cell"></td>
                     </tr>
                   </tfoot>
                 </table>
@@ -271,72 +270,58 @@ const ReportCard = () => {
             </div>
 
             {/* Remarks */}
-            <div className="p-6 grid md:grid-cols-2 gap-4 border-b">
-              <div className="bg-eduplay-green/5 border border-eduplay-green/20 rounded-2xl p-4">
-                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 text-eduplay-green" /> শ্রেণী শিক্ষকের মন্তব্য
+            <div className="p-6 md:p-8 grid md:grid-cols-2 gap-6 border-b border-slate-700 print:border-gray-300">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 print:bg-white print:border-gray-300">
+                <h4 className="font-bold text-emerald-400 print:text-black mb-3 flex items-center gap-2 uppercase tracking-wider text-xs">
+                  <GraduationCap className="w-4 h-4" /> Class Teacher's Review
                 </h4>
-                <p className="text-sm text-gray-700 leading-relaxed">{selectedStudent.teacherComment}</p>
+                <p className="text-sm text-slate-300 print:text-gray-800 leading-relaxed font-medium">{selectedStudent.teacherComment}</p>
               </div>
-              <div className="bg-eduplay-purple/5 border border-eduplay-purple/20 rounded-2xl p-4">
-                <h4 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                  <Award className="w-4 h-4 text-eduplay-purple" /> প্রধান শিক্ষকের মন্তব্য
+              <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-5 print:bg-white print:border-gray-300">
+                <h4 className="font-bold text-indigo-400 print:text-black mb-3 flex items-center gap-2 uppercase tracking-wider text-xs">
+                  <Award className="w-4 h-4" /> Principal's Note
                 </h4>
-                <p className="text-sm text-gray-700 leading-relaxed">{selectedStudent.principalComment}</p>
+                <p className="text-sm text-slate-300 print:text-gray-800 leading-relaxed font-medium">{selectedStudent.principalComment}</p>
               </div>
             </div>
 
-            {/* Grade Scale */}
-            <div className="p-6 bg-gray-50">
-              <h4 className="text-sm font-bold text-gray-600 mb-3">গ্রেড স্কেল:</h4>
-              <div className="flex flex-wrap gap-3 text-xs">
-                {[
-                  { grade: 'A+', range: '90-100%', color: 'bg-eduplay-green/20 text-eduplay-green border-eduplay-green/30' },
-                  { grade: 'A', range: '80-89%', color: 'bg-eduplay-blue/20 text-eduplay-blue border-eduplay-blue/30' },
-                  { grade: 'B+', range: '70-79%', color: 'bg-eduplay-purple/20 text-eduplay-purple border-eduplay-purple/30' },
-                  { grade: 'B', range: '60-69%', color: 'bg-eduplay-orange/20 text-eduplay-orange border-eduplay-orange/30' },
-                  { grade: 'C', range: '50-59%', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-                  { grade: 'F', range: '0-49%', color: 'bg-red-100 text-red-500 border-red-200' },
-                ].map((g, i) => (
-                  <span key={i} className={`px-3 py-1.5 rounded-full border font-bold ${g.color}`}>
-                    {g.grade} ({g.range})
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Signature Area */}
-            <div className="p-6 border-t">
-              <div className="grid grid-cols-3 gap-4 text-center text-sm text-gray-600">
+            {/* Print Only Signatures */}
+            <div className="hidden print:block p-8 pt-16">
+              <div className="grid grid-cols-3 gap-8 text-center text-sm font-bold">
                 <div>
-                  <div className="border-b border-gray-300 mb-2 pb-6"></div>
-                  <p className="font-medium">শ্রেণী শিক্ষক</p>
+                  <div className="border-b-2 border-black mb-2 pb-8"></div>
+                  <p>Class Teacher</p>
                 </div>
                 <div>
-                  <div className="border-b border-gray-300 mb-2 pb-6"></div>
-                  <p className="font-medium">অভিভাবক</p>
+                  <div className="border-b-2 border-black mb-2 pb-8"></div>
+                  <p>Parent / Guardian</p>
                 </div>
                 <div>
-                  <div className="border-b border-gray-300 mb-2 pb-6"></div>
-                  <p className="font-medium">প্রধান শিক্ষক</p>
+                  <div className="border-b-2 border-black mb-2 pb-8"></div>
+                  <p>Principal</p>
                 </div>
               </div>
             </div>
-          </Card>
+          </motion.div>
         </div>
 
-        {/* Bottom CTA */}
-        <div className="mt-10 text-center bg-gradient-to-r from-eduplay-purple to-eduplay-blue p-8 rounded-3xl playful-shadow animate-fade-in print:hidden">
-          <Sparkles className="w-10 h-10 text-white/80 mx-auto mb-3 animate-pulse" />
-          <h3 className="text-2xl font-bold text-white mb-2">ভালো ফলাফলের জন্য অভিনন্দন! 🎉</h3>
-          <p className="text-white/80 mb-4">তোমার কঠোর পরিশ্রম এবং নিষ্ঠার প্রতিফলন এই রিপোর্ট কার্ডে!</p>
+        {/* Bottom CTA for screen only */}
+        <div className="mt-12 text-center print:hidden">
           <Link to="/leaderboard">
-            <Button className="bg-white text-eduplay-purple hover:bg-white/90 hover:scale-105 transition-all duration-300 text-lg px-8 py-5 rounded-2xl">
-              লিডারবোর্ড দেখো 🏆
+            <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black hover:scale-105 transition-all duration-300 text-lg px-10 py-6 rounded-full shadow-[0_0_30px_rgba(249,115,22,0.4)]">
+              View Leaderboard 🏆
             </Button>
           </Link>
         </div>
       </div>
+      
+      {/* Global Print Styles to enforce cleanliness */}
+      <style>{`
+        @media print {
+          body { background: white !important; -webkit-print-color-adjust: exact; }
+          .playful-shadow { box-shadow: none !important; }
+        }
+      `}</style>
     </div>
   );
 };

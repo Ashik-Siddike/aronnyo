@@ -297,6 +297,15 @@ export default function StoryMode() {
                     backdropFilter:'blur(4px)',boxShadow:isDark?'0 1px 4px rgba(0,0,0,0.3)':'0 1px 4px rgba(0,0,0,0.05)' }}>
                   {lvl.title}
                 </div>
+                {isSel && (
+                  <button
+                    onClick={(e)=>{ e.stopPropagation(); localStorage.setItem(PEND, String(lvl.id)); nav(lvl.route); }}
+                    className="mt-2 flex items-center gap-1.5 px-5 py-2.5 rounded-full font-black text-white text-xs transition-all active:scale-95 animate-bounce shadow-lg"
+                    style={{ background:lvl.color, boxShadow:`0 4px 12px ${lvl.color}60` }}>
+                    <Play className="w-3.5 h-3.5 fill-white"/>
+                    {lp?.done ? t.playAgainBtn : t.playBtn}
+                  </button>
+                )}
               </button>
             );
           })}
@@ -307,43 +316,7 @@ export default function StoryMode() {
         </div>
       </div>
 
-      {/* ── Bottom Panel ── */}
-      <div className="shrink-0 backdrop-blur-md px-4 py-3 pb-24 lg:pb-4"
-        style={{ background:bottomBg, borderTop:`1px solid ${bottomBorder}`, boxShadow:isDark?'0 -6px 24px rgba(0,0,0,0.4)':'0 -6px 24px rgba(0,0,0,0.06)' }}>
-        {selLvl ? (
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center text-3xl shadow-sm"
-              style={{ background:isDark?selLvl.darkBg:selLvl.bg, border:`1.5px solid ${selLvl.color}40` }}>
-              {selLvl.emoji}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-black text-sm" style={{ color:levelTitleColor }}>{selLvl.title}</p>
-              <p className="text-xs" style={{ color:levelSubColor }}>{selLvl.sub}</p>
-              <div className="flex gap-0.5 mt-1">
-                {[1,2,3].map(s=>(
-                  <Star key={s} className={`w-3 h-3 ${s<=(selLP?.stars??0)?'fill-amber-400 text-amber-400':isDark?'fill-slate-700 text-slate-700':'fill-slate-200 text-slate-200'}`}/>
-                ))}
-              </div>
-            </div>
-            {!isOpen(selLvl.id, prog) ? (
-              <div className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm"
-                style={{ background:lockedBg, color:lockedText }}>
-                <Lock className="w-4 h-4" /> {t.lockedLabel}
-              </div>
-            ) : (
-              <button
-                onClick={()=>{ localStorage.setItem(PEND, String(selLvl.id)); nav(selLvl.route); }}
-                className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-white text-sm transition-all active:scale-95 hover:opacity-90"
-                style={{ background:selLvl.color, boxShadow:`0 4px 16px ${selLvl.color}60` }}>
-                <Play className="w-4 h-4 fill-white"/>
-                {selLP?.done ? t.playAgainBtn : t.playBtn}
-              </button>
-            )}
-          </div>
-        ) : (
-          <p className="text-center text-sm py-2" style={{ color:emptyColor }}>{t.tapToStart}</p>
-        )}
-      </div>
+
       <style>{`::-webkit-scrollbar{display:none}`}</style>
     </div>
   );

@@ -48,14 +48,7 @@ const Header = () => {
     }
   };
 
-  const handleGamesClick = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    if (location.pathname === "/") {
-      document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      navigate('/#games');
-    }
-  };
+
 
   const handleStandardSelect = (standard: string) => {
     if (standard === 'Nursery') handleSubjectsClick();
@@ -126,7 +119,7 @@ const Header = () => {
             </DropdownMenu>
 
             {/* Games */}
-            <Link to="/#games" onClick={handleGamesClick} className={NavItemStyles(isActive("/#games"))}>
+            <Link to="/games" className={NavItemStyles(isActive("/games"))}>
               <Gamepad2 className="w-5 h-5 text-pink-500" />
               <span>{t.games}</span>
             </Link>

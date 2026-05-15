@@ -16,20 +16,20 @@
     "hash": "3b149ddcfb5838e2f7b8273659e7fc15"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\server\\seed.js": {
-    "mtime": 1776456458.0112932,
-    "hash": "bad7c3f725c2c75c1b03cca5f2907c63"
+    "mtime": 1778610346.4913652,
+    "hash": "b6692c6d6971e74d0bbc83a46eda33cf"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\server\\server.js": {
-    "mtime": 1777579385.1397648,
-    "hash": "9543c32a3de9f653290e34e5a1738496"
+    "mtime": 1778219979.627847,
+    "hash": "6cd96e6a35d5ae16606a8b91440c9693"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\server\\test-connection.js": {
     "mtime": 1776446718.6909516,
     "hash": "954f1120ad213f23a860740a3b47c3ae"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\App.tsx": {
-    "mtime": 1777631149.3769224,
-    "hash": "88c61edd35d7955d7d3470ac70b7244f"
+    "mtime": 1778216544.3614228,
+    "hash": "4ce095af9200f931a2cafc632e5c2c1d"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\main.tsx": {
     "mtime": 1764963012.3423948,
@@ -119,6 +119,10 @@
     "mtime": 1777578584.4868734,
     "hash": "d9d89d0b6b9011b3f361c4e5d53bf8f1"
   },
+  "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\components\\admin\\AdminAssignments.tsx": {
+    "mtime": 1778218876.318385,
+    "hash": "d8130f01a091d2a4c7d9ff991b8d6a0e"
+  },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\components\\admin\\AdminAttendance.tsx": {
     "mtime": 1776540231.7380812,
     "hash": "f30f405962099fe4eb0c5f10d7acda76"
@@ -136,16 +140,24 @@
     "hash": "4595585a0130d5466d970e7372d13e25"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\components\\admin\\AdminLayout.tsx": {
-    "mtime": 1776457315.440311,
-    "hash": "72ef71d5bdb014dfdc98e6b47a9531be"
+    "mtime": 1778218745.469337,
+    "hash": "e2bacf84d88caa3c177a0c51152fd932"
+  },
+  "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\components\\admin\\AdminMessages.tsx": {
+    "mtime": 1778219007.3136406,
+    "hash": "75efa6ec5c244f824b381bc84f55aeca"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\components\\admin\\AdminReportCard.tsx": {
     "mtime": 1776540652.3645499,
     "hash": "2e3fd5c52b669ad393dbf45daeae4c61"
   },
+  "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\components\\admin\\AdminTimetable.tsx": {
+    "mtime": 1778219077.8514588,
+    "hash": "975b351a5527a3b7c7c20c5ebf03381e"
+  },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\components\\admin\\NewContentManager.tsx": {
-    "mtime": 1766754812.301297,
-    "hash": "cf5b8bd99bda0fb104f9fab34b136d7b"
+    "mtime": 1778610344.4717243,
+    "hash": "efc0663210a9cc35604ee214c0e1f8a8"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\components\\admin\\NewGradeSubjectManager.tsx": {
     "mtime": 1766754812.3024948,
@@ -356,8 +368,8 @@
     "hash": "13144f36cdf5c3d0ee7585daba94fea1"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\contexts\\LangContext.tsx": {
-    "mtime": 1777651915.7521503,
-    "hash": "f72b97f1c06d83783553fe1d5d61401b"
+    "mtime": 1778219216.180115,
+    "hash": "4c7a91a0d6f677922130ed52124d3dbc"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\contexts\\NotificationContext.tsx": {
     "mtime": 1776842854.5561512,
@@ -372,8 +384,8 @@
     "hash": "d1f4753f9501ab9fe77bef5b1b8df9ca"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\data\\staticData.ts": {
-    "mtime": 1766754812.2945454,
-    "hash": "dcfa6b836cb39e237a8d59e0b4a24610"
+    "mtime": 1778610302.9276986,
+    "hash": "39418a20c93c5eaeb95f2495180fb6e7"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\hooks\\use-mobile.tsx": {
     "mtime": 1764963012.3373883,
@@ -408,20 +420,20 @@
     "hash": "3f4fce936b5fb1bf75a1c723129afb2b"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\AdminDashboard.tsx": {
-    "mtime": 1777578711.891034,
-    "hash": "c884c359baca8a5020aa9e443a560b1e"
+    "mtime": 1778216557.4286244,
+    "hash": "b283eafad12f00cb3d55253e00e2829f"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\AnimalQuiz.tsx": {
     "mtime": 1764963012.344393,
     "hash": "5178764291a27e10a8bd5c9f4f2f4897"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\Assignments.tsx": {
-    "mtime": 1777566055.6809535,
-    "hash": "25503989ca1d56369239d34e4c2f2640"
+    "mtime": 1778216904.560749,
+    "hash": "defacd57c92c8a10f5c49a4f06d13404"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\Attendance.tsx": {
-    "mtime": 1776453014.1613941,
-    "hash": "e97aeb78d6b6f5e8408655aafb93623a"
+    "mtime": 1778220052.2821617,
+    "hash": "bd712a35040a0b9f206aff1b8bdad42a"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\Auth.tsx": {
     "mtime": 1766296642.0750053,
@@ -472,8 +484,8 @@
     "hash": "3ae203efa070a4c2d40f6db895c75d23"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\Messages.tsx": {
-    "mtime": 1777566111.798288,
-    "hash": "e82d3b8ed085ce8ed4ec1fccb7eff7d7"
+    "mtime": 1778216958.7923906,
+    "hash": "339320685ee691d54e23be35d9ee8d4d"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\MultiplicationGame.tsx": {
     "mtime": 1764963012.3496144,
@@ -512,8 +524,8 @@
     "hash": "05173365849166d33843e1d8295cbfee"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\StoryMode.tsx": {
-    "mtime": 1777652789.8945937,
-    "hash": "becef1183f52ec3fad26654e7417db8f"
+    "mtime": 1778216142.2911673,
+    "hash": "d0b493f3761bca77090230d13cee6865"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\StudentDashboard.tsx": {
     "mtime": 1777565313.4474084,
@@ -532,24 +544,28 @@
     "hash": "7cdf56edda8d538c2dbd5abd97db5a01"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\Timetable.tsx": {
-    "mtime": 1777565336.0143712,
-    "hash": "beefe802dd6bcd0844473dd5eb22665f"
+    "mtime": 1778216935.4947815,
+    "hash": "bc8e6b25e7cc710617c4b4163b884460"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\pages\\VideoLessons.tsx": {
-    "mtime": 1777565498.7858882,
-    "hash": "29b4141e0d6f1f43c44fa6fdcd9ec139"
+    "mtime": 1778216196.1143727,
+    "hash": "a6d83a9fa5c0df2f0598b9c4686310ac"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\services\\activityService.ts": {
     "mtime": 1776536691.616792,
     "hash": "0c84967b7e688a121be9ba542570518b"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\services\\api.ts": {
-    "mtime": 1777579440.2937737,
-    "hash": "7cac4ebbea389be6c9fb4d1627302912"
+    "mtime": 1778216033.980129,
+    "hash": "94ed3cd6806bcf778879ef06b16c63b2"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\src\\services\\audioService.ts": {
     "mtime": 1764963012.3552043,
     "hash": "a0e3c5572ccbf5f2bf34642d3e4b86c9"
+  },
+  "E:\\projects\\skill compitition\\play-learn-grow-kids\\CLAUDE.md": {
+    "mtime": 1778402032.0594397,
+    "hash": "0dd2903cae43cca2bcc973297f2eb6af"
   },
   "E:\\projects\\skill compitition\\play-learn-grow-kids\\competition_audit_report.md": {
     "mtime": 1776448289.5539107,

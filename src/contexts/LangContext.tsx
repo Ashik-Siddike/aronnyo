@@ -123,8 +123,8 @@ const translations = {
     issuedOn: 'Issued on', studentName: 'Student Name',
 
     // ── Assignments (extra) ──
+    // ── Assignments (extra) ──
     allAssignments: 'All', pendingLabel: 'Active', overdueLabel: 'Overdue',
-    assignmentsTitle: 'Assignments', dueDate: 'Due Date', submitAssignment: 'Submit Assignment',
     completed: 'Submitted', assignmentDesc: 'Description', noDescription: 'No description provided.',
     submitSuccess: 'Assignment submitted! 🎉', submitFailed: 'Submit failed, try again.',
     fileRequired: 'Please attach a file', confirmSubmit: 'Submit this assignment?',
@@ -134,13 +134,12 @@ const translations = {
     inbox: 'Inbox', broadcast: 'Announcement', announcement: '📢 Announcement',
     sendReply: 'Reply', online: 'Online', adminReply: 'Admin',
     broadcastSent: 'Announcement sent!', noInbox: 'No messages yet.',
-    messageFrom: 'Message from', messagesTitle: 'Messages', typeMessage: 'Type a message…',
+    messageFrom: 'Message from',
 
     // ── Timetable (extra) ──
     teacherLabel: 'Teacher', todaySchedule: "Today's Schedule",
     classCount: 'classes', noClassToday: 'No class scheduled today.',
     allDays: 'All Days', dbLive: 'Live from DB', fallbackData: 'Sample data',
-    timetableTitle: 'Class Timetable',
 
     // ── Admin ──
     adminPanel: 'Admin Panel', systemModules: 'System Modules',
@@ -149,7 +148,7 @@ const translations = {
     terminateSession: 'Sign Out',
 
     // ── Report Card ──
-    reportCardTitle: 'Report Card', grade: 'Grade', percentage: 'Percentage',
+    reportCardTitle: 'Report Card', percentage: 'Percentage',
     remarks: 'Remarks', excellent: 'Excellent', good: 'Good', average: 'Average',
     needsImprovement: 'Needs Improvement',
 

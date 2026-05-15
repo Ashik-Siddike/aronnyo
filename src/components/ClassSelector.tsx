@@ -1,153 +1,162 @@
 
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { GraduationCap, Sparkles, Star, Trophy } from 'lucide-react';
+import { GraduationCap, Sparkles, Trophy } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const standards = [
+  { value: '1st', label: '১ম',  age: '৬-৭ বছর',   gradient: 'from-red-400 to-pink-500',     shadow: 'shadow-red-300/50',    emoji: '🌟' },
+  { value: '2nd', label: '২য়',  age: '৭-৮ বছর',   gradient: 'from-orange-400 to-yellow-500', shadow: 'shadow-orange-300/50', emoji: '🎨' },
+  { value: '3rd', label: '৩য়',  age: '৮-৯ বছর',   gradient: 'from-yellow-400 to-amber-500',  shadow: 'shadow-yellow-300/50', emoji: '🚀' },
+  { value: '4th', label: '৪র্থ', age: '৯-১০ বছর',  gradient: 'from-green-400 to-emerald-500', shadow: 'shadow-green-300/50',  emoji: '📚' },
+  { value: '5th', label: '৫ম',  age: '১০-১১ বছর', gradient: 'from-blue-400 to-indigo-500',   shadow: 'shadow-blue-300/50',   emoji: '🔬' },
+];
 
 const ClassSelector = () => {
   const navigate = useNavigate();
-
-  const standards = [
-    { value: '1st', label: '1st', age: '6-7 years', color: 'bg-gradient-to-br from-red-200 via-red-300 to-pink-300', border: 'border-red-300', hover: 'hover:from-red-300 hover:to-pink-400', emoji: '🌟' },
-    { value: '2nd', label: '2nd', age: '7-8 years', color: 'bg-gradient-to-br from-orange-200 via-orange-300 to-yellow-300', border: 'border-orange-300', hover: 'hover:from-orange-300 hover:to-yellow-400', emoji: '🎨' },
-    { value: '3rd', label: '3rd', age: '8-9 years', color: 'bg-gradient-to-br from-yellow-200 via-yellow-300 to-amber-300', border: 'border-yellow-300', hover: 'hover:from-yellow-300 hover:to-amber-400', emoji: '🚀' },
-    { value: '4th', label: '4th', age: '9-10 years', color: 'bg-gradient-to-br from-green-200 via-green-300 to-emerald-300', border: 'border-green-300', hover: 'hover:from-green-300 hover:to-emerald-400', emoji: '📚' },
-    { value: '5th', label: '5th', age: '10-11 years', color: 'bg-gradient-to-br from-blue-200 via-blue-300 to-sky-300', border: 'border-blue-300', hover: 'hover:from-blue-300 hover:to-sky-400', emoji: '🔬' },
-  ];
 
   const handleGradeSelect = (gradeValue: string) => {
     navigate(`/class/${gradeValue}`);
   };
 
   return (
-    <section className="py-20 lg:py-28 bg-gradient-to-b from-white via-purple-50/40 to-blue-50/50 relative overflow-hidden">
-      {/* Background decorative elements */}
+    <section id="class-selector" className="py-12 lg:py-28 bg-gradient-to-b from-white via-purple-50/40 to-blue-50/50 relative overflow-hidden">
+      {/* decorative */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 text-6xl animate-float opacity-20">✨</div>
-        <div className="absolute top-40 right-20 text-5xl animate-bounce-gentle opacity-30">🌟</div>
-        <div className="absolute bottom-32 left-20 text-4xl animate-wiggle opacity-25">🎨</div>
-        <div className="absolute bottom-20 right-16 text-5xl animate-pulse opacity-20">🚀</div>
+        <div className="absolute top-10 left-6 text-4xl animate-float opacity-20">✨</div>
+        <div className="absolute top-28 right-10 text-4xl animate-bounce-gentle opacity-25">🌟</div>
+        <div className="absolute bottom-16 left-10 text-3xl animate-wiggle opacity-20">🎨</div>
+        <div className="absolute bottom-10 right-14 text-4xl animate-pulse opacity-15">🚀</div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 px-6 py-3 rounded-full mb-6 animate-fade-in">
-            <Sparkles className="w-5 h-5 text-purple-600 animate-pulse" />
-            <span className="text-purple-700 font-semibold">Start Your Learning Adventure</span>
-            <Sparkles className="w-5 h-5 text-blue-600 animate-pulse" />
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-8 lg:mb-14"
+        >
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-full mb-4 border border-purple-200 shadow-sm">
+            <Sparkles className="w-4 h-4 text-purple-600 animate-pulse" />
+            <span className="text-purple-700 font-bold text-xs sm:text-sm uppercase tracking-wider">
+              Start Your Learning Adventure
+            </span>
+            <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" />
           </div>
-          
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-800 mb-6 animate-fade-in leading-tight">
-            Choose Your 
-            <span className="block bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green bg-clip-text text-transparent animate-scale-bounce">
-              Learning Level
+
+          <h2 className="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-gray-800 mb-3 leading-tight">
+            তোমার{' '}
+            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+              শ্রেণি বেছে নাও
             </span>
           </h2>
-          <p className="text-xl sm:text-2xl text-gray-600 max-w-4xl mx-auto animate-fade-in delay-150 leading-relaxed">
-            Select your current grade to access curriculum designed specifically for your level. 
-            <span className="block mt-2 text-purple-600 font-medium">Every journey begins with a single step! 🌟</span>
+          <p className="text-base sm:text-lg text-gray-500 max-w-xl mx-auto font-medium">
+            তোমার ক্লাস সিলেক্ট করো — তোমার জন্য তৈরি পাঠ্যক্রম পাবে! 🌟
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10 max-w-6xl mx-auto mb-16">
+        {/* ── Mobile: horizontal scroll  |  Desktop: 5-col grid ── */}
+        <div className="lg:hidden flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4 scrollbar-hide">
           {standards.map((standard, index) => (
-            <div 
-              key={standard.value} 
-              className={`grade-${standard.value.replace('st', '').replace('nd', '').replace('rd', '').replace('th', '')}`}
+            <motion.button
+              key={standard.value}
+              initial={{ opacity: 0, scale: 0.85 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.08 }}
+              whileTap={{ scale: 0.93 }}
+              onClick={() => handleGradeSelect(standard.value)}
+              className="snap-start flex-shrink-0 w-36 flex flex-col items-center"
             >
-              <Card
-                className={`${standard.color} ${standard.border} ${standard.hover} border-3 cursor-pointer transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-purple-200/50 animate-fade-in transform hover:-translate-y-2 group relative overflow-hidden`}
-                style={{ animationDelay: `${index * 120}ms` }}
-                onClick={() => handleGradeSelect(standard.value)}
-                role="button"
-                tabIndex={0}
-                aria-label={`Select ${standard.label} Grade for students aged ${standard.age}`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleGradeSelect(standard.value);
-                  }
-                }}
-              >
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                
-                <CardContent className="p-5 text-center relative z-10">
-                  <div className="text-4xl mb-3 animate-bounce-gentle group-hover:animate-wiggle">
-                    {standard.emoji}
-                  </div>
-                  
-                  <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-                    <GraduationCap className="w-8 h-8 text-gray-700 group-hover:text-purple-600 transition-colors duration-300" />
-                  </div>
-                  
-                  <h3 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-3 group-hover:text-purple-700 transition-colors duration-300">
-                    Grade {standard.label}
-                  </h3>
-                  <p className="text-base text-gray-600 font-medium mb-4 group-hover:text-gray-700 transition-colors duration-300">
-                    {standard.age}
-                  </p>
-                  
-                  <div className="flex justify-center items-center space-x-1 mb-2">
-                    <Star className="w-4 h-4 text-yellow-500 animate-pulse" />
-                    <Star className="w-4 h-4 text-yellow-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                    <Star className="w-4 h-4 text-yellow-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-                  </div>
-                  
-                  <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="text-sm bg-white/80 px-4 py-2 rounded-full text-purple-700 font-semibold shadow-md">
-                      Click to Explore!
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+              <div className={`w-full aspect-square bg-gradient-to-br ${standard.gradient} rounded-2xl flex flex-col items-center justify-center shadow-lg ${standard.shadow} relative overflow-hidden`}>
+                {/* Shine */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent rounded-2xl" />
+                <span className="text-4xl mb-1 drop-shadow">{standard.emoji}</span>
+                <div className="w-10 h-10 bg-white/90 rounded-xl flex items-center justify-center shadow">
+                  <GraduationCap className="w-5 h-5 text-gray-700" />
+                </div>
+              </div>
+              <div className="mt-2.5 text-center">
+                <div className="font-extrabold text-gray-800 text-sm">Grade {standard.label}</div>
+                <div className="text-xs text-gray-500">{standard.age}</div>
+              </div>
+            </motion.button>
           ))}
         </div>
 
-        <div className="text-center">
-          <div className="bg-gradient-to-r from-white via-purple-50/80 to-white rounded-3xl p-10 shadow-2xl max-w-3xl mx-auto border border-purple-100 backdrop-blur-sm relative overflow-hidden">
-            {/* Background pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-4 left-4 text-2xl">📚</div>
-              <div className="absolute top-8 right-8 text-2xl">🎓</div>
-              <div className="absolute bottom-6 left-8 text-2xl">✨</div>
-              <div className="absolute bottom-4 right-6 text-2xl">🌟</div>
-            </div>
-            
-            <div className="relative z-10">
-              <div className="flex justify-center mb-6">
-                <Trophy className="w-12 h-12 text-yellow-500 animate-bounce-gentle" />
-              </div>
-              
-              <h3 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-6 leading-tight">
-                Ready to Start Your 
-                <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent"> Learning Journey?</span>
-              </h3>
-              
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                Choose any grade above to explore subjects and lessons designed just for that level! 
-                <span className="block mt-2 font-medium text-purple-600">
-                  Each grade is carefully crafted to match your learning needs. 🎯
-                </span>
-              </p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse shadow-lg"></div>
-                  <span className="text-sm font-semibold text-gray-700">Interactive Lessons</span>
-                </div>
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full animate-pulse shadow-lg" style={{ animationDelay: '0.2s' }}></div>
-                  <span className="text-sm font-semibold text-gray-700">Fun Activities</span>
-                </div>
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full animate-pulse shadow-lg" style={{ animationDelay: '0.4s' }}></div>
-                  <span className="text-sm font-semibold text-gray-700">Progress Tracking</span>
+        {/* Desktop Grid */}
+        <div className="hidden lg:grid grid-cols-5 gap-8 max-w-5xl mx-auto mb-16">
+          {standards.map((standard, index) => (
+            <motion.button
+              key={standard.value}
+              initial={{ opacity: 0, y: 40, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, delay: index * 0.1, type: 'spring', bounce: 0.4 }}
+              whileHover={{ y: -8, scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => handleGradeSelect(standard.value)}
+              className="group flex flex-col items-center gap-3"
+            >
+              <div className={`w-full aspect-square bg-gradient-to-br ${standard.gradient} rounded-3xl flex flex-col items-center justify-center shadow-xl ${standard.shadow} relative overflow-hidden transition-shadow duration-300 group-hover:shadow-2xl`}>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <span className="text-5xl mb-2">{standard.emoji}</span>
+                <div className="w-14 h-14 bg-white/90 rounded-2xl flex items-center justify-center shadow-md">
+                  <GraduationCap className="w-7 h-7 text-gray-700 group-hover:text-purple-600 transition-colors" />
                 </div>
               </div>
+              <div className="text-center">
+                <div className="font-extrabold text-gray-800 text-lg">Grade {standard.label}</div>
+                <div className="text-sm text-gray-500">{standard.age}</div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+
+        {/* CTA Card — mobile compact */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-10 lg:mt-0"
+        >
+          <div className="bg-gradient-to-br from-white via-purple-50/90 to-blue-50/90 rounded-3xl p-6 sm:p-10 lg:p-14 shadow-xl max-w-4xl mx-auto border border-white/60 text-center">
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="inline-flex mb-4"
+            >
+              <div className="w-14 h-14 lg:w-20 lg:h-20 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                <Trophy className="w-7 h-7 lg:w-10 lg:h-10 text-white" />
+              </div>
+            </motion.div>
+
+            <h3 className="text-xl sm:text-3xl lg:text-5xl font-extrabold text-gray-800 mb-3 leading-tight">
+              শেখার যাত্রা শুরু করতে{' '}
+              <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
+                প্রস্তুত?
+              </span>
+            </h3>
+            <p className="text-sm sm:text-lg text-gray-500 mb-6 max-w-xl mx-auto">
+              উপরে যেকোনো ক্লাস বেছে নাও এবং তোমার পাঠ্যক্রম দেখো! 🎯
+            </p>
+
+            <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+              {[
+                { icon: '✨', label: 'ইন্টারঅ্যাক্টিভ' },
+                { icon: '🎮', label: 'মজাদার' },
+                { icon: '📈', label: 'প্রগ্রেস' },
+              ].map(({ icon, label }) => (
+                <div key={label} className="flex flex-col items-center gap-1.5 bg-white/70 p-3 rounded-2xl shadow-sm">
+                  <span className="text-2xl">{icon}</span>
+                  <span className="text-xs font-bold text-gray-600">{label}</span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

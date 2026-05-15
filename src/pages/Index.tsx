@@ -9,6 +9,7 @@ import FeaturesSection from '@/components/FeaturesSection';
 import GamesSection from '@/components/GamesSection';
 import DashboardPreview from '@/components/DashboardPreview';
 import { useLang } from '@/contexts/LangContext';
+import { motion } from 'framer-motion';
 
 const Index = () => {
   const location = useLocation();
@@ -44,32 +45,47 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <HeroSection userCount={userCount} lessonCount={lessonCount} />
-      <ClassSelector />
+      <div id="hero-section"><HeroSection userCount={userCount} lessonCount={lessonCount} /></div>
+      <div id="class-selector"><ClassSelector /></div>
       <SubjectsSection />
-      <GamesSection />
+      <div id="games-section"><GamesSection /></div>
       <FeaturesSection />
       <DashboardPreview />
       
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green py-12 animate-fade-in">
-        <div className="container mx-auto px-4 text-center">
-          <div className="text-white space-y-4">
-            <h3 className="text-3xl font-bold animate-bounce-gentle">247School</h3>
-            <p className="text-lg opacity-90 animate-slide-in-right">{t.footerTagline}</p>
-            <div className="flex justify-center space-x-6 text-4xl">
-              <span className="animate-bounce-gentle">🎓</span>
-              <span className="animate-wiggle">📚</span>
-              <span className="animate-float">⭐</span>
-              <span className="animate-scale-bounce">🏆</span>
-              <span className="animate-pulse">🚀</span>
+      <motion.footer 
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="bg-gradient-to-r from-purple-700 via-blue-600 to-green-500 py-16 relative overflow-hidden"
+      >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIwLjEiLz48L3N2Zz4=')]"></div>
+        </div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="text-white space-y-6">
+            <motion.h3 
+              whileHover={{ scale: 1.05 }}
+              className="text-4xl md:text-5xl font-extrabold drop-shadow-md cursor-pointer"
+            >
+              247School
+            </motion.h3>
+            <p className="text-xl md:text-2xl font-medium opacity-90 max-w-2xl mx-auto">{t.footerTagline}</p>
+            <div className="flex justify-center space-x-6 md:space-x-8 text-5xl py-6">
+              <motion.span animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 0 }}>🎓</motion.span>
+              <motion.span animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}>📚</motion.span>
+              <motion.span animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}>⭐</motion.span>
+              <motion.span animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}>🏆</motion.span>
+              <motion.span animate={{ y: [0, -10, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 0.8 }}>🚀</motion.span>
             </div>
-            <p className="text-sm opacity-75 mt-8 animate-fade-in delay-500">
+            <div className="w-24 h-1 bg-white/20 mx-auto rounded-full my-8"></div>
+            <p className="text-base font-medium opacity-75">
               {t.footerCopy}
             </p>
           </div>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 };

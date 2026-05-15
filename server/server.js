@@ -16,9 +16,46 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import { MongoClient, ObjectId } from 'mongodb';
+import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import { v2 as cloudinary } from 'cloudinary';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt-key-play-learn-grow';
+
+// Cloudinary Configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Multer Setup (Memory Storage for Vercel Serverless)
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Middleware for JWT Authentication
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  
+  if (!token) return res.status(401).json({ error: 'Access denied: No token provided' });
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Access denied: Invalid token' });
+    req.user = user;
+    next();
+  });
+};
+
+// Middleware for Admin only
+const requireAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    return res.status(403).json({ error: 'Access denied: Admin only' });
+  }
+};
 
 // Middleware — allow production Vercel + local dev
 const ALLOWED_ORIGINS = [
@@ -160,8 +197,12 @@ app.post('/api/auth/login', async (req, res) => {
         created_at: u.created_at
       },
       session: {
-        access_token: `token-${Date.now()}-${u._id}`,
-        expires_at: Date.now() + 3600000
+        access_token: jwt.sign(
+          { id: u._id, email: u.email, role: u.role || 'student' },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        ),
+        expires_at: Date.now() + 7 * 24 * 3600000 // 7 days in ms
       }
     });
 
@@ -218,8 +259,12 @@ app.post('/api/auth/register', async (req, res) => {
         created_at: newUser.created_at
       },
       session: {
-        access_token: `token-${Date.now()}`,
-        expires_at: Date.now() + 3600000
+        access_token: jwt.sign(
+          { id: newUser._id, email: newUser.email, role: newUser.role },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        ),
+        expires_at: Date.now() + 7 * 24 * 3600000
       }
     });
   } catch (error) {
@@ -250,7 +295,7 @@ app.get('/api/users', async (req, res) => {
 });
 
 // DELETE /api/users/:id
-app.delete('/api/users/:id', async (req, res) => {
+app.delete('/api/users/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await getCollection('users').deleteOne({ _id: req.params.id });
     res.json({ success: true });
@@ -261,13 +306,23 @@ app.delete('/api/users/:id', async (req, res) => {
 });
 
 // PUT /api/users/:id
-app.put('/api/users/:id', async (req, res) => {
+app.put('/api/users/:id', authenticateToken, async (req, res) => {
   try {
-    const { full_name, role, email } = req.body;
+    const { full_name, role, email, avatar, bio, class: userClass, age, school, phone } = req.body;
     const update = { updated_at: new Date().toISOString() };
-    if (full_name) update.full_name = full_name;
-    if (role) update.role = role;
-    if (email) update.email = email;
+    
+    if (full_name !== undefined) update.full_name = full_name;
+    // Allow updating 'name' as an alias for 'full_name' from the second route
+    if (req.body.name !== undefined && full_name === undefined) update.full_name = req.body.name;
+    
+    if (role !== undefined) update.role = role;
+    if (email !== undefined) update.email = email;
+    if (avatar !== undefined) update.avatar = avatar;
+    if (bio !== undefined) update.bio = bio;
+    if (userClass !== undefined) update.class = userClass;
+    if (age !== undefined) update.age = age;
+    if (school !== undefined) update.school = school;
+    if (phone !== undefined) update.phone = phone;
     
     await getCollection('users').updateOne(
       { _id: req.params.id },
@@ -303,7 +358,7 @@ app.get('/api/grades', async (req, res) => {
 });
 
 // POST /api/grades
-app.post('/api/grades', async (req, res) => {
+app.post('/api/grades', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) return res.status(400).json({ error: 'Grade name required' });
@@ -322,7 +377,7 @@ app.post('/api/grades', async (req, res) => {
 });
 
 // DELETE /api/grades/:id
-app.delete('/api/grades/:id', async (req, res) => {
+app.delete('/api/grades/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     await getCollection('grades').deleteOne({ _id: id });
@@ -357,7 +412,7 @@ app.get('/api/subjects', async (req, res) => {
 });
 
 // POST /api/subjects
-app.post('/api/subjects', async (req, res) => {
+app.post('/api/subjects', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { name, grade_id } = req.body;
     if (!name || !grade_id) return res.status(400).json({ error: 'Name and grade_id required' });
@@ -376,7 +431,7 @@ app.post('/api/subjects', async (req, res) => {
 });
 
 // DELETE /api/subjects/:id
-app.delete('/api/subjects/:id', async (req, res) => {
+app.delete('/api/subjects/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     await getCollection('subjects').deleteOne({ _id: id });
@@ -555,7 +610,7 @@ app.get('/api/contents', async (req, res) => {
 });
 
 // POST /api/contents
-app.post('/api/contents', async (req, res) => {
+app.post('/api/contents', authenticateToken, async (req, res) => {
   try {
     const { title, description, content_type, youtube_link, file_url, pages, 
             class: cls, subject, grade_id, subject_id, chapter_id, is_published } = req.body;
@@ -589,7 +644,7 @@ app.post('/api/contents', async (req, res) => {
 });
 
 // PUT /api/contents/:id
-app.put('/api/contents/:id', async (req, res) => {
+app.put('/api/contents/:id', authenticateToken, async (req, res) => {
   try {
     const update = { ...req.body };
     delete update._id;
@@ -611,7 +666,7 @@ app.put('/api/contents/:id', async (req, res) => {
 });
 
 // DELETE /api/contents/:id
-app.delete('/api/contents/:id', async (req, res) => {
+app.delete('/api/contents/:id', authenticateToken, async (req, res) => {
   try {
     await getCollection('contents').deleteOne({ _id: req.params.id });
     res.json({ success: true });
@@ -1840,7 +1895,7 @@ app.delete('/api/results/:id', async (req, res) => {
 // ==========================================
 
 // POST /api/quiz/submit
-app.post('/api/quiz/submit', async (req, res) => {
+app.post('/api/quiz/submit', authenticateToken, async (req, res) => {
   try {
     const { student_id, subject, score, total, accuracy, time_spent } = req.body;
     if (!student_id || !subject) return res.status(400).json({ error: 'student_id and subject required' });
@@ -1882,28 +1937,7 @@ app.get('/api/quiz/history', async (req, res) => {
   }
 });
 
-// ==========================================
-// USER PROFILE UPDATE
-// ==========================================
 
-// PUT /api/users/:id — update profile (name, avatar, bio, class)
-app.put('/api/users/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const allowedFields = ['name', 'avatar', 'bio', 'class', 'age', 'school', 'phone'];
-    const update = {};
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) update[field] = req.body[field];
-    }
-    if (Object.keys(update).length === 0) return res.status(400).json({ error: 'No valid fields to update' });
-    update.updated_at = new Date();
-
-    await getCollection('users').updateOne({ _id: new ObjectId(id) }, { $set: update });
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // ==========================================
 // TEAMS ROUTES
@@ -1920,7 +1954,7 @@ app.get('/api/teams', async (req, res) => {
 });
 
 // POST /api/teams — create team
-app.post('/api/teams', async (req, res) => {
+app.post('/api/teams', authenticateToken, async (req, res) => {
   try {
     const { name, description, created_by, avatar, subject } = req.body;
     if (!name || !created_by) return res.status(400).json({ error: 'name and created_by required' });
@@ -1938,7 +1972,7 @@ app.post('/api/teams', async (req, res) => {
 });
 
 // POST /api/teams/:id/join
-app.post('/api/teams/:id/join', async (req, res) => {
+app.post('/api/teams/:id/join', authenticateToken, async (req, res) => {
   try {
     const { user_id } = req.body;
     if (!user_id) return res.status(400).json({ error: 'user_id required' });
@@ -1953,7 +1987,7 @@ app.post('/api/teams/:id/join', async (req, res) => {
 });
 
 // POST /api/teams/:id/leave
-app.post('/api/teams/:id/leave', async (req, res) => {
+app.post('/api/teams/:id/leave', authenticateToken, async (req, res) => {
   try {
     const { user_id } = req.body;
     await getCollection('teams').updateOne(
@@ -1967,7 +2001,7 @@ app.post('/api/teams/:id/leave', async (req, res) => {
 });
 
 // DELETE /api/teams/:id
-app.delete('/api/teams/:id', async (req, res) => {
+app.delete('/api/teams/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     await getCollection('teams').deleteOne({ _id: new ObjectId(req.params.id) });
     res.json({ success: true });
@@ -2018,7 +2052,7 @@ app.get('/api/daily-challenge', async (req, res) => {
 });
 
 // POST /api/daily-challenge — admin creates today's challenge
-app.post('/api/daily-challenge', async (req, res) => {
+app.post('/api/daily-challenge', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { date, questions, reward_stars } = req.body;
     const today = date || new Date().toISOString().split('T')[0];
@@ -2031,7 +2065,7 @@ app.post('/api/daily-challenge', async (req, res) => {
 });
 
 // POST /api/daily-challenge/submit
-app.post('/api/daily-challenge/submit', async (req, res) => {
+app.post('/api/daily-challenge/submit', authenticateToken, async (req, res) => {
   try {
     const { student_id, date, answers, score, total } = req.body;
     const today = date || new Date().toISOString().split('T')[0];
@@ -2045,7 +2079,7 @@ app.post('/api/daily-challenge/submit', async (req, res) => {
       student_id, date: today, answers, score, total, stars, submitted_at: new Date(),
     });
     await getCollection('users').updateOne(
-      { _id: new ObjectId(student_id) },
+      { _id: student_id },
       { $inc: { total_stars: stars }, $set: { last_active: new Date() } }
     );
     res.json({ success: true, stars });
@@ -2077,7 +2111,7 @@ app.get('/api/notifications', async (req, res) => {
 });
 
 // POST /api/notifications — admin sends notification
-app.post('/api/notifications', async (req, res) => {
+app.post('/api/notifications', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { title, body, type, recipient_id, icon } = req.body;
     if (!title || !body) return res.status(400).json({ error: 'title and body required' });
@@ -2095,7 +2129,7 @@ app.post('/api/notifications', async (req, res) => {
 });
 
 // PATCH /api/notifications/:id/read
-app.patch('/api/notifications/:id/read', async (req, res) => {
+app.patch('/api/notifications/:id/read', authenticateToken, async (req, res) => {
   try {
     await getCollection('notifications').updateOne(
       { _id: new ObjectId(req.params.id) },
@@ -2104,6 +2138,39 @@ app.patch('/api/notifications/:id/read', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// UPLOAD ROUTES (Cloudinary)
+// ==========================================
+
+// POST /api/upload
+app.post('/api/upload', authenticateToken, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Convert buffer to base64 for Cloudinary upload
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(dataURI, {
+      resource_type: 'auto', // Automatically detects image, video, raw file (pdf)
+      folder: 'play_learn_grow',
+    });
+
+    res.json({
+      success: true,
+      url: result.secure_url,
+      format: result.format,
+      public_id: result.public_id
+    });
+  } catch (error) {
+    console.error('Upload Error:', error);
+    res.status(500).json({ error: 'File upload failed' });
   }
 });
 

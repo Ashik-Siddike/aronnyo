@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { playSound } from '@/services/audioService';
+import { useLessonProgress } from '@/hooks/useLessonProgress';
+import confetti from 'canvas-confetti';
 
 const SubtractionGame = () => {
   const [num1, setNum1] = useState(0);
@@ -19,7 +21,39 @@ const SubtractionGame = () => {
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(1);
+  const [startTime] = useState(new Date());
   const maxQuestions = 10;
+  const { trackGameComplete } = useLessonProgress();
+
+  const handleGameCompletion = async () => {
+    const finalScore = score * 100;
+    const timeSpent = Math.max(1, Math.round((new Date().getTime() - startTime.getTime()) / (1000 * 60)));
+
+    await trackGameComplete(
+      'Subtraction Game',
+      finalScore,
+      {
+        correct_answers: score,
+        total_questions: maxQuestions,
+        accuracy: (score / maxQuestions) * 100
+      }
+    );
+
+    if (score === maxQuestions) {
+      playSound('levelUp');
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 }
+      });
+    } else {
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+  };
 
   // Generate random options including the correct answer
   const generateOptions = (correctAnswer: number) => {
@@ -44,6 +78,7 @@ const SubtractionGame = () => {
   const generateNewRound = () => {
     if (totalQuestions >= maxQuestions) {
       setGameCompleted(true);
+      handleGameCompletion();
       return;
     }
 
@@ -243,16 +278,21 @@ const SubtractionGame = () => {
                 <Button
                   onClick={resetGame}
                   size="lg"
-                  className="bg-red-500 hover:bg-red-600 text-white text-lg px-8 py-3 rounded-xl transition-colors duration-200"
+                  className="w-full bg-red-500 hover:bg-red-600 text-white text-lg px-8 py-3 rounded-xl transition-colors duration-200"
                 >
                   <Trophy className="w-5 h-5 mr-2" />
                   আবার খেলো! 🎮
                 </Button>
-                
-                <div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Link to="/dashboard">
+                    <Button variant="outline" size="lg" className="w-full text-base px-4 py-3 rounded-xl border-2 border-blue-300 text-blue-600 hover:bg-blue-50">
+                      📊 ড্যাশবোর্ড
+                    </Button>
+                  </Link>
                   <Link to="/">
-                    <Button variant="outline" size="lg" className="text-lg px-8 py-3 rounded-xl transition-colors duration-200">
-                      হোমে ফিরুন
+                    <Button variant="outline" size="lg" className="w-full text-base px-4 py-3 rounded-xl border-2 border-purple-300 text-purple-600 hover:bg-purple-50">
+                      🎮 আরও গেম
                     </Button>
                   </Link>
                 </div>

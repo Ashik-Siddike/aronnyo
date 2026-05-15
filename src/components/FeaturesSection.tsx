@@ -1,6 +1,7 @@
 
 import { Trophy, Gamepad2, BarChart, Users, Volume2, Puzzle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { motion } from 'framer-motion';
 
 const features = [
   {
@@ -58,76 +59,91 @@ const FeaturesSection = () => {
     <section className="py-16 lg:py-24 bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center space-y-6 mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold">
-            <span className="bg-gradient-to-r from-eduplay-purple via-eduplay-blue to-eduplay-green bg-clip-text text-transparent">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-6 mb-16"
+        >
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
+            <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
               Why Kids Love 247School!
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto font-medium">
             We've designed every feature to make learning feel like playing!
             Here's what makes 247School special 🌈
           </p>
-        </div>
+        </motion.div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Features Grid — 2-col mobile, 3-col desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 lg:gap-8">
           {features.map((feature, index) => (
-            <Card 
-              key={index} 
-              className="border-0 playful-shadow bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 group"
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: index * 0.1, type: "spring", bounce: 0.4 }}
             >
-              <CardContent className="p-8 text-center space-y-6">
-                <div className="relative">
-                  <div className={`inline-flex p-6 rounded-3xl bg-gradient-to-r ${feature.color} group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon className="w-10 h-10 text-white" />
+              <Card className="border-0 playful-shadow bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 group h-full">
+                <CardContent className="p-4 sm:p-8 text-center space-y-3 sm:space-y-6 flex flex-col h-full">
+                  <div className="relative mx-auto">
+                    <div className={`inline-flex p-3 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${feature.color} group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-md`}>
+                      <feature.icon className="w-6 h-6 sm:w-10 sm:h-10 text-white" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 text-xl sm:text-3xl animate-bounce-gentle">{feature.emoji}</div>
                   </div>
-                  <div className="absolute -top-2 -right-2 text-2xl animate-bounce-gentle">
-                    {feature.emoji}
-                  </div>
-                </div>
-                
-                <h3 className="text-xl font-bold text-gray-800">
-                  {feature.title}
-                </h3>
-                
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
-              </CardContent>
-            </Card>
+
+                  <h3 className="text-sm sm:text-2xl font-extrabold text-gray-800 leading-snug">{feature.title}</h3>
+                  <p className="text-gray-500 text-xs sm:text-lg leading-relaxed hidden sm:block">{feature.description}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
 
         {/* Fun Fact Section */}
-        <div className="mt-16 text-center">
-          <div className="bg-gradient-to-r from-eduplay-yellow/20 via-eduplay-orange/20 to-eduplay-pink/20 rounded-3xl p-8 playful-shadow max-w-4xl mx-auto">
-            <div className="text-6xl mb-4">🎉</div>
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-eduplay-purple to-eduplay-blue bg-clip-text text-transparent">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9, y: 50 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7, type: "spring" }}
+          className="mt-16 text-center"
+        >
+          <div className="bg-gradient-to-r from-yellow-100 via-orange-100 to-pink-100 rounded-[3rem] p-10 lg:p-14 shadow-2xl max-w-5xl mx-auto border border-white/60 relative overflow-hidden">
+            {/* Confetti background */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none">
+              <div className="absolute top-10 left-10 text-3xl animate-spin" style={{ animationDuration: '4s' }}>✨</div>
+              <div className="absolute bottom-10 right-10 text-3xl animate-bounce">🎈</div>
+              <div className="absolute top-20 right-20 text-4xl animate-pulse">🎉</div>
+              <div className="absolute bottom-20 left-20 text-3xl animate-wiggle">🎊</div>
+            </div>
+
+            <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }} className="text-7xl lg:text-8xl mb-6 relative z-10 drop-shadow-lg">🎉</motion.div>
+            <h3 className="text-3xl md:text-5xl font-extrabold mb-6 relative z-10">
+              <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Did you know?
               </span>
             </h3>
-            <p className="text-lg text-gray-700 mb-6">
-              Kids who use 247School spend 3x more time learning and remember 85% more information
-              compared to traditional methods! That's the power of fun learning! 🚀
+            <p className="text-xl lg:text-2xl text-gray-700 mb-10 font-medium leading-relaxed max-w-3xl mx-auto relative z-10">
+              Kids who use 247School spend <span className="font-bold text-purple-600">3x more time</span> learning and remember <span className="font-bold text-green-600">85% more information</span> compared to traditional methods! That's the power of fun learning! 🚀
             </p>
-            <div className="flex justify-center space-x-8 text-center">
-              <div>
-                <div className="text-3xl font-bold text-eduplay-purple">3x</div>
-                <div className="text-sm text-gray-600">More Engagement</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-eduplay-green">85%</div>
-                <div className="text-sm text-gray-600">Better Retention</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-eduplay-orange">100%</div>
-                <div className="text-sm text-gray-600">Fun Guaranteed</div>
-              </div>
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center relative z-10">
+              {[
+                { val: '3x',   label: 'More Engagement', color: 'text-purple-600', border: 'border-purple-100' },
+                { val: '85%',  label: 'Better Retention', color: 'text-green-600',  border: 'border-green-100'  },
+                { val: '100%', label: 'Fun Guaranteed',   color: 'text-orange-500', border: 'border-orange-100' },
+              ].map(({ val, label, color, border }) => (
+                <motion.div key={val} whileHover={{ scale: 1.08 }} className={`bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-6 shadow-md border ${border} cursor-pointer`}>
+                  <div className={`text-2xl sm:text-5xl font-extrabold ${color} mb-1`}>{val}</div>
+                  <div className="text-[10px] sm:text-base font-bold text-gray-600 uppercase tracking-wide leading-tight">{label}</div>
+                </motion.div>
+              ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

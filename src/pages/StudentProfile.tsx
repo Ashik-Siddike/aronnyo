@@ -6,8 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { ActivityService } from '@/services/activityService';
+import { uploadApi } from '@/services/api';
+import { toast } from 'sonner';
 
 const BADGE_RULES = [
   { id: 'first_quiz',    icon: '🎯', title: 'First Quiz',      desc: 'Complete your first quiz',        req: (s: any) => (s.quizzes_completed || 0) >= 1 },
@@ -46,6 +49,7 @@ const StudentProfile = () => {
   const [recentActivities, setRecentActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [avatar, setAvatar] = useState('🧒');
+  const [isUploading, setIsUploading] = useState(false);
 
   const avatars = ['🧒', '👧', '👨‍🚀', '👩‍🚀', '🦸‍♂️', '🦸‍♀️', '🧙‍♂️', '🧚‍♀️', '🦁', '🐯', '🐻', '🐼', '🦊', '🦄'];
 
@@ -58,6 +62,26 @@ const StudentProfile = () => {
   const handleAvatarChange = (newAvatar: string) => {
     setAvatar(newAvatar);
     localStorage.setItem(`avatar_${user?.id}`, newAvatar);
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      toast.info('Uploading image... Please wait');
+      
+      const response = await uploadApi.uploadFile(file);
+      
+      handleAvatarChange(response.url);
+      toast.success('Profile picture updated successfully! 🎉');
+    } catch (error) {
+      console.error('Upload failed', error);
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   useEffect(() => {
@@ -81,10 +105,19 @@ const StudentProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <RefreshCw className="w-10 h-10 animate-spin text-eduplay-purple mx-auto" />
-          <p className="text-gray-500">Loading your profile...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-6 md:p-12 space-y-8">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <Skeleton className="h-64 w-full rounded-2xl" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-1 space-y-8">
+              <Skeleton className="h-48 w-full rounded-xl" />
+              <Skeleton className="h-64 w-full rounded-xl" />
+            </div>
+            <div className="md:col-span-2 space-y-8">
+              <Skeleton className="h-40 w-full rounded-xl" />
+              <Skeleton className="h-80 w-full rounded-xl" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -108,9 +141,13 @@ const StudentProfile = () => {
           <div className="flex items-center gap-6">
             <Dialog>
               <DialogTrigger asChild>
-                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-4xl border-4 border-white/40 shadow-xl cursor-pointer hover:bg-white/30 transition-all relative group">
-                  {avatar}
-                  <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-4xl border-4 border-white/40 shadow-xl cursor-pointer hover:bg-white/30 transition-all relative group overflow-hidden">
+                  {avatar.startsWith('http') ? (
+                    <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    avatar
+                  )}
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="text-xs font-bold text-white uppercase tracking-wider text-center">Edit<br/>Avatar</span>
                   </div>
                 </div>
@@ -129,6 +166,20 @@ const StudentProfile = () => {
                       {a}
                     </button>
                   ))}
+                </div>
+                
+                <div className="mt-4 pt-4 border-t text-center">
+                  <p className="text-sm text-gray-500 mb-2">Or upload your own picture</p>
+                  <label className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
+                    {isUploading ? 'Uploading... ⏳' : '📸 Upload Photo'}
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      className="hidden" 
+                      onChange={handleFileUpload}
+                      disabled={isUploading}
+                    />
+                  </label>
                 </div>
               </DialogContent>
             </Dialog>

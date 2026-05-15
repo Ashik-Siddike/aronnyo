@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ActivityService } from '@/services/activityService';
 import { useToast } from '@/hooks/use-toast';
+import confetti from 'canvas-confetti';
+import { playSound } from '@/utils/sounds';
 
 const QuizPage = () => {
   const { subject, id } = useParams();
@@ -62,6 +64,19 @@ const QuizPage = () => {
     setAnswers(newAnswers);
     setShowResult(true);
 
+    const isCorrect = selectedAnswer === quizData.questions[currentQuestion].correct;
+    if (isCorrect) {
+      playSound('success');
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.8 },
+        colors: ['#A020F0', '#00FF00', '#FFA500']
+      });
+    } else {
+      playSound('pop');
+    }
+
     setTimeout(async () => {
       if (currentQuestion < quizData.questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
@@ -90,6 +105,16 @@ const QuizPage = () => {
             timeSpent,
             { quiz_id: id }
           );
+
+          if (percentage >= 80) {
+            playSound('levelUp');
+            confetti({
+              particleCount: 150,
+              spread: 100,
+              origin: { y: 0.6 }
+            });
+          }
+
           toast({
             title: `Quiz Completed! ${percentage >= 80 ? '🌟' : '👍'}`,
             description: `Score: ${percentage}% (${correctCount}/${quizData.questions.length}) — Saved to your profile!`,

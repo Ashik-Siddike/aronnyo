@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
 interface UserProfileButtonProps {
@@ -71,6 +71,10 @@ const UserProfileButton: React.FC<UserProfileButtonProps> = ({
     return 'U';
   };
 
+  const storedAvatar = localStorage.getItem(`avatar_${user?.id}`);
+  const isEmojiAvatar = storedAvatar && !storedAvatar.startsWith('http');
+  const avatarUrl = storedAvatar?.startsWith('http') ? storedAvatar : undefined;
+
   const handleNavigation = (path: string) => {
     navigate(path);
     onMenuClose?.();
@@ -104,8 +108,9 @@ const UserProfileButton: React.FC<UserProfileButtonProps> = ({
         {/* User Info */}
         <div className="flex items-center space-x-3 px-4 py-3 bg-eduplay-purple/10 rounded-lg">
           <Avatar className="h-10 w-10">
+            {avatarUrl && <AvatarImage src={avatarUrl} />}
             <AvatarFallback className="bg-eduplay-purple text-white font-bold">
-              {getUserInitials()}
+              {isEmojiAvatar ? storedAvatar : getUserInitials()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
@@ -183,8 +188,9 @@ const UserProfileButton: React.FC<UserProfileButtonProps> = ({
             className="bg-gradient-to-r from-eduplay-green to-eduplay-blue hover:shadow-xl transform hover:scale-105 transition-all duration-300"
           >
             <Avatar className="h-6 w-6 mr-2">
+              {avatarUrl && <AvatarImage src={avatarUrl} />}
               <AvatarFallback className="bg-white text-eduplay-blue text-xs font-bold">
-                {getUserInitials()}
+                {isEmojiAvatar ? storedAvatar : getUserInitials()}
               </AvatarFallback>
             </Avatar>
             {getUserDisplayName()}
@@ -195,8 +201,9 @@ const UserProfileButton: React.FC<UserProfileButtonProps> = ({
           <DropdownMenuLabel className="p-4">
             <div className="flex items-center space-x-3">
               <Avatar className="h-12 w-12">
+                {avatarUrl && <AvatarImage src={avatarUrl} />}
                 <AvatarFallback className="bg-eduplay-purple text-white font-bold text-lg">
-                  {getUserInitials()}
+                  {isEmojiAvatar ? storedAvatar : getUserInitials()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
