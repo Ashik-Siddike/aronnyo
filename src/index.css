@@ -85,23 +85,17 @@
     @apply bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 text-foreground;
     font-family: 'Comic Neue', cursive, system-ui, -apple-system, sans-serif;
     transition: background 0.3s ease, color 0.3s ease;
-    /* Prevent horizontal scroll */
+    /* Prevent horizontal scroll — only on body, NOT html (iOS Safari bug) */
     overflow-x: hidden;
-    max-width: 100vw;
-    /* Prevent zoom on scroll / double-tap */
-    touch-action: pan-x pan-y;
-    /* Prevent iOS rubber-band bounce */
-    overscroll-behavior: none;
   }
 
+  /* ⚠️ Do NOT set overflow on html — breaks scroll on iOS Safari */
   html {
-    overflow-x: hidden;
-    max-width: 100%;
-    /* Prevent pinch-zoom triggered by scroll momentum */
-    touch-action: pan-x pan-y;
+    /* only clip horizontal, never restrict vertical scroll */
+    overflow-x: clip;
   }
 
-  /* Prevent double-tap zoom on buttons and interactive elements */
+  /* Prevent double-tap zoom on buttons/links without breaking scroll */
   button, a, input, select, textarea, [role="button"] {
     touch-action: manipulation;
   }
