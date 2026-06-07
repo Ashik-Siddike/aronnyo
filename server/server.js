@@ -1918,14 +1918,19 @@ app.get('/api/attendance/students', async (req, res) => {
       .find({ role: 'student' }, { projection: { password: 0, password_hash: 0 } })
       .toArray();
 
-    const enriched = await Promise.all(students.map(async (s) => {
-      const records = await getCollection('attendance').find({ student_id: String(s._id) }).toArray();
+    const studentIds = students.map(s => String(s._id));
+    const allRecords = await getCollection('attendance')
+      .find({ student_id: { $in: studentIds } })
+      .toArray();
+
+    const enriched = students.map((s) => {
+      const records = allRecords.filter(r => r.student_id === String(s._id));
       const total   = records.filter(r => r.status !== 'holiday').length;
       const present = records.filter(r => r.status === 'present').length;
       const absent  = records.filter(r => r.status === 'absent').length;
       const late    = records.filter(r => r.status === 'late').length;
       return { ...s, attendance: { total, present, absent, late, rate: total > 0 ? Math.round((present / total) * 100) : 0 } };
-    }));
+    });
 
     res.json(enriched);
   } catch (err) {
