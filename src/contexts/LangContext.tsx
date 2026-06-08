@@ -44,6 +44,7 @@ const translations = {
     countingGame: 'Counting Game', additionGame: 'Addition Game',
     subtractionGame: 'Subtraction Game', multiplicationGame: 'Multiplication Game',
     spellingWizard: 'Spelling Wizard', animalQuiz: 'Animal Quiz',
+    writingWizard: 'Writing Wizard',
     plantExplorer: 'Plant Explorer', memoryMatch: 'Memory Match',
     playNow: 'Play Now',
 
@@ -210,6 +211,7 @@ const translations = {
     countingGame: 'গণনার গেম', additionGame: 'যোগের গেম',
     subtractionGame: 'বিয়োগের গেম', multiplicationGame: 'গুণের গেম',
     spellingWizard: 'বানান জাদুকর', animalQuiz: 'প্রাণী কুইজ',
+    writingWizard: 'বর্ণমালা জাদুকর',
     plantExplorer: 'উদ্ভিদ অন্বেষণ', memoryMatch: 'স্মৃতি মিলাও',
     playNow: 'এখনই খেলো',
 

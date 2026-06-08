@@ -11,12 +11,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import DailyChallenge from '@/components/DailyChallenge';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLang } from '@/contexts/LangContext';
 
 const StudentDashboard = () => {
   const [studentData, setStudentData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const { lang } = useLang();
+  const isBn = lang === 'bn';
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -269,13 +272,19 @@ const StudentDashboard = () => {
               <Link to="/games" className="block">
                 <button className="w-full bg-gradient-to-b from-purple-400 to-purple-600 border-b-4 border-purple-700 text-white rounded-2xl p-4 font-black shadow-sm active:scale-95 transition-transform flex flex-col items-center gap-2">
                   <span className="text-3xl">🎮</span>
-                  Games
+                  {isBn ? 'খেলাধুলা' : 'Games'}
                 </button>
               </Link>
               <Link to="/story-mode" className="block">
                 <button className="w-full bg-gradient-to-b from-emerald-400 to-emerald-600 border-b-4 border-emerald-700 text-white rounded-2xl p-4 font-black shadow-sm active:scale-95 transition-transform flex flex-col items-center gap-2">
                   <span className="text-3xl">🗺️</span>
-                  Story
+                  {isBn ? 'গল্প' : 'Story'}
+                </button>
+              </Link>
+              <Link to="/writing-wizard" className="block col-span-2">
+                <button className="w-full bg-gradient-to-br from-amber-400 to-orange-500 border-b-4 border-orange-700 text-white rounded-2xl p-4 font-black shadow-md shadow-orange-300/30 dark:shadow-orange-950/20 active:scale-95 transition-all flex items-center justify-center gap-3">
+                  <span className="text-3xl">✏️</span>
+                  <span className="text-lg">{isBn ? 'বর্ণমালা জাদুকর' : 'Writing Wizard'}</span>
                 </button>
               </Link>
             </div>

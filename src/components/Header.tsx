@@ -124,6 +124,9 @@ const Header = () => {
                 <DropdownMenuItem onClick={() => navigate('/assignments')} className="cursor-pointer rounded-lg hover:bg-eduplay-orange/10 text-base font-semibold py-2">
                   <FileText className="w-5 h-5 mr-3 text-orange-500" /> Assignments
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/writing-wizard')} className="cursor-pointer rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/10 text-base font-semibold py-2">
+                  <span className="text-base mr-3">✏️</span> {lang === 'bn' ? 'বর্ণমালা জাদুকর' : 'Writing Wizard'}
+                </DropdownMenuItem>
                 <div className="my-1 border-t border-gray-100 dark:border-slate-800"></div>
                 <div className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">{t.classes}</div>
                 {standards.map((s) => (
@@ -242,6 +245,9 @@ const Header = () => {
                   </Link>
                   <Link to="/leaderboard" onClick={() => setIsMenuOpen(false)} className="flex flex-col items-center justify-center p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 text-yellow-600">
                     <Trophy className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">Leaderboard</span>
+                  </Link>
+                  <Link to="/writing-wizard" onClick={() => setIsMenuOpen(false)} className="col-span-2 flex items-center justify-center p-3.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 text-amber-600 font-bold active:scale-98 transition-transform">
+                    <span className="text-lg mr-2">✏️</span> <span className="text-sm">{lang === 'bn' ? 'বর্ণমালা জাদুকর' : 'Writing Wizard'}</span>
                   </Link>
                 </div>
               </div>

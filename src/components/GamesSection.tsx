@@ -13,6 +13,7 @@ const GamesSection = () => {
     { id: 'subtraction',     titleKey: 'subtractionGame'    as const, emoji: '➖',  path: '/subtraction-game',    color: 'from-orange-500 to-red-600',     difficulty: 'Medium', category: 'Math'     },
     { id: 'multiplication',  titleKey: 'multiplicationGame' as const, emoji: '✖️',  path: '/multiplication-game', color: 'from-purple-500 to-pink-600',    difficulty: 'Hard',   category: 'Math'     },
     { id: 'spelling-wizard', titleKey: 'spellingWizard'     as const, emoji: '🪄',  path: '/spelling-wizard',     color: 'from-pink-500 to-purple-500',    difficulty: 'Easy',   category: 'Language' },
+    { id: 'writing-wizard',  titleKey: 'writingWizard'      as const, emoji: '✏️',  path: '/writing-wizard',      color: 'from-amber-500 to-orange-600',   difficulty: 'Easy',   category: 'Language', isNew: true },
     { id: 'animal-quiz',     titleKey: 'animalQuiz'         as const, emoji: '🐾',  path: '/animal-quiz',         color: 'from-green-500 to-teal-600',     difficulty: 'Easy',   category: 'Science', isNew: true },
     { id: 'plant-explorer',  titleKey: 'plantExplorer'      as const, emoji: '🌱',  path: '/plant-explorer',      color: 'from-emerald-500 to-green-600',  difficulty: 'Medium', category: 'Science', isNew: true },
     { id: 'memory-match',    titleKey: 'memoryMatch'        as const, emoji: '🧠',  path: '/memory-match',        color: 'from-blue-500 to-indigo-600',    difficulty: 'Easy',   category: 'Memory',  isNew: true },
