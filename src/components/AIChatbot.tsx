@@ -196,7 +196,7 @@ const AIChatbot: React.FC = () => {
   };
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 ${isMinimized ? 'w-72' : 'w-85 sm:w-96'} transition-all duration-300`}>
+    <div className={`fixed bottom-6 right-6 z-50 ${isOpen ? (isMinimized ? 'w-72' : 'w-85 sm:w-96') : 'w-auto'} transition-all duration-300`}>
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
