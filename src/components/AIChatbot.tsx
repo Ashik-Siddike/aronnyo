@@ -23,7 +23,8 @@ const quickReplies = [
 const AIChatbot: React.FC = () => {
   const { user } = useAuth();
   const { lang, t } = useLang();
-  const isBn = lang === 'bn';
+  const [chatbotLang, setChatbotLang] = useState<'bn' | 'en'>(lang === 'bn' ? 'bn' : 'en');
+  const isBn = chatbotLang === 'bn';
 
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -38,13 +39,34 @@ const AIChatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: isBn 
+      text: lang === 'bn' 
         ? "আসসালামু আলাইকুম! 👋 আমি টুটু টিচার — তোমার AI শিক্ষা সহকারী! 🦉\n\nআমাকে যেকোনো প্রশ্ন করো — গণিত, ইংরেজি, বিজ্ঞান, বা মজার ধাঁধা! 🎓"
         : "Hello! 👋 I am Teacher Tutu — your AI education assistant! 🦉\n\nAsk me any question — Math, English, Science, or fun riddles! 🎓",
       sender: 'bot',
       timestamp: new Date(),
     }
   ]);
+
+  // Sync chatbot language with site language on load/change
+  useEffect(() => {
+    setChatbotLang(lang === 'bn' ? 'bn' : 'en');
+  }, [lang]);
+
+  // Sync welcome message when chatbot language changes
+  useEffect(() => {
+    if (messages.length === 1) {
+      setMessages([
+        {
+          id: 1,
+          text: chatbotLang === 'bn' 
+            ? "আসসালামু আলাইকুম! 👋 আমি টুটু টিচার — তোমার AI শিক্ষা সহকারী! 🦉\n\nআমাকে যেকোনো প্রশ্ন করো — গণিত, ইংরেজি, বিজ্ঞান, বা মজার ধাঁধা! 🎓"
+            : "Hello! 👋 I am Teacher Tutu — your AI education assistant! 🦉\n\nAsk me any question — Math, English, Science, or fun riddles! 🎓",
+          sender: 'bot',
+          timestamp: new Date(),
+        }
+      ]);
+    }
+  }, [chatbotLang]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -64,7 +86,7 @@ const AIChatbot: React.FC = () => {
       const rec = new SpeechRecognition();
       rec.continuous = false;
       rec.interimResults = false;
-      rec.lang = lang === 'bn' ? 'bn-BD' : 'en-US';
+      rec.lang = chatbotLang === 'bn' ? 'bn-BD' : 'en-US';
 
       rec.onstart = () => {
         setIsListening(true);
@@ -90,7 +112,7 @@ const AIChatbot: React.FC = () => {
 
       recognitionRef.current = rec;
     }
-  }, [lang]);
+  }, [chatbotLang]);
 
   // Speak bot response text helper
   const speakText = async (text: string, messageId: number) => {
@@ -108,7 +130,7 @@ const AIChatbot: React.FC = () => {
   // Toggle voice recognition
   const toggleListening = () => {
     if (!recognitionRef.current) {
-      alert(isBn ? 'দুঃখিত, আপনার ব্রাউজারে ভয়েস রিকগনিশন সমর্থিত নয়।' : 'Speech recognition is not supported in this browser.');
+      alert(chatbotLang === 'bn' ? 'দুঃখিত, আপনার ব্রাউজারে ভয়েস রিকগনিশন সমর্থিত নয়।' : 'Speech recognition is not supported in this browser.');
       return;
     }
 
@@ -116,7 +138,7 @@ const AIChatbot: React.FC = () => {
       recognitionRef.current.stop();
     } else {
       stopNarration();
-      recognitionRef.current.lang = lang === 'bn' ? 'bn-BD' : 'en-US';
+      recognitionRef.current.lang = chatbotLang === 'bn' ? 'bn-BD' : 'en-US';
       recognitionRef.current.start();
     }
   };
@@ -236,6 +258,19 @@ const AIChatbot: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-1">
+              {/* Chatbot Language Selector */}
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setChatbotLang(prev => prev === 'bn' ? 'en' : 'bn');
+                }} 
+                className="px-2 py-1 text-white hover:bg-white/15 active:scale-95 rounded-xl transition-all text-xs font-black flex items-center gap-1 border border-white/20 bg-white/5 mr-1"
+                title={isBn ? 'Switch to English' : 'বাংলায় পরিবর্তন করুন'}
+              >
+                <span>{isBn ? '🇧🇩' : '🇬🇧'}</span>
+                <span className="uppercase text-[9px] font-black">{isBn ? 'বাং' : 'EN'}</span>
+              </button>
+
               {/* Speak Responses toggle */}
               <button 
                 onClick={(e) => { e.stopPropagation(); setSpeakResponses(!speakResponses); }} 

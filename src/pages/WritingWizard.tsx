@@ -686,7 +686,7 @@ const WritingWizard = () => {
                     ) : (
                       <>
                         <Sparkles className="w-5 h-5 animate-pulse" />
-                        <span>{lang === 'bn' ? 'চেক করো' : 'Check Code'}</span>
+                        <span>{lang === 'bn' ? 'লেখা যাচাই করো 🔍' : 'Check Writing 🔍'}</span>
                       </>
                     )}
                   </Button>
