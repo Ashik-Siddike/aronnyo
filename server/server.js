@@ -87,7 +87,7 @@ let client;
 // Ensure DB connection middleware for Serverless (Vercel)
 app.use(async (req, res, next) => {
   // Bypass database connection check for pure proxy endpoints that do not query MongoDB
-  if (req.path === '/api/handwriting' || req.path === '/api/tts') {
+  if (req.path === '/api/handwriting' || req.path === '/api/tts' || req.path === '/api/chatbot') {
     return next();
   }
 
@@ -2457,6 +2457,209 @@ app.post('/api/upload', authenticateToken, upload.single('file'), async (req, re
     res.status(500).json({ error: 'File upload failed' });
   }
 });
+
+
+// ==========================================
+// CHATBOT ENDPOINT WITH GEMINI KEY ROTATION
+// ==========================================
+
+let currentGeminiKeyIndex = 0;
+
+// Local rule-based fallback response generator
+function getLocalFallbackResponse(input) {
+  const lower = input.toLowerCase();
+  
+  if (lower.includes('গণিত') || lower.includes('math') || lower.includes('যোগ') || lower.includes('বিয়োগ')) {
+    const mathFacts = [
+      "🔢 তুমি কি জানো? ১ থেকে ১০০ পর্যন্ত সব সংখ্যা যোগ করলে ৫০৫০ হয়! গাউস নামের একজন গণিতবিদ মাত্র ৮ বছর বয়সে এটা আবিষ্কার করেছিলেন! 🧒",
+      "➕ চলো একটা মজার যোগ করি! ৩ + ৪ = ৭। এবার তুমি বলো, ৫ + ৬ = কত? আমাদের Addition Game খেলে দেখো! 🎮",
+      "📐 তুমি কি জানো ত্রিভুজের তিন কোণের সমষ্টি সবসময় ১৮০°? এটা প্রকৃতিতেও দেখা যায় — মৌমাছির চাক ষড়ভুজ আকৃতির হয়! 🐝",
+      "🔢 মজার সংখ্যা তথ্য: ১১ x ১১ = ১২১, ১১১ x ১১১ = ১২৩২১। দেখো কী সুন্দর প্যাটার্ন! ✨"
+    ];
+    return mathFacts[Math.floor(Math.random() * mathFacts.length)];
+  }
+  
+  if (lower.includes('ইংরেজি') || lower.includes('english') || lower.includes('abc')) {
+    const englishFacts = [
+      "📖 Did you know? The word 'set' has the most definitions in English — over 430! চলো আমাদের Spelling Wizard গেম খেলো! ✨",
+      "🔤 The most common letter in English is 'E'. তোমার নামে কি 'E' আছে? The quick brown fox jumps over the lazy dog — এই বাক্যে A-Z সব letter আছে! 🦊",
+      "📚 'Rhythm' is the longest English word without a vowel (a, e, i, o, u)! মজার তাই না? 🎵",
+      "🌟 Fun fact: 'Go' is the shortest complete sentence in English! এবার তুমি একটা ছোট sentence বলো! 💬"
+    ];
+    return englishFacts[Math.floor(Math.random() * englishFacts.length)];
+  }
+  
+  if (lower.includes('বিজ্ঞান') || lower.includes('science') || lower.includes('पृथ्वी') || lower.includes('পৃথিবী')) {
+    const scienceFacts = [
+      "🔬 তুমি কি জানো? একটি বজ্রপাত সূর্যের পৃষ্ঠের চেয়ে ৫ গুণ বেশি গরম! তাপমাত্রা প্রায় ৩০,০০০ ডিগ্রি! ⚡",
+      "🌍 পৃথিবী প্রতি ঘণ্টায় ১,৬৭০ কিলোমিটার বেগে ঘুরছে! কিন্তু আমরা টের পাই না কারণ সবকিছু একসাথে ঘুরছে! 🌎",
+      "🦕 ডাইনোসররা ৬.৫ কোটি বছর আগে বিলুপ্ত হয়ে গেছে! কিন্তু মুরগি আসলে ডাইনোসরের বংশধর! 🐔",
+      "💧 মানুষের শরীরের ৬০% জল! তাই পানি খাওয়া এত জরুরি। তোমার মস্তিষ্কের ৭৫% ও জল! 🧠"
+    ];
+    return scienceFacts[Math.floor(Math.random() * scienceFacts.length)];
+  }
+  
+  if (lower.includes('ধাঁধা') || lower.includes('puzzle') || lower.includes('riddle')) {
+    const riddles = [
+      "🧩 ধাঁধা: আমার রং আছে, কিন্তু ওজন নেই। আমি কে?\n\n💡 উত্তর: ছায়া! 😄",
+      "🧩 ধাঁধা: যে যত বড় হয়, তত ছোট হয় — সে কে?\n\n💡 উত্তর: মোমবাতি! 🕯️",
+      "🧩 ধাঁধা: ১০০টা পাখি একটা গাছে বসে আছে, একজন শিকারি একটি পাখি মারলো, কয়টা রইলো?\n\n💡 উত্তর: একটিও না! বাকিরা উড়ে গেছে! 🐦",
+      "🧩 ধাঁধা: কোন জিনিসটা বাড়ে কিন্তু কমে না?\n\n💡 উত্তর: বয়স! 🎂"
+    ];
+    return riddles[Math.floor(Math.random() * riddles.length)];
+  }
+  
+  if (lower.includes('মজা') || lower.includes('তথ্য') || lower.includes('fun') || lower.includes('fact')) {
+    const funFacts = [
+      "🤩 মজার তথ্য: একটি অক্টোপাসের ৩টি হৃদপিণ্ড আর নীল রক্ত আছে! 🐙💙",
+      "🦒 জিরাফের জিহ্বা ২১ ইঞ্চি লম্বা — তারা নিজের কান পরিষ্কার করতে পারে জিহ্বা দিয়ে! 👅",
+      "🍯 মধু কখনো নষ্ট হয় না! ৩,০০০ বছরের পুরনো মধু পাওয়া গেছে যা এখনও খাওয়া যায়! 🐝",
+      "🌈 রংধনুতে আসলে ৭টি রং নেই — এটা একটা অবিচ্ছিন্ন বর্ণালী! কিন্তু আমরা ৭টি প্রধান রং দেখি! 🎨",
+      "🦋 প্রজাপতি তার পা দিয়ে স্বাদ গ্রহণ করে! 🦶😮"
+    ];
+    return funFacts[Math.floor(Math.random() * funFacts.length)];
+  }
+  
+  if (lower.includes('হ্যালো') || lower.includes('hello') || lower.includes('হাই') || lower.includes('hi') || lower.includes('hey')) {
+    return "হ্যালো! 👋 আমি 247School AI Assistant! আমি তোমাকে গণিত, ইংরেজি, বাংলা আর বিজ্ঞান শেখাতে পারি! কী শিখতে চাও? 🎓✨";
+  }
+  
+  if (lower.includes('নাম') || lower.includes('name') || lower.includes('কে তুমি') || lower.includes('who')) {
+    return "আমার নাম 247Bot! 🤖 আমি 247School এর AI Assistant। আমি তোমাকে পড়ালেখায় সাহায্য করি, মজার তথ্য বলি, আর ধাঁধাও দিতে পারি! কী জানতে চাও? 💡";
+  }
+  
+  if (lower.includes('ধন্যবাদ') || lower.includes('thanks') || lower.includes('thank')) {
+    return "তোমাকেও ধন্যবাদ! 🙏 তুমি খুব ভালো ছাত্র! প্রতিদিন কিছু নতুন শেখো — এটাই সফলতার চাবি! 🔑✨ আর কিছু জানতে চাইলে বলো!";
+  }
+
+  const defaults = [
+    "দারুণ প্রশ্ন! 🌟 আমি তোমাকে গণিত, ইংরেজি, বিজ্ঞান শেখাতে পারি। নিচের বাটন থেকে একটি বিষয় বেছে নাও! 👇",
+    "চমৎকার! 😊 247School এ আমরা খেলতে খেলতে শিখি! কোন বিষয়ে তুমি আগ্রহী — গণিত, ইংরেজি নাকি বিজ্ঞান? 📚",
+    "তুমি কি জানো যে 247School এ ৪০+ মজার lesson আর ৮টা interactive game আছে? 🎮 চলো একসাথে শিখি!"
+  ];
+  return defaults[Math.floor(Math.random() * defaults.length)];
+}
+
+app.post('/api/chatbot', async (req, res) => {
+  try {
+    const { message, history = [], studentContext = {} } = req.body;
+
+    if (!message || message.trim().length === 0) {
+      return res.status(400).json({ error: 'message is required' });
+    }
+
+    const keysStr = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
+    const geminiKeys = keysStr.split(',').map(k => k.trim()).filter(Boolean);
+
+    const systemPrompt = `
+You are Tutu 🦉, a friendly, warm, and encouraging AI tutor for a kids educational platform called 247School.
+Your audience consists of children (Nursery to 5th Standard).
+Always respond in the same language the child uses (primarily Bengali or English).
+Use simple words, cute emojis, and encouraging, child-safe phrases.
+If the child gives a wrong answer or is confused, guide them step-by-step with positive motivation. Never say "You are wrong" or "Incorrect" rudely. Say: "Oh, that was a close try! Let's think about it this way... 🌟" or "দারুণ চেষ্টা সোনামণি! চলো আমরা অন্যভাবে ভাবি... 💡".
+You have context about the current student:
+- Name: ${studentContext.name || 'Friend'}
+- Grade: ${studentContext.grade || 'Nursery'}
+- Stars: ${studentContext.stars || 0}
+- Streak: ${studentContext.streak || 0}
+Refer to their name or praise their achievements occasionally to make the conversation feel deeply personal and magical!
+Keep responses concise (under 3-4 sentences or 2 short paragraphs) so kids don't get bored.
+`;
+
+    // Map history to Gemini contents structure
+    const contents = history.map(msg => ({
+      role: msg.sender === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.text }]
+    }));
+    
+    // Append current message
+    contents.push({
+      role: 'user',
+      parts: [{ text: message }]
+    });
+
+    const payload = {
+      contents: contents,
+      systemInstruction: {
+        parts: [{ text: systemPrompt }]
+      },
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 300
+      }
+    };
+
+    if (geminiKeys.length === 0) {
+      console.warn('⚠️ No Gemini API keys configured. Falling back to local rule-based response.');
+      return res.json({ text: getLocalFallbackResponse(message), source: 'fallback' });
+    }
+
+    let success = false;
+    let responseData = null;
+    let attempts = 0;
+
+    while (!success && attempts < geminiKeys.length) {
+      const activeKeyIndex = (currentGeminiKeyIndex + attempts) % geminiKeys.length;
+      const apiKey = geminiKeys[activeKeyIndex];
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+      try {
+        console.log(`🤖 Attempting Gemini API call with key index ${activeKeyIndex}...`);
+        const geminiRes = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(8000) // 8 second timeout
+        });
+
+        if (geminiRes.status === 429) {
+          console.warn(`⚠️ Gemini API Key index ${activeKeyIndex} returned 429 (Rate Limit). Rotating key...`);
+          attempts++;
+          continue;
+        }
+
+        if (!geminiRes.ok) {
+          const errMsg = await geminiRes.text();
+          console.error(`❌ Gemini API Key index ${activeKeyIndex} returned status ${geminiRes.status}: ${errMsg}`);
+          attempts++;
+          continue;
+        }
+
+        responseData = await geminiRes.json();
+        
+        if (
+          responseData.candidates &&
+          responseData.candidates[0] &&
+          responseData.candidates[0].content &&
+          responseData.candidates[0].content.parts &&
+          responseData.candidates[0].content.parts[0]
+        ) {
+          const botText = responseData.candidates[0].content.parts[0].text;
+          
+          // Successfully obtained response! Update currentKeyIndex so we start here next time
+          currentGeminiKeyIndex = activeKeyIndex;
+          success = true;
+          return res.json({ text: botText, source: 'gemini' });
+        } else {
+          console.error(`❌ Unexpected response format from Gemini:`, JSON.stringify(responseData));
+          attempts++;
+        }
+      } catch (error) {
+        console.error(`❌ Network or fetch error using key index ${activeKeyIndex}:`, error.message);
+        attempts++;
+      }
+    }
+
+    // If we reached here, all keys failed
+    console.error('❌ All Gemini API keys in rotation list failed. Falling back to local rule-based engine.');
+    return res.json({ text: getLocalFallbackResponse(message), source: 'fallback' });
+
+  } catch (err) {
+    console.error('Chatbot route error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 // ==========================================
 // HEALTH CHECK
