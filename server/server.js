@@ -2630,7 +2630,7 @@ Keep responses concise (under 3-4 sentences or 2 short paragraphs) so kids don't
     while (!success && attempts < geminiKeys.length) {
       const activeKeyIndex = (currentGeminiKeyIndex + attempts) % geminiKeys.length;
       const apiKey = geminiKeys[activeKeyIndex];
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
       try {
         console.log(`🤖 Attempting Gemini API call with key index ${activeKeyIndex}...`);
