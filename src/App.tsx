@@ -39,6 +39,7 @@ import SpellingWizard from "./pages/SpellingWizard";
 import AnimalQuiz from "./pages/AnimalQuiz";
 import PlantExplorer from "./pages/PlantExplorer";
 import MemoryMatch from "./pages/MemoryMatch";
+import WritingWizard from "./pages/WritingWizard";
 import AIChatbot from "./components/AIChatbot";
 import ScrollToTop from "./components/ScrollToTop";
 import Leaderboard from "./pages/Leaderboard";
@@ -93,6 +94,7 @@ const AnimatedRoutes = () => {
         <Route path="/animal-quiz" element={<PageTransition><AnimalQuiz /></PageTransition>} />
         <Route path="/plant-explorer" element={<PageTransition><PlantExplorer /></PageTransition>} />
         <Route path="/memory-match" element={<PageTransition><MemoryMatch /></PageTransition>} />
+        <Route path="/writing-wizard" element={<PageTransition><WritingWizard /></PageTransition>} />
         <Route path="/story-mode" element={<PageTransition><StoryMode /></PageTransition>} />
         <Route path="/games" element={<PageTransition><GamesHub /></PageTransition>} />
         <Route path="/dashboard" element={<PageTransition><DashboardErrorBoundary><StudentDashboard /></DashboardErrorBoundary></PageTransition>} />

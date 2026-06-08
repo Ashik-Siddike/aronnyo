@@ -75,6 +75,18 @@ export default function GamesHub() {
       stars: 3
     },
     {
+      id: "writing-wizard",
+      title: isBn ? "বর্ণমালা জাদুকর" : "Writing Wizard",
+      emoji: "✏️",
+      route: "/writing-wizard",
+      gradient: "from-amber-400 to-orange-500",
+      shadow: "shadow-[0_0_15px_rgba(245,158,11,0.4)]",
+      borderColor: "border-orange-100",
+      textColor: "text-orange-600",
+      category: "language",
+      stars: 4
+    },
+    {
       id: "animal",
       title: isBn ? "পশু-পাখি কুইজ" : "Animal Quiz",
       emoji: "🐾",

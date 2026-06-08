@@ -86,6 +86,11 @@ let client;
 
 // Ensure DB connection middleware for Serverless (Vercel)
 app.use(async (req, res, next) => {
+  // Bypass database connection check for pure proxy endpoints that do not query MongoDB
+  if (req.path === '/api/handwriting' || req.path === '/api/tts') {
+    return next();
+  }
+
   if (!db) {
     try {
       await connectDB();
@@ -99,6 +104,10 @@ app.use(async (req, res, next) => {
 
 async function connectDB() {
   const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.warn('⚠️ MONGODB_URI is not defined in environment variables. Skipping database connection.');
+    return null;
+  }
   const maxRetries = 3;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -124,12 +133,12 @@ async function connectDB() {
         try { await client.close(); } catch {}
       }
       if (attempt === maxRetries) {
-        console.error('❌ All connection attempts failed. Check your network and MongoDB Atlas IP whitelist.');
+        console.warn('⚠️ All connection attempts failed. Proceeding without active DB connection for proxy endpoints.');
         console.log('💡 Tips:');
         console.log('   1. Ensure your IP is whitelisted in MongoDB Atlas (Network Access → Add Current IP)');
         console.log('   2. Check your internet connection');
         console.log('   3. Try using a different DNS (e.g., Google DNS 8.8.8.8)');
-        process.exit(1);
+        // Do not process.exit(1) - allow the server to start and serve handwriting/TTS endpoints.
       }
       // Wait before retry
       await new Promise(r => setTimeout(r, 2000 * attempt));
@@ -248,6 +257,70 @@ app.post('/api/tts', async (req, res) => {
 
   } catch (err) {
     console.error('TTS route error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+// ==========================================
+// HANDWRITING RECOGNITION PROXY
+// ==========================================
+app.post('/api/handwriting', async (req, res) => {
+  try {
+    const { ink, language = 'en' } = req.body;
+
+    if (!ink || !Array.isArray(ink)) {
+      return res.status(400).json({ error: 'ink coordinate strokes array is required' });
+    }
+
+    const googleImeUrl = 'https://inputtools.google.com/request?ime=handwriting&app=mobilesearch&cs=1&oe=utf-8';
+
+    const payload = {
+      app: 'mobilesearch',
+      device: 'tablet',
+      input_type: 0,
+      options: 'enable_pre_space',
+      source: 'inputtools',
+      itc: language === 'bn' ? 'bn-t-i0-handwrit' : 'en-t-i0-handwrit',
+      requests: [
+        {
+          writing_guide: {
+            writing_area_width: 800,
+            writing_area_height: 600
+          },
+          ink: ink,
+          language: language
+        }
+      ]
+    };
+
+    const response = await fetch(googleImeUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      console.error(`Google IME API failed: ${response.status}`);
+      return res.status(502).json({ error: 'Upstream handwriting recognition service failed' });
+    }
+
+    const data = await response.json();
+    console.log('Google Handwriting API raw response:', JSON.stringify(data));
+    
+    // Parse Google response:
+    // Format: ["SUCCESS", [ [ "requests_index_0", [ "candidate1", "candidate2", ... ], [], {"key": "value"} ] ]]
+    if (data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1]) {
+      const candidates = data[1][0][1];
+      return res.json({ candidates });
+    } else {
+      return res.json({ candidates: [] });
+    }
+
+  } catch (err) {
+    console.error('Handwriting proxy route error:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });

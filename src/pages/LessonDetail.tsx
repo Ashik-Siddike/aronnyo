@@ -5,11 +5,12 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { AudioService } from '@/services/audioService';
+import { AudioService, playSound } from '@/services/audioService';
 import { lessons } from '@/lib/lessons';
 import NotFound from './NotFound';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLang } from '@/contexts/LangContext';
 import { staticContents, mockDelay } from '@/data/staticData';
 import confetti from 'canvas-confetti';
 
@@ -23,6 +24,7 @@ const LessonDetail = () => {
   const audioService = AudioService.getInstance();
   const { trackLessonStart, trackLessonComplete } = useLessonProgress();
   const { user } = useAuth();
+  const { lang } = useLang();
   const [dbContent, setDbContent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -355,6 +357,26 @@ const LessonDetail = () => {
                     <Volume2 className="w-5 h-5 mr-2" />
                     Listen Again
                   </Button>
+                  {(subject === 'english' || subject === 'bangla' || subject === 'math') && (
+                    <Button
+                      onClick={() => {
+                        let practiceChar = 'A';
+                        const slideImg = lessonContent?.slides?.[currentSlide]?.image || '';
+                        // If slideImg is a single char, use it! (exclude emojis)
+                        if (slideImg && slideImg.length === 1 && !/^\p{Emoji}$/u.test(slideImg)) {
+                          practiceChar = slideImg;
+                        } else {
+                          // Default fallbacks
+                          if (subject === 'bangla') practiceChar = 'অ';
+                          else if (subject === 'math') practiceChar = '1';
+                        }
+                        navigate(`/writing-wizard?char=${encodeURIComponent(practiceChar)}`);
+                      }}
+                      className="bg-gradient-to-r from-eduplay-purple to-eduplay-blue text-white text-lg px-6 py-3 border-b-4 border-purple-700 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                    >
+                      <span>📝 {lang === 'bn' ? 'লিখতে শেখো' : 'Practice Writing'}</span>
+                    </Button>
+                  )}
                 </div>
 
                 {/* Navigation */}
