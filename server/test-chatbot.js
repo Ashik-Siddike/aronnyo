@@ -5,6 +5,7 @@ async function testChatbot() {
     message: "হ্যালো! আমার নাম কি মনে আছে? আমাকে একটা গণিতের কোশ্চেন করো তো!",
     history: [],
     studentContext: {
+      id: "student-1",
       name: "রাফাত",
       grade: "Class 2",
       stars: 120,

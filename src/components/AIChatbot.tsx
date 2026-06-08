@@ -141,6 +141,7 @@ const AIChatbot: React.FC = () => {
     try {
       // Package student profile context
       const studentContext = {
+        id: user?.id,
         name: user?.full_name || 'Friend',
         grade: user?.grade_id ? `${user.grade_id} Standard` : 'Nursery',
         stars: user?.total_stars || 0,

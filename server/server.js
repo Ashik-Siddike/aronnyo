@@ -2551,6 +2551,33 @@ app.post('/api/chatbot', async (req, res) => {
     const keysStr = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
     const geminiKeys = keysStr.split(',').map(k => k.trim()).filter(Boolean);
 
+    // Fetch latest completed lesson from MongoDB if database is connected and student id is available
+    let latestLessonName = '';
+    if (db && studentContext.id) {
+      try {
+        const lastActivity = await getCollection('activity').findOne(
+          {
+            student_id: studentContext.id,
+            $or: [
+              { type: 'lesson_completed' },
+              { activity_type: 'lesson_completed' }
+            ]
+          },
+          { sort: { created_at: -1 } }
+        );
+        if (lastActivity) {
+          latestLessonName = lastActivity.lesson_name || lastActivity.lesson || lastActivity.subject || '';
+        }
+      } catch (err) {
+        console.error('Failed to fetch latest completed lesson for chatbot:', err);
+      }
+    }
+
+    let lessonContextInfo = '';
+    if (latestLessonName) {
+      lessonContextInfo = `\n- Latest Completed Lesson: "${latestLessonName}"`;
+    }
+
     const systemPrompt = `
 You are Tutu 🦉, a friendly, warm, and encouraging AI tutor for a kids educational platform called 247School.
 Your audience consists of children (Nursery to 5th Standard).
@@ -2561,7 +2588,9 @@ You have context about the current student:
 - Name: ${studentContext.name || 'Friend'}
 - Grade: ${studentContext.grade || 'Nursery'}
 - Stars: ${studentContext.stars || 0}
-- Streak: ${studentContext.streak || 0}
+- Streak: ${studentContext.streak || 0}${lessonContextInfo}
+
+${latestLessonName ? `IMPORTANT: The student has just completed the lesson "${latestLessonName}". In your initial welcoming/greeting response (or if they ask how they are doing), you MUST warmly congratulate them on finishing this lesson and ask them if they want to talk or play a quick quiz about it! E.g., "আমি দেখছি তুমি মাত্র '${latestLessonName}' লেসনটি শেষ করেছ! চলো এটি নিয়ে কিছু মজা করি! 🦉✨" (or the English equivalent if they chat in English). Do not repeat this greeting in subsequent messages.` : ''}
 Refer to their name or praise their achievements occasionally to make the conversation feel deeply personal and magical!
 Keep responses concise (under 3-4 sentences or 2 short paragraphs) so kids don't get bored.
 `;
