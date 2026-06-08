@@ -138,10 +138,10 @@ const StudentProfile = () => {
           <Link to="/dashboard" className="inline-flex items-center text-white/80 hover:text-white mb-6 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
           </Link>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6">
             <Dialog>
               <DialogTrigger asChild>
-                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-4xl border-4 border-white/40 shadow-xl cursor-pointer hover:bg-white/30 transition-all relative group overflow-hidden">
+                <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-4xl border-4 border-white/40 shadow-xl cursor-pointer hover:bg-white/30 transition-all relative group overflow-hidden shrink-0">
                   {avatar.startsWith('http') ? (
                     <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -183,9 +183,9 @@ const StudentProfile = () => {
                 </div>
               </DialogContent>
             </Dialog>
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <h1 className="text-3xl font-bold">{stats?.full_name || user?.email || 'শিক্ষার্থী'}</h1>
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-2">
                 <Badge className="bg-white/20 text-white border-white/30 text-sm">
                   <Award className="w-3 h-3 mr-1" />{level.name}
                 </Badge>
@@ -194,7 +194,7 @@ const StudentProfile = () => {
                 </Badge>
               </div>
               {/* Level progress */}
-              <div className="mt-3 max-w-xs">
+              <div className="mt-3 max-w-xs mx-auto sm:mx-0">
                 <div className="flex justify-between text-xs text-white/70 mb-1">
                   <span>{stars} stars</span>
                   {nextLevel && <span>Next: {level.max} stars</span>}

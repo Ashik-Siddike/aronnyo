@@ -92,12 +92,12 @@ export default function Timetable() {
 
       <div className="grid md:grid-cols-4 gap-6">
         {/* Day Selector */}
-        <div className="md:col-span-1 space-y-2">
+        <div className="md:col-span-1 flex flex-row overflow-x-auto md:flex-col gap-2 md:space-y-2 pb-3 md:pb-0 scrollbar-hide snap-x snap-mandatory">
           {DAYS.map((day, idx) => (
             <button
               key={idx}
               onClick={() => setActiveDay(idx)}
-              className={`w-full text-left px-4 py-3 rounded-xl font-bold transition-all ${
+              className={`whitespace-nowrap px-4 py-3 rounded-xl font-bold transition-all snap-start flex-shrink-0 text-center md:text-left w-auto md:w-full ${
                 activeDay === idx
                   ? 'bg-eduplay-purple text-white shadow-md scale-105'
                   : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-slate-700'

@@ -197,23 +197,23 @@ export default function GamesHub() {
               animate={{ opacity: 1, scale: 1 }}
               whileHover={{ y: -5 }}
               onClick={() => navigate(game.route)}
-              className={`aspect-[1/1.2] rounded-3xl bg-gradient-to-b ${game.gradient} p-5 flex flex-col justify-between cursor-pointer relative overflow-hidden group ${game.shadow}`}
+              className={`aspect-auto sm:aspect-[1/1.2] min-h-[195px] sm:min-h-0 rounded-3xl bg-gradient-to-b ${game.gradient} p-3.5 sm:p-5 flex flex-col justify-between cursor-pointer relative overflow-hidden group ${game.shadow}`}
             >
               <div className="relative z-10">
-                <span className="text-4xl lg:text-5xl mb-3 block transform group-hover:scale-110 transition-transform">{game.emoji}</span>
-                <h3 className="text-white font-black text-lg lg:text-xl leading-tight">{game.title}</h3>
-                <p className="text-white/80 text-[11px] font-bold mt-1">⭐ +10 {isBn ? "পয়েন্ট" : "Points"}</p>
+                <span className="text-3xl sm:text-4xl lg:text-5xl mb-2 sm:mb-3 block transform group-hover:scale-110 transition-transform">{game.emoji}</span>
+                <h3 className="text-white font-black text-sm sm:text-base lg:text-xl leading-tight">{game.title}</h3>
+                <p className="text-white/80 text-[10px] sm:text-[11px] font-bold mt-0.5 sm:mt-1">⭐ +10 {isBn ? "পয়েন্ট" : "Points"}</p>
               </div>
-              <div className="relative z-10 mt-auto">
-                <div className="flex gap-0.5 mb-3">
+              <div className="relative z-10 mt-auto pt-3 sm:pt-0">
+                <div className="flex gap-0.5 mb-2 sm:mb-3">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star 
                       key={s} 
-                      className={`w-3.5 h-3.5 ${s <= game.stars ? 'fill-yellow-300 text-yellow-300' : 'fill-white/20 text-transparent'}`} 
+                      className={`w-3 sm:w-3.5 h-3 sm:h-3.5 ${s <= game.stars ? 'fill-yellow-300 text-yellow-300' : 'fill-white/20 text-transparent'}`} 
                     />
                   ))}
                 </div>
-                <button className={`bg-white w-full py-2.5 rounded-xl font-black transition-transform active:scale-95 border-b-4 hover:brightness-95 ${game.borderColor} ${game.textColor}`}>
+                <button className={`bg-white w-full py-2 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm transition-transform active:scale-95 border-b-4 hover:brightness-95 ${game.borderColor} ${game.textColor}`}>
                   {isBn ? "খেলো" : "Play"}
                 </button>
               </div>

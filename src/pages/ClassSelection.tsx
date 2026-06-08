@@ -205,7 +205,7 @@ const ClassSelection = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {subjectsWithContent.map((subject, index) => {
               const IconComponent = getSubjectIcon(subject.name);
               return (
@@ -214,20 +214,20 @@ const ClassSelection = () => {
                   className={`border-0 playful-shadow hover:shadow-xl transition-all group hover:scale-105 animate-fade-in ${getColorForIndex(index)}`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="text-4xl group-hover:animate-bounce">
+                  <CardHeader className="pb-4 pt-5 px-3 sm:px-6">
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                      <div className="text-3xl sm:text-4xl group-hover:animate-bounce">
                         {getSubjectEmoji(subject.name)}
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-gray-700">{subject.contentCount}</div>
-                        <div className="text-xs text-gray-500">Lessons</div>
+                        <div className="text-xl sm:text-2xl font-bold text-gray-700">{subject.contentCount}</div>
+                        <div className="text-[10px] sm:text-xs text-gray-500">Lessons</div>
                       </div>
                     </div>
-                    <CardTitle className="text-lg group-hover:text-eduplay-blue transition-colors">
+                    <CardTitle className="text-sm sm:text-lg group-hover:text-eduplay-blue transition-colors">
                       {subject.name}
                     </CardTitle>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-[11px] sm:text-sm text-gray-600 hidden sm:block">
                       {subject.contentCount > 0 
                         ? `${subject.contentCount} lessons available` 
                         : 'No lessons available yet'
@@ -235,15 +235,19 @@ const ClassSelection = () => {
                     </p>
                   </CardHeader>
                   
-                  <CardContent className="pt-0">
+                  <CardContent className="pt-0 px-3 pb-4 sm:px-6 sm:pb-6">
                     <Button
                       onClick={() => handleSubjectClick(subject.name)}
-                      className={`w-full ${getButtonColorForIndex(index)} hover:shadow-lg transform hover:scale-105 transition-all`}
+                      className={`w-full ${getButtonColorForIndex(index)} hover:shadow-lg transform hover:scale-105 transition-all text-xs sm:text-sm py-4 sm:py-6`}
                       disabled={subject.contentCount === 0}
                     >
-                      <IconComponent className="w-4 h-4 mr-2" />
-                      {subject.contentCount > 0 ? 'Start Learning' : 'Coming Soon'}
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <IconComponent className="w-3.5 h-3.5 mr-1.5 hidden sm:inline-block" />
+                      {subject.contentCount > 0 ? (
+                        <span>Start<span className="hidden sm:inline"> Learning</span></span>
+                      ) : (
+                        <span>Coming<span className="hidden sm:inline"> Soon</span></span>
+                      )}
+                      <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                     </Button>
                   </CardContent>
                 </Card>

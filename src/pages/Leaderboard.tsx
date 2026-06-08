@@ -199,23 +199,23 @@ const Leaderboard = () => {
 
         {/* Top 3 Podium */}
         {leaders.length >= 3 && (
-          <div className="flex justify-center items-end gap-2 md:gap-6 mb-16 relative">
+          <div className="flex justify-center items-end gap-1.5 sm:gap-4 md:gap-6 mb-16 relative">
             {/* 2nd Place */}
             <motion.div 
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-center w-28 md:w-36 z-10"
+              className="text-center w-24 sm:w-28 md:w-36 z-10"
             >
-              <div className="text-5xl md:text-6xl mb-3 relative drop-shadow-[0_0_15px_rgba(148,163,184,0.5)]">
+              <div className="text-4xl sm:text-5xl md:text-6xl mb-2 sm:mb-3 relative drop-shadow-[0_0_15px_rgba(148,163,184,0.5)]">
                 {leaders[1]?.avatar}
               </div>
-              <div className="bg-gradient-to-t from-slate-800 to-slate-700 rounded-t-2xl h-24 md:h-32 flex flex-col items-center justify-start pt-4 relative shadow-[0_-5px_20px_rgba(148,163,184,0.2)] border-t-4 border-slate-400">
-                <span className="text-4xl font-black text-slate-300/50">2</span>
+              <div className="bg-gradient-to-t from-slate-800 to-slate-700 rounded-t-2xl h-16 sm:h-24 md:h-32 flex flex-col items-center justify-start pt-3 sm:pt-4 relative shadow-[0_-5px_20px_rgba(148,163,184,0.2)] border-t-4 border-slate-400">
+                <span className="text-3xl sm:text-4xl font-black text-slate-300/50">2</span>
               </div>
-              <div className="bg-slate-800 p-3 rounded-b-2xl border-t border-slate-700 shadow-xl">
-                <p className="text-sm font-black text-white truncate">{leaders[1]?.name.split(' ')[0]}</p>
-                <p className="text-xs text-yellow-400 font-bold mt-1">⭐ {leaders[1]?.stars}</p>
+              <div className="bg-slate-800 p-2 sm:p-3 rounded-b-2xl border-t border-slate-700 shadow-xl">
+                <p className="text-xs sm:text-sm font-black text-white truncate">{leaders[1]?.name.split(' ')[0]}</p>
+                <p className="text-[10px] sm:text-xs text-yellow-400 font-bold mt-0.5 sm:mt-1">⭐ {leaders[1]?.stars}</p>
               </div>
             </motion.div>
 
@@ -223,21 +223,21 @@ const Leaderboard = () => {
             <motion.div 
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center w-32 md:w-44 z-20 relative"
+              className="text-center w-28 sm:w-32 md:w-44 z-20 relative"
             >
               <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-40 h-40 bg-yellow-500/20 rounded-full blur-2xl"></div>
-              <div className="text-6xl md:text-7xl mb-4 relative z-10 drop-shadow-[0_0_20px_rgba(250,204,21,0.8)] animate-bounce-slow">
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
-                  <Crown className="w-10 h-10 text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,1)]" fill="currentColor" />
+              <div className="text-5xl sm:text-6xl md:text-7xl mb-3 sm:mb-4 relative z-10 drop-shadow-[0_0_20px_rgba(250,204,21,0.8)] animate-bounce-slow">
+                <div className="absolute -top-5 sm:-top-6 left-1/2 -translate-x-1/2 z-20">
+                  <Crown className="w-8 sm:w-10 h-8 sm:h-10 text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,1)]" fill="currentColor" />
                 </div>
                 {leaders[0]?.avatar}
               </div>
-              <div className="bg-gradient-to-t from-yellow-700 via-yellow-600 to-yellow-500 rounded-t-2xl h-32 md:h-44 flex flex-col items-center justify-start pt-4 relative shadow-[0_-10px_30px_rgba(234,179,8,0.4)] border-t-4 border-yellow-300">
-                <span className="text-5xl font-black text-yellow-200/50">1</span>
+              <div className="bg-gradient-to-t from-yellow-700 via-yellow-600 to-yellow-500 rounded-t-2xl h-24 sm:h-32 md:h-44 flex flex-col items-center justify-start pt-3 sm:pt-4 relative shadow-[0_-10px_30px_rgba(234,179,8,0.4)] border-t-4 border-yellow-300">
+                <span className="text-4xl sm:text-5xl font-black text-yellow-200/50">1</span>
               </div>
-              <div className="bg-yellow-600 p-4 rounded-b-2xl shadow-[0_10px_20px_rgba(234,179,8,0.3)]">
-                <p className="text-base font-black text-white truncate drop-shadow-md">{leaders[0]?.name.split(' ')[0]}</p>
-                <p className="text-sm text-yellow-100 font-bold mt-1">⭐ {leaders[0]?.stars}</p>
+              <div className="bg-yellow-600 p-2.5 sm:p-4 rounded-b-2xl shadow-[0_10px_20px_rgba(234,179,8,0.3)]">
+                <p className="text-xs sm:text-base font-black text-white truncate drop-shadow-md">{leaders[0]?.name.split(' ')[0]}</p>
+                <p className="text-xs sm:text-sm text-yellow-100 font-bold mt-0.5 sm:mt-1">⭐ {leaders[0]?.stars}</p>
               </div>
             </motion.div>
 
@@ -246,17 +246,17 @@ const Leaderboard = () => {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-center w-28 md:w-36 z-10"
+              className="text-center w-24 sm:w-28 md:w-36 z-10"
             >
-              <div className="text-5xl md:text-6xl mb-3 relative drop-shadow-[0_0_15px_rgba(249,115,22,0.5)]">
+              <div className="text-4xl sm:text-5xl md:text-6xl mb-2 sm:mb-3 relative drop-shadow-[0_0_15px_rgba(249,115,22,0.5)]">
                 {leaders[2]?.avatar}
               </div>
-              <div className="bg-gradient-to-t from-orange-900 to-orange-800 rounded-t-2xl h-20 md:h-24 flex flex-col items-center justify-start pt-4 relative shadow-[0_-5px_20px_rgba(249,115,22,0.2)] border-t-4 border-orange-500">
-                <span className="text-4xl font-black text-orange-300/50">3</span>
+              <div className="bg-gradient-to-t from-orange-900 to-orange-800 rounded-t-2xl h-12 sm:h-20 md:h-24 flex flex-col items-center justify-start pt-3 sm:pt-4 relative shadow-[0_-5px_20px_rgba(249,115,22,0.2)] border-t-4 border-orange-500">
+                <span className="text-3xl sm:text-4xl font-black text-orange-300/50">3</span>
               </div>
-              <div className="bg-orange-800 p-3 rounded-b-2xl border-t border-orange-700 shadow-xl">
-                <p className="text-sm font-black text-white truncate">{leaders[2]?.name.split(' ')[0]}</p>
-                <p className="text-xs text-yellow-300 font-bold mt-1">⭐ {leaders[2]?.stars}</p>
+              <div className="bg-orange-800 p-2 sm:p-3 rounded-b-2xl border-t border-orange-700 shadow-xl">
+                <p className="text-xs sm:text-sm font-black text-white truncate">{leaders[2]?.name.split(' ')[0]}</p>
+                <p className="text-[10px] sm:text-xs text-yellow-300 font-bold mt-0.5 sm:mt-1">⭐ {leaders[2]?.stars}</p>
               </div>
             </motion.div>
           </div>

@@ -112,12 +112,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.5 }}
-              className="flex flex-row gap-3 justify-center lg:justify-start"
+              className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start w-full max-w-sm sm:max-w-none mx-auto lg:mx-0 px-4 sm:px-0"
             >
               <Button
                 size="lg"
                 onClick={handleStartLearning}
-                className="bg-gradient-to-r from-eduplay-purple to-eduplay-blue hover:shadow-lg hover:shadow-purple-500/30 transform hover:scale-105 transition-all duration-300 text-sm sm:text-lg py-4 sm:py-6 px-4 sm:px-8 rounded-2xl flex-1 sm:flex-none font-bold"
+                className="bg-gradient-to-r from-eduplay-purple to-eduplay-blue hover:shadow-lg hover:shadow-purple-500/30 transform hover:scale-105 transition-all duration-300 text-sm sm:text-lg py-4 sm:py-6 px-4 sm:px-8 rounded-2xl w-full sm:w-auto font-bold"
               >
                 <Play className="w-4 sm:w-6 h-4 sm:h-6 mr-1.5 sm:mr-3" />
                 {t.heroStart}
@@ -126,7 +126,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                 variant="outline"
                 size="lg"
                 onClick={handleExploreSubjects}
-                className="bg-white/80 backdrop-blur-md border-2 border-eduplay-purple text-eduplay-purple hover:bg-eduplay-purple hover:text-white text-sm sm:text-lg py-4 sm:py-6 px-4 sm:px-8 rounded-2xl transition-all duration-300 hover:scale-105 flex-1 sm:flex-none font-bold"
+                className="bg-white/80 backdrop-blur-md border-2 border-eduplay-purple text-eduplay-purple hover:bg-eduplay-purple hover:text-white text-sm sm:text-lg py-4 sm:py-6 px-4 sm:px-8 rounded-2xl transition-all duration-300 hover:scale-105 w-full sm:w-auto font-bold"
               >
                 <BookOpen className="w-4 sm:w-6 h-4 sm:h-6 mr-1.5 sm:mr-3" />
                 {t.heroExplore}
