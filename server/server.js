@@ -358,6 +358,28 @@ app.post('/api/auth/register', async (req, res) => {
 
     await getCollection('users').insertOne(newUser);
 
+    // Auto-create a profile document in profiles collection if registering as a student
+    if (role === 'student') {
+      const newProfile = {
+        _id: `profile-${newUser._id}-${Date.now()}`,
+        user_id: newUser._id,
+        full_name: newUser.full_name,
+        avatar_emoji: '👦',
+        grade_id: 1, // default Grade 1
+        total_stars: 0,
+        badges: 0,
+        hours_learned: 0,
+        accuracy: 0,
+        streak: 0,
+        level: 'নতুন শিক্ষার্থী',
+        lessons_completed: 0,
+        quizzes_taken: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      await getCollection('profiles').insertOne(newProfile);
+    }
+
     res.status(201).json({
       user: {
         id: newUser._id,
@@ -948,9 +970,34 @@ app.get('/api/activity/:userId', async (req, res) => {
 // GET /api/profiles/:userId
 app.get('/api/profiles/:userId', async (req, res) => {
   try {
-    const profile = await getCollection('profiles').findOne({ user_id: req.params.userId });
+    const userId = req.params.userId;
+    let profile = await getCollection('profiles').findOne({ user_id: userId });
+    
     if (!profile) {
-      return res.status(404).json({ error: 'Profile not found' });
+      // Auto-create profile if user exists but has no profile
+      const user = await getCollection('users').findOne({ _id: userId });
+      if (user) {
+        profile = {
+          _id: `profile-${userId}-${Date.now()}`,
+          user_id: userId,
+          full_name: user.full_name || 'নতুন শিক্ষার্থী',
+          avatar_emoji: user.role === 'admin' ? '🛡️' : (user.role === 'teacher' ? '👨‍🏫' : '👦'),
+          grade_id: user.grade_id || 1,
+          total_stars: 0,
+          badges: 0,
+          hours_learned: 0,
+          accuracy: 0,
+          streak: 0,
+          level: 'নতুন শিক্ষার্থী',
+          lessons_completed: 0,
+          quizzes_taken: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        await getCollection('profiles').insertOne(profile);
+      } else {
+        return res.status(404).json({ error: 'Profile not found' });
+      }
     }
     res.json(profile);
   } catch (error) {
@@ -1075,7 +1122,7 @@ app.get('/api/student-dashboard', async (req, res) => {
   try {
     const studentId = req.query.userId || 'student-1';
 
-    const [profile, activities, achievements, users, profiles] = await Promise.all([
+    let [profile, activities, achievements, users, profiles] = await Promise.all([
       getCollection('profiles').findOne({ user_id: studentId }),
       getCollection('activity').find({ student_id: studentId }).sort({ created_at: -1 }).limit(50).toArray(),
       getCollection('achievements').find({ student_id: studentId }).sort({ earned_at: -1 }).toArray(),
@@ -1084,7 +1131,31 @@ app.get('/api/student-dashboard', async (req, res) => {
     ]);
 
     if (!profile) {
-      return res.status(404).json({ error: 'Student not found' });
+      // Auto-create profile if user exists but has no profile
+      const user = await getCollection('users').findOne({ _id: studentId });
+      if (user) {
+        profile = {
+          _id: `profile-${studentId}-${Date.now()}`,
+          user_id: studentId,
+          full_name: user.full_name || 'নতুন শিক্ষার্থী',
+          avatar_emoji: user.role === 'admin' ? '🛡️' : (user.role === 'teacher' ? '👨‍🏫' : '👦'),
+          grade_id: user.grade_id || 1,
+          total_stars: 0,
+          badges: 0,
+          hours_learned: 0,
+          accuracy: 0,
+          streak: 0,
+          level: 'নতুন শিক্ষার্থী',
+          lessons_completed: 0,
+          quizzes_taken: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        await getCollection('profiles').insertOne(profile);
+        profiles.push(profile);
+      } else {
+        return res.status(404).json({ error: 'Student not found' });
+      }
     }
 
     // ── Real Rank ────────────────────────────────────────────────────────────
@@ -1209,14 +1280,36 @@ app.get('/api/parent-dashboard', async (req, res) => {
   try {
     const studentId = req.query.userId || 'student-1';
     
-    const [profile, activities, users] = await Promise.all([
+    let [profile, activities, user] = await Promise.all([
       getCollection('profiles').findOne({ user_id: studentId }),
       getCollection('activity').find({ student_id: studentId }).sort({ created_at: -1 }).limit(5).toArray(),
       getCollection('users').findOne({ _id: studentId })
     ]);
 
     if (!profile) {
-      return res.status(404).json({ error: 'Student profile not found for this user.' });
+      // Auto-create profile if user exists but has no profile
+      if (user) {
+        profile = {
+          _id: `profile-${studentId}-${Date.now()}`,
+          user_id: studentId,
+          full_name: user.full_name || 'নতুন শিক্ষার্থী',
+          avatar_emoji: user.role === 'admin' ? '🛡️' : (user.role === 'teacher' ? '👨‍🏫' : '👦'),
+          grade_id: user.grade_id || 1,
+          total_stars: 0,
+          badges: 0,
+          hours_learned: 0,
+          accuracy: 0,
+          streak: 0,
+          level: 'নতুন শিক্ষার্থী',
+          lessons_completed: 0,
+          quizzes_taken: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        await getCollection('profiles').insertOne(profile);
+      } else {
+        return res.status(404).json({ error: 'Student profile not found for this user.' });
+      }
     }
 
     const period = req.query.period || 'week'; // today, week, month, session
