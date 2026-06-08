@@ -195,20 +195,20 @@ const Header = () => {
             {/* Language Toggle */}
             <button
               onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-gray-100 dark:bg-slate-800 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all shadow-inner"
+              className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-purple-200/50 dark:border-purple-800/30 text-sm font-black text-slate-700 dark:text-slate-200 hover:bg-eduplay-purple hover:text-white dark:hover:bg-eduplay-purple dark:hover:text-white transition-all duration-300 shadow-sm"
               title="Change Language"
             >
-              <Languages className="w-4 h-4 text-eduplay-purple" />
-              {lang === 'bn' ? 'EN' : 'বাং'}
+              <Languages className="w-4 h-4 text-eduplay-purple dark:text-purple-400" />
+              <span>{lang === 'bn' ? 'EN' : 'বাং'}</span>
             </button>
 
             {/* Dark Mode */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all shadow-inner"
+              className="flex items-center justify-center w-11 h-11 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-purple-200/50 dark:border-purple-800/30 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 shadow-sm"
               title="Toggle Dark Mode"
             >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDark ? <Sun className="w-5 h-5 text-yellow-500 animate-pulse" /> : <Moon className="w-5 h-5 text-indigo-500" />}
             </button>
 
             <div className="pl-2 border-l border-gray-200 dark:border-slate-700">
@@ -218,7 +218,7 @@ const Header = () => {
 
           {/* Mobile Menu Toggle */}
           <button
-            className="lg:hidden p-2 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition"
+            className="lg:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition active:scale-95"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="w-6 h-6 text-eduplay-purple" /> : <Menu className="w-6 h-6 text-eduplay-purple" />}
@@ -261,11 +261,18 @@ const Header = () => {
               <div className="pt-4 mt-2 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between px-2">
                 <NotificationBell />
                 <div className="flex gap-2">
-                  <button onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')} className="flex items-center gap-1 px-4 py-2 rounded-xl bg-gray-100 dark:bg-slate-800 font-bold text-sm">
-                    <Languages className="w-4 h-4 text-eduplay-purple" /> {lang === 'bn' ? 'EN' : 'বাং'}
+                  <button 
+                    onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')} 
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 dark:bg-slate-800 font-bold text-sm text-slate-700 dark:text-slate-200 active:scale-95 transition-all"
+                  >
+                    <Languages className="w-4 h-4 text-eduplay-purple dark:text-purple-400" /> 
+                    <span>{lang === 'bn' ? 'EN' : 'বাং'}</span>
                   </button>
-                  <button onClick={toggleTheme} className="p-2 rounded-xl bg-gray-100 dark:bg-slate-800 text-yellow-500">
-                    {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  <button 
+                    onClick={toggleTheme} 
+                    className="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-slate-800 text-yellow-500 active:scale-95 transition-all"
+                  >
+                    {isDark ? <Sun className="w-5 h-5 text-yellow-500 animate-pulse" /> : <Moon className="w-5 h-5 text-indigo-400" />}
                   </button>
                 </div>
               </div>
