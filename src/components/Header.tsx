@@ -29,7 +29,12 @@ const Header = () => {
   }, []);
 
   const standards = [
-    'Nursery', '1st Standard', '2nd Standard', '3rd Standard', '4th Standard', '5th Standard'
+    { value: 'Nursery', label: t.nurseryStandard },
+    { value: '1st',     label: t.class1Standard },
+    { value: '2nd',     label: t.class2Standard },
+    { value: '3rd',     label: t.class3Standard },
+    { value: '4th',     label: t.class4Standard },
+    { value: '5th',     label: t.class5Standard },
   ];
 
   const isActive = (href: string) => {
@@ -58,9 +63,9 @@ const Header = () => {
 
 
 
-  const handleStandardSelect = (standard: string) => {
-    if (standard === 'Nursery') handleSubjectsClick();
-    else navigate(`/class/${standard.split(' ')[0]}`);
+  const handleStandardSelect = (val: string) => {
+    if (val === 'Nursery') handleSubjectsClick();
+    else navigate(`/class/${val}`);
   };
 
   const NavItemStyles = (active: boolean) =>
@@ -116,13 +121,13 @@ const Header = () => {
               <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900 border-2 border-eduplay-green/20 rounded-xl p-2 shadow-xl">
                 <div className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">{t.subjects}</div>
                 <DropdownMenuItem onClick={() => handleSubjectsClick()} className="cursor-pointer rounded-lg hover:bg-eduplay-green/10 text-base font-semibold py-2">
-                  <BookOpen className="w-5 h-5 mr-3 text-eduplay-green" /> All Subjects
+                  <BookOpen className="w-5 h-5 mr-3 text-eduplay-green" /> {t.allSubjects}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/video-lessons')} className="cursor-pointer rounded-lg hover:bg-eduplay-red/10 text-base font-semibold py-2">
-                  <Play className="w-5 h-5 mr-3 text-red-500" /> Video Lessons
+                  <Play className="w-5 h-5 mr-3 text-red-500" /> {t.videoLessons}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/assignments')} className="cursor-pointer rounded-lg hover:bg-eduplay-orange/10 text-base font-semibold py-2">
-                  <FileText className="w-5 h-5 mr-3 text-orange-500" /> Assignments
+                  <FileText className="w-5 h-5 mr-3 text-orange-500" /> {t.assignments}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/writing-wizard')} className="cursor-pointer rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/10 text-base font-semibold py-2">
                   <span className="text-base mr-3">✏️</span> {lang === 'bn' ? 'বর্ণমালা জাদুকর' : 'Writing Wizard'}
@@ -130,8 +135,8 @@ const Header = () => {
                 <div className="my-1 border-t border-gray-100 dark:border-slate-800"></div>
                 <div className="px-2 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider">{t.classes}</div>
                 {standards.map((s) => (
-                  <DropdownMenuItem key={s} onClick={() => handleStandardSelect(s)} className="cursor-pointer rounded-lg hover:bg-eduplay-purple/10 text-base font-medium py-2">
-                    <GraduationCap className="w-4 h-4 mr-3 text-eduplay-purple opacity-70" /> {s}
+                  <DropdownMenuItem key={s.value} onClick={() => handleStandardSelect(s.value)} className="cursor-pointer rounded-lg hover:bg-eduplay-purple/10 text-base font-medium py-2">
+                    <GraduationCap className="w-4 h-4 mr-3 text-eduplay-purple opacity-70" /> {s.label}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -146,7 +151,7 @@ const Header = () => {
             {/* Story Mode */}
             <Link to="/story-mode" className={NavItemStyles(isActive("/story-mode"))}>
               <Map className="w-5 h-5 text-emerald-500" />
-              <span>Story Mode</span>
+              <span>{t.storyMode}</span>
             </Link>
 
             {/* Progress Dropdown */}
@@ -170,7 +175,7 @@ const Header = () => {
                 </DropdownMenuItem>
                 <div className="my-1 border-t border-gray-100 dark:border-slate-800"></div>
                 <DropdownMenuItem onClick={() => navigate('/timetable')} className="cursor-pointer rounded-lg hover:bg-yellow-500/10 text-base font-semibold py-2">
-                  <Clock className="w-5 h-5 mr-3 text-eduplay-blue" /> Timetable
+                  <Clock className="w-5 h-5 mr-3 text-eduplay-blue" /> {t.timetable}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/attendance')} className="cursor-pointer rounded-lg hover:bg-yellow-500/10 text-base font-semibold py-2">
                   <Calendar className="w-5 h-5 mr-3 text-eduplay-orange" /> {t.attendance}
@@ -232,19 +237,19 @@ const Header = () => {
         {isMenuOpen && (
           <div className="lg:hidden mt-4 p-4 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border-2 border-eduplay-purple/10 animate-scale-in">
               <div className="pt-2">
-                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">School Tools</p>
+                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{t.schoolTools}</p>
                 <div className="grid grid-cols-2 gap-2 px-2">
                   <Link to="/timetable" onClick={() => setIsMenuOpen(false)} className="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-eduplay-blue">
-                    <Clock className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">Timetable</span>
+                    <Clock className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">{t.timetable}</span>
                   </Link>
                   <Link to="/assignments" onClick={() => setIsMenuOpen(false)} className="flex flex-col items-center justify-center p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 text-orange-500">
-                    <FileText className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">Assignments</span>
+                    <FileText className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">{t.assignments}</span>
                   </Link>
                   <Link to="/video-lessons" onClick={() => setIsMenuOpen(false)} className="flex flex-col items-center justify-center p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 text-red-500">
-                    <Play className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">Lessons</span>
+                    <Play className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">{t.lessons}</span>
                   </Link>
                   <Link to="/leaderboard" onClick={() => setIsMenuOpen(false)} className="flex flex-col items-center justify-center p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 text-yellow-600">
-                    <Trophy className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">Leaderboard</span>
+                    <Trophy className="w-6 h-6 mb-1" /> <span className="text-xs font-bold">{t.leaderboard}</span>
                   </Link>
                   <Link to="/writing-wizard" onClick={() => setIsMenuOpen(false)} className="col-span-2 flex items-center justify-center p-3.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 text-amber-600 font-bold active:scale-98 transition-transform">
                     <span className="text-lg mr-2">✏️</span> <span className="text-sm">{lang === 'bn' ? 'বর্ণমালা জাদুকর' : 'Writing Wizard'}</span>
@@ -253,11 +258,11 @@ const Header = () => {
               </div>
 
               <div className="pt-4 mt-2">
-                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">My Classes</p>
+                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{t.myClasses}</p>
                 <div className="px-2 space-y-1">
                   {standards.slice(0, 4).map(s => (
-                    <button key={s} onClick={() => { handleStandardSelect(s); setIsMenuOpen(false); }} className="w-full flex items-center p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 text-sm font-bold text-gray-700 dark:text-gray-300">
-                      <GraduationCap className="w-5 h-5 mr-3 text-eduplay-purple opacity-70" /> {s}
+                    <button key={s.value} onClick={() => { handleStandardSelect(s.value); setIsMenuOpen(false); }} className="w-full flex items-center p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 text-sm font-bold text-gray-700 dark:text-gray-300">
+                      <GraduationCap className="w-5 h-5 mr-3 text-eduplay-purple opacity-70" /> {s.label}
                     </button>
                   ))}
                 </div>

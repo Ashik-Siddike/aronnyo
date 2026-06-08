@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLang } from '@/contexts/LangContext';
 
 interface TourStep {
   title: string;
@@ -10,46 +11,47 @@ interface TourStep {
   targetId?: string;
 }
 
-const tourSteps: TourStep[] = [
-  {
-    emoji: '🎉',
-    title: 'Play Learn Grow-এ স্বাগতম!',
-    description: 'এই সংক্ষিপ্ত ট্যুরে আমরা অ্যাপটির সেরা ফিচারগুলো দেখাবো।',
-  },
-  {
-    emoji: '📚',
-    title: 'ক্লাস বেছে নাও',
-    description: 'তোমার শ্রেণি সিলেক্ট করো এবং সেই অনুযায়ী পাঠ্যক্রম দেখো।',
-    targetId: 'class-selector',
-  },
-  {
-    emoji: '🎮',
-    title: 'মজার গেমস খেলো',
-    description: 'গণিত, বিজ্ঞান, ভাষা — সব বিষয়ের মজাদার গেম এখানে! খেলে খেলে শেখো!',
-    targetId: 'games-section',
-  },
-  {
-    emoji: '📊',
-    title: 'প্রগ্রেস ট্র্যাক করো',
-    description: 'পয়েন্ট আয় করো, স্ট্রিক বাড়াও এবং Leaderboard-এ শীর্ষে উঠো!',
-  },
-  {
-    emoji: '🏆',
-    title: 'সার্টিফিকেট পাও',
-    description: 'কোর্স সম্পন্ন করলে তোমার নামে সুন্দর সার্টিফিকেট পাবে!',
-  },
-  {
-    emoji: '🚀',
-    title: 'শুরু করো!',
-    description: 'এখন শেখা শুরু করো এবং প্রতিদিন নতুন কিছু আবিষ্কার করো!',
-  },
-];
-
 const OnboardingTour = () => {
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const { user } = useAuth();
+  const { t } = useLang();
+
+  const tourSteps: TourStep[] = [
+    {
+      emoji: '🎉',
+      title: t.tourWelcome,
+      description: t.tourWelcomeDesc,
+    },
+    {
+      emoji: '📚',
+      title: t.tourChooseClass,
+      description: t.tourChooseClassDesc,
+      targetId: 'class-selector',
+    },
+    {
+      emoji: '🎮',
+      title: t.tourPlayGames,
+      description: t.tourPlayGamesDesc,
+      targetId: 'games-section',
+    },
+    {
+      emoji: '📊',
+      title: t.tourTrackProgress,
+      description: t.tourTrackProgressDesc,
+    },
+    {
+      emoji: '🏆',
+      title: t.tourEarnCertificate,
+      description: t.tourEarnCertificateDesc,
+    },
+    {
+      emoji: '🚀',
+      title: t.tourStartTitle,
+      description: t.tourStartDesc,
+    },
+  ];
 
   useEffect(() => {
     if (!user) return;
@@ -202,7 +204,7 @@ const OnboardingTour = () => {
                       className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4" />
-                      পেছনে
+                      {t.tourBack}
                     </button>
                   )}
 
@@ -219,11 +221,11 @@ const OnboardingTour = () => {
                     {isLast ? (
                       <>
                         <Sparkles className="w-4 h-4" />
-                        শুরু করো!
+                        {t.tourStartTitle}
                       </>
                     ) : (
                       <>
-                        পরবর্তী
+                        {t.tourNext}
                         <ChevronRight className="w-4 h-4" />
                       </>
                     )}
@@ -236,7 +238,7 @@ const OnboardingTour = () => {
                     onClick={dismiss}
                     className="w-full mt-3 text-xs text-gray-400 hover:text-gray-500 transition-colors"
                   >
-                    বাদ দাও
+                    {t.tourSkip}
                   </button>
                 )}
               </div>

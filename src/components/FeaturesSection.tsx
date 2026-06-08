@@ -2,59 +2,62 @@
 import { Trophy, Gamepad2, BarChart, Users, Volume2, Puzzle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
-
-const features = [
-  {
-    icon: Gamepad2,
-    title: 'Fun Games & Quizzes',
-    description: 'Learn through exciting games, puzzles, and interactive quizzes!',
-    color: 'from-eduplay-purple to-eduplay-blue',
-    bgColor: 'bg-eduplay-purple/10',
-    emoji: '🎮'
-  },
-  {
-    icon: Trophy,
-    title: 'Rewards & Badges',
-    description: 'Earn stars, badges, and trophies as you complete lessons!',
-    color: 'from-eduplay-orange to-eduplay-yellow',
-    bgColor: 'bg-eduplay-orange/10',
-    emoji: '🏆'
-  },
-  {
-    icon: BarChart,
-    title: 'Track Progress',
-    description: 'See how much you\'ve learned with colorful progress charts!',
-    color: 'from-eduplay-green to-eduplay-blue',
-    bgColor: 'bg-eduplay-green/10',
-    emoji: '📊'
-  },
-  {
-    icon: Volume2,
-    title: 'Audio Narration',
-    description: 'Listen to friendly voices read lessons and instructions!',
-    color: 'from-eduplay-pink to-eduplay-purple',
-    bgColor: 'bg-eduplay-pink/10',
-    emoji: '🔊'
-  },
-  {
-    icon: Puzzle,
-    title: 'Interactive Activities',
-    description: 'Drag-and-drop, match games, and hands-on learning!',
-    color: 'from-eduplay-blue to-eduplay-green',
-    bgColor: 'bg-eduplay-blue/10',
-    emoji: '🧩'
-  },
-  {
-    icon: Users,
-    title: 'Parent Dashboard',
-    description: 'Parents can track progress and celebrate achievements!',
-    color: 'from-eduplay-orange to-eduplay-pink',
-    bgColor: 'bg-eduplay-orange/10',
-    emoji: '👨‍👩‍👧‍👦'
-  }
-];
+import { useLang } from '@/contexts/LangContext';
 
 const FeaturesSection = () => {
+  const { t } = useLang();
+
+  const features = [
+    {
+      icon: Gamepad2,
+      title: t.featureGamesTitle,
+      description: t.featureGamesDesc,
+      color: 'from-eduplay-purple to-eduplay-blue',
+      bgColor: 'bg-eduplay-purple/10',
+      emoji: '🎮'
+    },
+    {
+      icon: Trophy,
+      title: t.featureRewardsTitle,
+      description: t.featureRewardsDesc,
+      color: 'from-eduplay-orange to-eduplay-yellow',
+      bgColor: 'bg-eduplay-orange/10',
+      emoji: '🏆'
+    },
+    {
+      icon: BarChart,
+      title: t.featureTrackTitle,
+      description: t.featureTrackDesc,
+      color: 'from-eduplay-green to-eduplay-blue',
+      bgColor: 'bg-eduplay-green/10',
+      emoji: '📊'
+    },
+    {
+      icon: Volume2,
+      title: t.featureAudioTitle,
+      description: t.featureAudioDesc,
+      color: 'from-eduplay-pink to-eduplay-purple',
+      bgColor: 'bg-eduplay-pink/10',
+      emoji: '🔊'
+    },
+    {
+      icon: Puzzle,
+      title: t.featureActivitiesTitle,
+      description: t.featureActivitiesDesc,
+      color: 'from-eduplay-blue to-eduplay-green',
+      bgColor: 'bg-eduplay-blue/10',
+      emoji: '🧩'
+    },
+    {
+      icon: Users,
+      title: t.featureParentTitle,
+      description: t.featureParentDesc,
+      color: 'from-eduplay-orange to-eduplay-pink',
+      bgColor: 'bg-eduplay-orange/10',
+      emoji: '👨‍👩‍👧‍👦'
+    }
+  ];
+
   return (
     <section className="py-12 lg:py-16 bg-gradient-to-br from-white via-purple-50/30 to-blue-50/30">
       <div className="container mx-auto px-4">
@@ -68,12 +71,11 @@ const FeaturesSection = () => {
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight">
             <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
-              Why Kids Love 247School!
+              {t.whyKidsLoveTitle}
             </span>
           </h2>
           <p className="text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto font-medium">
-            We've designed every feature to make learning feel like playing!
-            Here's what makes 247School special 🌈
+            {t.whyKidsLoveDesc}
           </p>
         </motion.div>
 
@@ -124,17 +126,17 @@ const FeaturesSection = () => {
             <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }} className="text-7xl lg:text-8xl mb-6 relative z-10 drop-shadow-lg">🎉</motion.div>
             <h3 className="text-3xl md:text-5xl font-extrabold mb-6 relative z-10">
               <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Did you know?
+                {t.didYouKnow}
               </span>
             </h3>
             <p className="text-xl lg:text-2xl text-gray-700 mb-10 font-medium leading-relaxed max-w-3xl mx-auto relative z-10">
-              Kids who use 247School spend <span className="font-bold text-purple-600">3x more time</span> learning and remember <span className="font-bold text-green-600">85% more information</span> compared to traditional methods! That's the power of fun learning! 🚀
+              {t.didYouKnowDesc}
             </p>
             <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center relative z-10">
               {[
-                { val: '3x',   label: 'More Engagement', color: 'text-purple-600', border: 'border-purple-100' },
-                { val: '85%',  label: 'Better Retention', color: 'text-green-600',  border: 'border-green-100'  },
-                { val: '100%', label: 'Fun Guaranteed',   color: 'text-orange-500', border: 'border-orange-100' },
+                { val: '3x',   label: t.moreEngagement, color: 'text-purple-600', border: 'border-purple-100' },
+                { val: '85%',  label: t.betterRetention, color: 'text-green-600',  border: 'border-green-100'  },
+                { val: '100%', label: t.funGuaranteed,   color: 'text-orange-500', border: 'border-orange-100' },
               ].map(({ val, label, color, border }) => (
                 <motion.div key={val} whileHover={{ scale: 1.08 }} className={`bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-6 shadow-md border ${border} cursor-pointer`}>
                   <div className={`text-2xl sm:text-5xl font-extrabold ${color} mb-1`}>{val}</div>

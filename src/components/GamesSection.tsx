@@ -61,7 +61,7 @@ const GamesSection = () => {
                   {/* NEW badge */}
                   {game.isNew && (
                     <span className="absolute top-2 right-2 z-10 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                      NEW
+                      {t.new}
                     </span>
                   )}
 
@@ -108,9 +108,9 @@ const GamesSection = () => {
           className="grid grid-cols-3 gap-3 sm:gap-6"
         >
           {[
-            { value: `${games.length}`, label: 'ইন্টারঅ্যাক্টিভ গেম', color: 'from-blue-500 to-purple-600', bg: 'from-blue-50 to-purple-50' },
-            { value: '5+',             label: 'শিক্ষামূলক বিষয়',   color: 'from-green-500 to-teal-600',  bg: 'from-green-50 to-teal-50'  },
-            { value: '100%',           label: 'মজা গ্যারান্টি',     color: 'from-orange-500 to-pink-600', bg: 'from-orange-50 to-pink-50' },
+            { value: `${games.length}`, label: t.interactiveGames, color: 'from-blue-500 to-purple-600', bg: 'from-blue-50 to-purple-50' },
+            { value: '5+',             label: t.educationalSubjects,   color: 'from-green-500 to-teal-600',  bg: 'from-green-50 to-teal-50'  },
+            { value: '100%',           label: t.funGuaranteed,     color: 'from-orange-500 to-pink-600', bg: 'from-orange-50 to-pink-50' },
           ].map(({ value, label, color, bg }) => (
             <motion.div key={label} whileHover={{ y: -4 }} transition={{ type: 'spring', bounce: 0.4 }}>
               <div className={`bg-gradient-to-br ${bg} rounded-2xl p-4 sm:p-6 text-center shadow-md`}>

@@ -5,12 +5,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trophy, Star, CheckCircle2, Target, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLang } from '@/contexts/LangContext';
 
 export default function DailyChallenge() {
   const { user } = useAuth();
   const [challengeData, setChallengeData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
+  const { t, isBn } = useLang();
+
+  const formatNumber = (num: number | string) => {
+    if (!isBn) return num;
+    const digits: Record<string, string> = {
+      '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪',
+      '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯'
+    };
+    return String(num).split('').map(char => digits[char] || char).join('');
+  };
 
   const fetchChallenge = async () => {
     try {
@@ -36,12 +47,12 @@ export default function DailyChallenge() {
       setCompleting(true);
       const res = await dailyChallengeApi.complete(user.id, challengeData.challenge.id, challengeData.challenge.rewardStars);
       if (res.success) {
-        toast.success(`অসাধারণ! তুমি ${res.rewardStars} স্টার জিতেছ! 🌟`);
+        toast.success(t.toastChallengeComplete.replace('{stars}', formatNumber(res.rewardStars).toString()));
         // Refresh to show completed state
         fetchChallenge();
       }
     } catch (err) {
-      toast.error('দুঃখিত, কিছু সমস্যা হয়েছে।');
+      toast.error(t.toastChallengeError);
     } finally {
       setCompleting(false);
     }
@@ -77,8 +88,8 @@ export default function DailyChallenge() {
             
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Daily Challenge</span>
-                {!isCompleted && <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">NEW</span>}
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">{t.dailyChallenge}</span>
+                {!isCompleted && <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">{t.new}</span>}
               </div>
               <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1">{challenge.title}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">{challenge.description}</p>
@@ -88,11 +99,11 @@ export default function DailyChallenge() {
           <div className="flex flex-col items-center justify-center bg-white/60 dark:bg-slate-900/60 p-4 rounded-xl backdrop-blur-sm min-w-[120px]">
             <div className="flex items-center gap-1 font-bold text-lg mb-2">
               <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-              <span>+{challenge.rewardStars}</span>
+              <span>+{formatNumber(challenge.rewardStars)}</span>
             </div>
             {isCompleted ? (
               <Badge className="bg-green-500 hover:bg-green-600 text-white border-0 w-full justify-center py-1">
-                সম্পন্ন! 🎉
+                {t.completed}! 🎉
               </Badge>
             ) : (
               <Button 
@@ -100,7 +111,7 @@ export default function DailyChallenge() {
                 disabled={completing}
                 className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md hover:shadow-lg transition-all hover:scale-105"
               >
-                {completing ? 'অপেক্ষা...' : 'শুরু করো'}
+                {completing ? t.waiting : t.start}
               </Button>
             )}
           </div>

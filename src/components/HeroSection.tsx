@@ -189,7 +189,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                       className="w-full bg-gradient-to-r from-eduplay-green to-eduplay-blue hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs py-2 px-2 rounded-lg"
                     >
                       <span className="text-sm mr-1">🔢</span>
-                      Counting
+                      {t.countingGame}
                     </Button>
 
                     <Button
@@ -198,7 +198,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                       className="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs py-2 px-2 rounded-lg"
                     >
                       <span className="text-sm mr-1">➕</span>
-                      Addition
+                      {t.additionGame}
                     </Button>
                   </div>
 
@@ -209,7 +209,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                       className="w-full bg-gradient-to-r from-orange-400 to-red-500 hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs py-2 px-2 rounded-lg"
                     >
                       <span className="text-sm mr-1">➖</span>
-                      Subtraction
+                      {t.subtractionGame}
                     </Button>
 
                     <Button
@@ -218,7 +218,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                       className="w-full bg-gradient-to-r from-purple-400 to-pink-500 hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs py-2 px-2 rounded-lg"
                     >
                       <span className="text-sm mr-1">✖️</span>
-                      Multiplication
+                      {t.multiplicationGame}
                     </Button>
                   </div>
 
@@ -229,7 +229,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                       className="w-full bg-gradient-to-r from-pink-400 to-purple-500 hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs py-2 px-2 rounded-lg"
                     >
                       <span className="text-sm mr-1">🎴</span>
-                      Memory Match
+                      {t.memoryMatch}
                     </Button>
 
                     <Button
@@ -238,7 +238,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                       className="w-full bg-gradient-to-r from-green-500 to-teal-500 hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs py-2 px-2 rounded-lg"
                     >
                       <span className="text-sm mr-1">🌱</span>
-                      Plant Explorer
+                      {t.plantExplorer}
                     </Button>
                   </div>
 
@@ -249,7 +249,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                       className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs py-2 px-2 rounded-lg"
                     >
                       <span className="text-sm mr-1">🦁</span>
-                      Animal Quiz
+                      {t.animalQuiz}
                     </Button>
 
                     <Button
@@ -258,7 +258,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                       className="w-full bg-gradient-to-r from-blue-400 to-indigo-500 hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs py-2 px-2 rounded-lg"
                     >
                       <span className="text-sm mr-1">✨</span>
-                      Spelling Wizard
+                      {t.spellingWizard}
                     </Button>
                   </div>
                 </div>
@@ -272,7 +272,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                   <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }}>
                     <Heart className="w-4 lg:w-5 h-4 lg:h-5 text-red-500 fill-red-500" />
                   </motion.div>
-                  <span className="font-bold text-gray-800 text-xs lg:text-sm">Made with Love</span>
+                  <span className="font-bold text-gray-800 text-xs lg:text-sm">{t.madeWithLove}</span>
                 </motion.div>
               </div>
             </div>

@@ -1,18 +1,19 @@
-
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, Sparkles, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const standards = [
-  { value: '1st', label: '১ম',  age: '৬-৭ বছর',   gradient: 'from-red-400 to-pink-500',     shadow: 'shadow-red-300/50',    emoji: '🌟' },
-  { value: '2nd', label: '২য়',  age: '৭-৮ বছর',   gradient: 'from-orange-400 to-yellow-500', shadow: 'shadow-orange-300/50', emoji: '🎨' },
-  { value: '3rd', label: '৩য়',  age: '৮-৯ বছর',   gradient: 'from-yellow-400 to-amber-500',  shadow: 'shadow-yellow-300/50', emoji: '🚀' },
-  { value: '4th', label: '৪র্থ', age: '৯-১০ বছর',  gradient: 'from-green-400 to-emerald-500', shadow: 'shadow-green-300/50',  emoji: '📚' },
-  { value: '5th', label: '৫ম',  age: '১০-১১ বছর', gradient: 'from-blue-400 to-indigo-500',   shadow: 'shadow-blue-300/50',   emoji: '🔬' },
-];
+import { useLang } from '@/contexts/LangContext';
 
 const ClassSelector = () => {
   const navigate = useNavigate();
+  const { t, isBn } = useLang();
+
+  const standards = [
+    { value: '1st', label: t.firstGrade,  age: isBn ? '৬-৭ বছর' : '6-7 Years',   gradient: 'from-red-400 to-pink-500',     shadow: 'shadow-red-300/50',    emoji: '🌟' },
+    { value: '2nd', label: t.secondGrade,  age: isBn ? '৭-৮ বছর' : '7-8 Years',   gradient: 'from-orange-400 to-yellow-500', shadow: 'shadow-orange-300/50', emoji: '🎨' },
+    { value: '3rd', label: t.thirdGrade,  age: isBn ? '৮-৯ বছর' : '8-9 Years',   gradient: 'from-yellow-400 to-amber-500',  shadow: 'shadow-yellow-300/50', emoji: '🚀' },
+    { value: '4th', label: t.fourthGrade, age: isBn ? '৯-১০ বছর' : '9-10 Years',  gradient: 'from-green-400 to-emerald-500', shadow: 'shadow-green-300/50',  emoji: '📚' },
+    { value: '5th', label: t.fifthGrade,  age: isBn ? '১০-১১ বছর' : '10-11 Years', gradient: 'from-blue-400 to-indigo-500',   shadow: 'shadow-blue-300/50',   emoji: '🔬' },
+  ];
 
   const handleGradeSelect = (gradeValue: string) => {
     navigate(`/class/${gradeValue}`);
@@ -40,19 +41,18 @@ const ClassSelector = () => {
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-blue-100 px-4 py-2 rounded-full mb-4 border border-purple-200 shadow-sm">
             <Sparkles className="w-4 h-4 text-purple-600 animate-pulse" />
             <span className="text-purple-700 font-bold text-xs sm:text-sm uppercase tracking-wider">
-              Start Your Learning Adventure
+              {t.startYourAdventure}
             </span>
             <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" />
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-6xl font-extrabold text-gray-800 mb-3 leading-tight">
-            তোমার{' '}
             <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
-              শ্রেণি বেছে নাও
+              {t.chooseClass}
             </span>
           </h2>
           <p className="text-base sm:text-lg text-gray-500 max-w-xl mx-auto font-medium">
-            তোমার ক্লাস সিলেক্ট করো — তোমার জন্য তৈরি পাঠ্যক্রম পাবে! 🌟
+            {t.classSubtitle}
           </p>
         </motion.div>
 
@@ -78,7 +78,7 @@ const ClassSelector = () => {
                 </div>
               </div>
               <div className="mt-2.5 text-center">
-                <div className="font-extrabold text-gray-800 text-sm">Grade {standard.label}</div>
+                <div className="font-extrabold text-gray-800 text-sm">{standard.label}</div>
                 <div className="text-xs text-gray-500">{standard.age}</div>
               </div>
             </motion.button>
@@ -107,7 +107,7 @@ const ClassSelector = () => {
                 </div>
               </div>
               <div className="text-center">
-                <div className="font-extrabold text-gray-800 text-lg">Grade {standard.label}</div>
+                <div className="font-extrabold text-gray-800 text-lg">{standard.label}</div>
                 <div className="text-sm text-gray-500">{standard.age}</div>
               </div>
             </motion.button>
@@ -134,20 +134,19 @@ const ClassSelector = () => {
             </motion.div>
 
             <h3 className="text-xl sm:text-3xl lg:text-5xl font-extrabold text-gray-800 mb-3 leading-tight">
-              শেখার যাত্রা শুরু করতে{' '}
               <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent">
-                প্রস্তুত?
+                {t.readyToStart}
               </span>
             </h3>
             <p className="text-sm sm:text-lg text-gray-500 mb-6 max-w-xl mx-auto">
-              উপরে যেকোনো ক্লাস বেছে নাও এবং তোমার পাঠ্যক্রম দেখো! 🎯
+              {t.selectClassAbove}
             </p>
 
             <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
               {[
-                { icon: '✨', label: 'ইন্টারঅ্যাক্টিভ' },
-                { icon: '🎮', label: 'মজাদার' },
-                { icon: '📈', label: 'প্রগ্রেস' },
+                { icon: '✨', label: t.interactive },
+                { icon: '🎮', label: t.gamified },
+                { icon: '📈', label: t.progress },
               ].map(({ icon, label }) => (
                 <div key={label} className="flex flex-col items-center gap-1.5 bg-white/70 p-3 rounded-2xl shadow-sm">
                   <span className="text-2xl">{icon}</span>

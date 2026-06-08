@@ -139,7 +139,7 @@ const SubjectsSection = () => {
             onClick={() => navigate('/dashboard')}
             className="bg-white/80 backdrop-blur-md border-2 border-eduplay-purple text-eduplay-purple hover:bg-eduplay-purple hover:text-white text-lg lg:text-xl px-10 py-6 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-xl font-bold"
           >
-            View Progress Dashboard
+            {t.viewProgressDashboard}
             <ArrowRight className="w-6 h-6 ml-3" />
           </Button>
         </motion.div>

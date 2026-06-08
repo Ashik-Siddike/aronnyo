@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Download, X, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
+import { useLang } from '@/contexts/LangContext';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -12,6 +13,7 @@ const PWAInstallBanner = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [installed, setInstalled] = useState(false);
+  const { t } = useLang();
 
   useEffect(() => {
     // Check if already installed
@@ -91,10 +93,10 @@ const PWAInstallBanner = () => {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-bold text-gray-900 dark:text-white text-sm">
-                        অ্যাপ ইন্সটল করুন!
+                        {t.installApp}
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        247School আপনার ডিভাইসে অ্যাপ হিসেবে ব্যবহার করুন
+                        {t.pwaDesc}
                       </p>
                     </div>
                     <button
@@ -112,13 +114,13 @@ const PWAInstallBanner = () => {
                       className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs px-4 rounded-xl h-8 font-bold shadow-md flex-1"
                     >
                       <Download className="w-3.5 h-3.5 mr-1.5" />
-                      ইন্সটল করুন
+                      {t.install}
                     </Button>
                     <button
                       onClick={handleDismiss}
                       className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 px-2"
                     >
-                      পরে
+                      {t.later}
                     </button>
                   </div>
                 </div>
@@ -127,9 +129,9 @@ const PWAInstallBanner = () => {
               {/* Features row */}
               <div className="flex gap-3 mt-3 pt-3 border-t border-gray-100 dark:border-slate-800">
                 {[
-                  { emoji: '⚡', label: 'দ্রুত' },
-                  { emoji: '📴', label: 'অফলাইন' },
-                  { emoji: '🔔', label: 'নোটিফিকেশন' },
+                  { emoji: '⚡', label: t.fast },
+                  { emoji: '📴', label: t.offline },
+                  { emoji: '🔔', label: t.notifications },
                 ].map(({ emoji, label }) => (
                   <div key={label} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                     <span>{emoji}</span>
