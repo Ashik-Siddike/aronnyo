@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 const teamMembers = [
   {
     id: 1,
-    name: "Ashik Siddike",
+    name: "MD Ashik Siddike",
     position: "Founder & Lead Developer",
-    bio: "Full-stack developer and visionary behind 247School. Built the entire platform architecture, MongoDB database, and API infrastructure. Passionate about using technology to make education accessible, interactive, and joyful for every child in Bangladesh.",
+    bio: "Full-stack developer and visionary behind 247School. Built the entire platform architecture, MongoDB database, API infrastructure, and AI integration. Passionate about using technology to make education accessible, interactive, and joyful for every child in Bangladesh.",
+    image: "/assets/me- md ashik siddike .jpg",
     avatar: "👨‍💻",
     color: "from-eduplay-blue to-eduplay-purple",
     skills: ["React", "Node.js", "MongoDB", "TypeScript", "System Architecture"],
@@ -17,13 +18,25 @@ const teamMembers = [
   },
   {
     id: 2,
-    name: "Aronnyo (Virifat)",
-    position: "Co-Founder & UI/UX Specialist",
-    bio: "Creative developer focused on building engaging, interactive learning experiences. Designed the beautiful UI, gamified lesson system, and kid-friendly dashboards that make learning fun for young minds.",
+    name: "SK Asaduzzaman",
+    position: "UI/UX Designer",
+    bio: "Creative frontend designer who crafted the beautiful, modern, and child-friendly layout of 247School. Focused on building responsive components, glassmorphism aesthetics, and delightful micro-interactions.",
+    image: "/assets/SK Asaduzzaman.jpeg",
     avatar: "🎨",
+    color: "from-pink-500 to-rose-500",
+    skills: ["UI/UX Design", "Tailwind CSS", "Figma Design", "Responsive Layouts", "Frontend Design"],
+    email: "asaduzzaman@example.com"
+  },
+  {
+    id: 3,
+    name: "Turna Paul",
+    position: "Educational Trainer",
+    bio: "Pedagogical expert who guided the development of lesson plans. Focused on EYFS and Key Stage 1 curriculum alignment, conducted real-world classroom pilot testing in kindergartens, and managed student feedback.",
+    image: "/assets/turna paul.jpeg",
+    avatar: "🏫",
     color: "from-eduplay-green to-teal-500",
-    skills: ["JavaScript", "UI/UX Design", "Gamification", "Frontend Development"],
-    email: "virifat01@gmail.com"
+    skills: ["Curriculum Design", "Early Childhood Education", "User Testing", "Trainer", "Feedback Analysis"],
+    email: "turna@example.com"
   }
 ];
 
@@ -57,12 +70,12 @@ const Teams = () => {
             Meet Our <span className="bg-gradient-to-r from-eduplay-purple to-eduplay-blue bg-clip-text text-transparent">Amazing Team</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto animate-fade-in delay-150">
-            Two passionate developers on a mission to revolutionize how children in Bangladesh learn — making education fun, interactive, and accessible to all. 🇧🇩
+            A passionate team on a mission to revolutionize how children in Bangladesh learn — making education fun, interactive, and accessible to all. 🇧🇩
           </p>
         </div>
 
         {/* Team Members */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-20">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20">
           {teamMembers.map((member, index) => (
             <Card
               key={member.id}
@@ -70,19 +83,27 @@ const Teams = () => {
               style={{ animationDelay: `${index * 200}ms` }}
             >
               {/* Gradient Header */}
-              <div className={`bg-gradient-to-r ${member.color} p-8 text-center`}>
-                <div className="text-6xl mb-3 animate-bounce-gentle">{member.avatar}</div>
+              <div className={`bg-gradient-to-r ${member.color} p-8 text-center flex flex-col items-center justify-center`}>
+                {member.image ? (
+                  <img 
+                    src={member.image} 
+                    alt={member.name} 
+                    className="w-28 h-28 rounded-full mb-3 object-cover border-4 border-white/80 shadow-lg hover:scale-105 transition-transform duration-300 bg-white"
+                  />
+                ) : (
+                  <div className="text-6xl mb-3 animate-bounce-gentle">{member.avatar}</div>
+                )}
                 <h2 className="text-2xl font-bold text-white mb-1">{member.name}</h2>
                 <p className="text-white/90 font-medium">{member.position}</p>
               </div>
               
               <CardContent className="p-6">
-                <p className="text-gray-600 text-center mb-6 leading-relaxed">
+                <p className="text-gray-600 text-center mb-6 leading-relaxed min-h-[100px]">
                   {member.bio}
                 </p>
                 
                 {/* Skills */}
-                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                <div className="flex flex-wrap justify-center gap-2 mb-6 min-h-[80px] items-center">
                   {member.skills.map((skill, i) => (
                     <span key={i} className="px-3 py-1 bg-gradient-to-r from-eduplay-purple/10 to-eduplay-blue/10 text-eduplay-purple text-sm font-medium rounded-full border border-eduplay-purple/20">
                       {skill}
