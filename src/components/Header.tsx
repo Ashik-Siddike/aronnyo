@@ -191,6 +191,12 @@ const Header = () => {
               <Users className="w-5 h-5 text-eduplay-blue" />
               <span>{t.parentPanel}</span>
             </Link>
+
+            {/* Teams */}
+            <Link to="/teams" className={NavItemStyles(isActive("/teams"))}>
+              <Users className="w-5 h-5 text-eduplay-purple" />
+              <span>{t.teams}</span>
+            </Link>
           </nav>
 
           {/* 3. Right Actions */}
@@ -265,6 +271,18 @@ const Header = () => {
                       <GraduationCap className="w-5 h-5 mr-3 text-eduplay-purple opacity-70" /> {s.label}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              <div className="pt-4 mt-2 border-t border-gray-100 dark:border-slate-800">
+                <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Links</p>
+                <div className="px-2 space-y-1">
+                  <Link to="/parent" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 text-sm font-bold text-gray-700 dark:text-gray-300">
+                    <Users className="w-5 h-5 mr-3 text-eduplay-blue opacity-70" /> {t.parentPanel}
+                  </Link>
+                  <Link to="/teams" onClick={() => setIsMenuOpen(false)} className="w-full flex items-center p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 text-sm font-bold text-gray-700 dark:text-gray-300">
+                    <Users className="w-5 h-5 mr-3 text-eduplay-purple opacity-70" /> {t.teams}
+                  </Link>
                 </div>
               </div>
 
