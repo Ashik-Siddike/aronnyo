@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLang } from '@/contexts/LangContext';
 import { staticContents, mockDelay } from '@/data/staticData';
 import confetti from 'canvas-confetti';
+import { contentsApi } from '@/services/api';
 
 const LessonDetail = () => {
   const { subject, id } = useParams();
@@ -40,11 +41,27 @@ const LessonDetail = () => {
       try {
         await mockDelay(200);
         
-        // Check if it's a UUID (from database) or numeric ID (from static lessons)
-        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        // Check if it's a database string ID or UUID (not just numeric static ID)
+        const isDbId = !/^\d+$/.test(String(id));
 
-        if (isUUID) {
-          // Find in static contents
+        if (isDbId) {
+          // 1. Try to fetch from MongoDB API
+          try {
+            const allContents = await contentsApi.getAll();
+            const content = allContents.find(c => String(c.id) === String(id));
+            if (content) {
+              setDbContent(content);
+              if (user && subject && content.title) {
+                trackLessonStart(subject.charAt(0).toUpperCase() + subject.slice(1), content.title);
+              }
+              setLoading(false);
+              return;
+            }
+          } catch (dbErr) {
+            console.error('Failed to fetch from MongoDB contents API:', dbErr);
+          }
+
+          // 2. Fallback to static contents
           const content = staticContents.find(c => c.id === id);
           if (content) {
             setDbContent(content);
@@ -220,7 +237,7 @@ const LessonDetail = () => {
       <div className="bg-gradient-to-r from-eduplay-blue to-eduplay-purple text-white py-4">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
-            <Link to={`/lessons/nursery-${subject}`}>
+            <Link to={`/lessons/${subject}`}>
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Lessons
@@ -276,6 +293,23 @@ const LessonDetail = () => {
                   </div>
                 )}
 
+                {dbContent.content_type?.toLowerCase() === 'text' && (
+                  <div className="bg-white rounded-xl p-6 border shadow-sm relative group">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleReadAloud(dbContent.pages?.text || dbContent.pages || dbContent.description || '')}
+                      className="absolute top-4 right-4 text-eduplay-blue hover:bg-blue-50 transition-colors"
+                      title="Read Aloud"
+                    >
+                      {isPlaying ? <Pause className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    </Button>
+                    <p className="text-gray-700 whitespace-pre-wrap text-lg leading-relaxed">
+                      {dbContent.pages?.text || dbContent.pages || dbContent.description}
+                    </p>
+                  </div>
+                )}
+
                 {dbContent.content_data?.pages && Array.isArray(dbContent.content_data.pages) && (
                   <div className="space-y-4">
                     {dbContent.content_data.pages.map((page: any, index: number) => (
@@ -319,7 +353,7 @@ const LessonDetail = () => {
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </Link>
-                  <Link to={`/lessons/nursery-${subject}`}>
+                  <Link to={`/lessons/${subject}`}>
                     <Button variant="outline" size="lg" className="text-lg px-8 py-3">
                       Back to Lessons
                     </Button>
@@ -435,7 +469,7 @@ const LessonDetail = () => {
                 </Button>
                 
                 <div>
-                  <Link to={`/lessons/nursery-${subject}`}>
+                  <Link to={`/lessons/${subject}`}>
                     <Button variant="outline" size="lg" className="text-lg px-8 py-3">
                       Back to Lessons
                     </Button>
