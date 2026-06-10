@@ -62,14 +62,28 @@ const OnboardingTour = () => {
     }
   }, [user]);
 
-  // Highlight target element
+  // Scroll target element into view on step change
   useEffect(() => {
     const currentStep = tourSteps[step];
     if (currentStep?.targetId) {
       const el = document.getElementById(currentStep.targetId);
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => setTargetRect(el.getBoundingClientRect()), 500);
+        const isMobile = window.innerWidth < 768;
+        el.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: isMobile ? 'start' : 'center' 
+        });
+      }
+    }
+  }, [step]);
+
+  // Track target element coordinates dynamically (handles smooth scrolling & manual scrolls)
+  const updateTargetRect = useCallback(() => {
+    const currentStep = tourSteps[step];
+    if (currentStep?.targetId) {
+      const el = document.getElementById(currentStep.targetId);
+      if (el) {
+        setTargetRect(el.getBoundingClientRect());
       } else {
         setTargetRect(null);
       }
@@ -77,6 +91,19 @@ const OnboardingTour = () => {
       setTargetRect(null);
     }
   }, [step]);
+
+  useEffect(() => {
+    updateTargetRect();
+    
+    // Listen to scroll and resize to dynamically recalculate coordinate rect
+    window.addEventListener('scroll', updateTargetRect, { passive: true });
+    window.addEventListener('resize', updateTargetRect, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', updateTargetRect);
+      window.removeEventListener('resize', updateTargetRect);
+    };
+  }, [step, updateTargetRect]);
 
   const dismiss = useCallback(() => {
     setVisible(false);
@@ -119,7 +146,9 @@ const OnboardingTour = () => {
                 top: targetRect.top - 8,
                 left: targetRect.left - 8,
                 width: targetRect.width + 16,
-                height: targetRect.height + 16,
+                height: window.innerWidth < 768 && targetRect.height > window.innerHeight * 0.5
+                  ? window.innerHeight * 0.4
+                  : targetRect.height + 16,
                 zIndex: 9999,
                 borderRadius: 16,
                 boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)',
@@ -136,7 +165,7 @@ const OnboardingTour = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-            className="fixed z-[10000] bottom-6 left-1/2 -translate-x-1/2 w-[90vw] max-w-sm"
+            className="fixed z-[10000] bottom-28 sm:bottom-6 left-1/2 -translate-x-1/2 w-[90vw] max-w-sm"
           >
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden">
               {/* Progress Bar */}

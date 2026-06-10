@@ -85,6 +85,7 @@ const WritingWizard = () => {
   const [successScore, setSuccessScore] = useState<number>(0);
   const [earnedStars, setEarnedStars] = useState<number>(0);
   const [showRewardModal, setShowRewardModal] = useState<boolean>(false);
+  const [showEncouragementModal, setShowEncouragementModal] = useState<boolean>(false);
 
   // Canvas Drawing Coordinate Buffers
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -412,17 +413,28 @@ const WritingWizard = () => {
         const randomQuote = encourageQuotes[Math.floor(Math.random() * encourageQuotes.length)];
         setMascotBubble(randomQuote);
         playSound('wrong');
+
+        // Show encouragement modal/popup and auto-dismiss after 2 seconds
+        setShowEncouragementModal(true);
+        setTimeout(() => {
+          setShowEncouragementModal(false);
+        }, 2000);
       }
     } catch (err) {
       console.error('Validation error:', err);
       // Fallback in case of server failure: inform the user of connection error and prompt retry
       setMascotState('encouragement');
-      setMascotBubble(
-        lang === 'bn' 
-          ? 'দুঃখিত সোনামণি, ইন্টারনেট সমস্যার কারণে টুটু বোর্ডটি দেখতে পারছে না। চলো আবার চেষ্টা করি! ✏️' 
-          : "Sorry dear, Tutu can't read the board due to connection issue. Let's try again! ✏️"
-      );
+      const connectionErrorBubble = lang === 'bn' 
+        ? 'দুঃখিত সোনামণি, ইন্টারনেট সমস্যার কারণে টুটু বোর্ডটি দেখতে পারছে না। চলো আবার চেষ্টা করি! ✏️' 
+        : "Sorry dear, Tutu can't read the board due to connection issue. Let's try again! ✏️";
+      setMascotBubble(connectionErrorBubble);
       playSound('wrong');
+
+      // Show encouragement modal/popup and auto-dismiss after 2 seconds
+      setShowEncouragementModal(true);
+      setTimeout(() => {
+        setShowEncouragementModal(false);
+      }, 2000);
     } finally {
       setIsLoading(false);
     }
@@ -783,6 +795,29 @@ const WritingWizard = () => {
 
           </Card>
 
+        </div>
+      )}
+
+      {/* GAMIFIED ENCOURAGEMENT MODAL (POPUP) */}
+      {showEncouragementModal && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <Card className="max-w-md w-full bg-white dark:bg-slate-900 border-0 shadow-2xl rounded-3xl overflow-hidden transform animate-scale-in relative border-t-8 border-orange-400">
+            <div className="p-8 text-center space-y-6">
+              <div className="text-8xl animate-wiggle select-none">💪</div>
+              
+              <h2 className="text-3xl font-black text-slate-800 dark:text-slate-100 leading-tight">
+                {lang === 'bn' ? 'দারুণ চেষ্টা, সোনামণি! 💖' : 'Wonderful Try, Dear! 💖'}
+              </h2>
+              
+              <p className="text-base font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
+                {mascotBubble}
+              </p>
+
+              <div className="text-xs font-black text-orange-400 uppercase tracking-widest animate-pulse">
+                {lang === 'bn' ? 'চলো আবার চেষ্টা করি...' : 'Let\'s try again...'}
+              </div>
+            </div>
+          </Card>
         </div>
       )}
 
