@@ -9,10 +9,10 @@ import { toast } from 'sonner';
 
 // Fallback videos if DB has none
 const FALLBACK_VIDEOS = [
-  { id: 'video-math-1',    title: 'Basic Addition for Kids',   url: 'https://www.youtube.com/embed/8hz0LAmGGgY', subject: 'Math',    duration: '5:20', stars: 10 },
-  { id: 'video-english-1', title: 'Learn English Alphabet',    url: 'https://www.youtube.com/embed/ccGQcs0bIfE', subject: 'English', duration: '4:15', stars: 10 },
-  { id: 'video-science-1', title: 'Solar System Planets',      url: 'https://www.youtube.com/embed/Qd6nLM2QlWw', subject: 'Science', duration: '8:30', stars: 15 },
-  { id: 'video-bangla-1',  title: 'বাংলা স্বরবর্ণ',           url: 'https://www.youtube.com/embed/O-A6hM9Z4Sg', subject: 'Bangla',  duration: '6:10', stars: 10 },
+  { id: 'video-math-1',    title: 'Basic Addition for Kids',   url: 'https://www.youtube.com/embed/1F_45p1mY5k', subject: 'Math',    duration: '5:20', stars: 10 },
+  { id: 'video-english-1', title: 'Learn English Alphabet',    url: 'https://www.youtube.com/embed/BELlZKpi1gs', subject: 'English', duration: '4:15', stars: 10 },
+  { id: 'video-science-1', title: 'Solar System Planets',      url: 'https://www.youtube.com/embed/libKVRa01L8', subject: 'Science', duration: '8:30', stars: 15 },
+  { id: 'video-bangla-1',  title: 'বাংলা স্বরবর্ণ',           url: 'https://www.youtube.com/embed/R9K4lqN-0Zc', subject: 'Bangla',  duration: '6:10', stars: 10 },
 ];
 
 type Video = {

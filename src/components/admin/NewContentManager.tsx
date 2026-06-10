@@ -23,7 +23,10 @@ import {
     X,
     RefreshCw,
     BookOpen,
-    ExternalLink
+    ExternalLink,
+    Search,
+    ArrowUpDown,
+    SlidersHorizontal
 } from 'lucide-react';
 
 interface Grade {
@@ -71,6 +74,71 @@ const NewContentManager = () => {
     const [loading, setLoading] = useState(true);
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingContent, setEditingContent] = useState<Content | null>(null);
+
+    // Search and Filter state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterGrade, setFilterGrade] = useState('all');
+    const [filterSubject, setFilterSubject] = useState('all');
+    const [filterType, setFilterType] = useState('all');
+    const [sortField, setSortField] = useState('created_at');
+    const [sortOrder, setSortOrder] = useState('desc');
+
+    // Memoized filtered and sorted contents
+    const filteredContents = React.useMemo(() => {
+        let result = [...contents];
+
+        // 1. Search Query Filter
+        if (searchQuery.trim() !== '') {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(c => 
+                c.title.toLowerCase().includes(query) || 
+                (c.description || '').toLowerCase().includes(query)
+            );
+        }
+
+        // 2. Grade Filter
+        if (filterGrade !== 'all') {
+            result = result.filter(c => c.grade_id?.toString() === filterGrade);
+        }
+
+        // 3. Subject Filter
+        if (filterSubject !== 'all') {
+            result = result.filter(c => c.subject_id?.toString() === filterSubject);
+        }
+
+        // 4. Content Type Filter
+        if (filterType !== 'all') {
+            result = result.filter(c => c.content_type === filterType);
+        }
+
+        // 5. Sorting
+        result.sort((a, b) => {
+            let fieldA: any = a[sortField as keyof Content] ?? '';
+            let fieldB: any = b[sortField as keyof Content] ?? '';
+
+            if (sortField === 'created_at') {
+                const dateA = new Date(fieldA || 0).getTime();
+                const dateB = new Date(fieldB || 0).getTime();
+                return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+            }
+
+            if (sortField === 'lesson_order') {
+                const orderA = Number(fieldA) || 0;
+                const orderB = Number(fieldB) || 0;
+                return sortOrder === 'asc' ? orderA - orderB : orderB - orderA;
+            }
+
+            if (typeof fieldA === 'string') {
+                return sortOrder === 'asc' 
+                    ? fieldA.localeCompare(fieldB) 
+                    : fieldB.localeCompare(fieldA);
+            }
+
+            return sortOrder === 'asc' ? fieldA - fieldB : fieldB - fieldA;
+        });
+
+        return result;
+    }, [contents, searchQuery, filterGrade, filterSubject, filterType, sortField, sortOrder]);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -773,83 +841,253 @@ const NewContentManager = () => {
                             </div>
                         ) : (
                             <div className="space-y-6">
-                                {contents.map((content) => (
-                                    <div key={content.id} className="border-0 shadow-lg bg-white rounded-xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex-1">
-                                                <div className="flex items-center space-x-3 mb-3">
-                                                    <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
-                                                        {getContentTypeIcon(content.content_type)}
-                                                    </div>
-                                                    <h3 className="font-bold text-xl text-gray-800">{content.title}</h3>
-                                                    <Badge 
-                                                        variant={content.is_published ? "default" : "secondary"}
-                                                        className={`px-3 py-1 rounded-full font-medium ${
-                                                            content.is_published 
-                                                                ? 'bg-green-100 text-green-800 border-green-200' 
-                                                                : 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                                                        }`}
-                                                    >
-                                                        {content.is_published ? "Published" : "Draft"}
-                                                    </Badge>
-                                                </div>
-                                                <p className="text-gray-600 mb-4 leading-relaxed">{content.description}</p>
-                                                <div className="flex flex-wrap items-center gap-3">
-                                                    <Badge variant="outline" className="px-3 py-1 text-blue-600 border-blue-200 bg-blue-50">
-                                                        {getGradeName(content.grade_id)}
-                                                    </Badge>
-                                                    <Badge variant="outline" className="px-3 py-1 text-green-600 border-green-200 bg-green-50">
-                                                        {getSubjectName(content.subject_id)}
-                                                    </Badge>
-                                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
-                                                        Order: {content.lesson_order}
-                                                    </span>
-                                                    <Badge variant="outline" className="px-3 py-1 text-purple-600 border-purple-200 bg-purple-50">
-                                                        {content.content_type.toUpperCase()}
-                                                    </Badge>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2 ml-6">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handlePreview(content)}
-                                                    className="p-2 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300"
-                                                    title="Preview Lesson"
+                                {/* Search and Filter Controls */}
+                                <div className="bg-white dark:bg-slate-900/60 p-5 rounded-2xl border-2 border-gray-100 dark:border-slate-800 space-y-4 shadow-sm">
+                                    <div className="flex flex-col md:flex-row gap-3">
+                                        <div className="relative flex-grow">
+                                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                            <Input
+                                                type="text"
+                                                placeholder="Search by title or description..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="pl-10 rounded-xl border-gray-200"
+                                            />
+                                            {searchQuery && (
+                                                <button 
+                                                    onClick={() => setSearchQuery('')}
+                                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold"
                                                 >
-                                                    <ExternalLink className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => togglePublished(content)}
-                                                    className="p-2 hover:bg-green-50 hover:border-green-300 transition-all duration-300"
-                                                    title={content.is_published ? "Unpublish" : "Publish"}
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleEdit(content)}
-                                                    className="p-2 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300"
-                                                    title="Edit Content"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleDelete(content.id)}
-                                                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-300 transition-all duration-300"
-                                                    title="Delete Content"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
+                                                    ×
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
-                                ))}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 pt-2">
+                                        {/* Grade Filter */}
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="filter-grade" className="text-xs font-semibold text-gray-500">Filter Grade</Label>
+                                            <Select value={filterGrade} onValueChange={(val) => { setFilterGrade(val); setFilterSubject('all'); }}>
+                                                <SelectTrigger id="filter-grade" className="rounded-lg h-9">
+                                                    <SelectValue placeholder="All Grades" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Grades</SelectItem>
+                                                    {grades.map(g => (
+                                                        <SelectItem key={g.id} value={g.id.toString()}>{g.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* Subject Filter */}
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="filter-subject" className="text-xs font-semibold text-gray-500">Filter Subject</Label>
+                                            <Select value={filterSubject} onValueChange={setFilterSubject}>
+                                                <SelectTrigger id="filter-subject" className="rounded-lg h-9">
+                                                    <SelectValue placeholder="All Subjects" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Subjects</SelectItem>
+                                                    {subjects.filter(s => filterGrade === 'all' || s.grade_id.toString() === filterGrade).map(s => (
+                                                        <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* Type Filter */}
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="filter-type" className="text-xs font-semibold text-gray-500">Filter Type</Label>
+                                            <Select value={filterType} onValueChange={setFilterType}>
+                                                <SelectTrigger id="filter-type" className="rounded-lg h-9">
+                                                    <SelectValue placeholder="All Types" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Types</SelectItem>
+                                                    <SelectItem value="text">Text Content</SelectItem>
+                                                    <SelectItem value="pdf">PDF Document</SelectItem>
+                                                    <SelectItem value="youtube">YouTube Video</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* Sort By Field */}
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="sort-field" className="text-xs font-semibold text-gray-500">Sort By</Label>
+                                            <Select value={sortField} onValueChange={setSortField}>
+                                                <SelectTrigger id="sort-field" className="rounded-lg h-9">
+                                                    <SelectValue placeholder="Date Created" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="created_at">Date Created</SelectItem>
+                                                    <SelectItem value="title">Title</SelectItem>
+                                                    <SelectItem value="lesson_order">Lesson Order</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* Sort Order Button */}
+                                        <div className="space-y-1.5 flex flex-col justify-end">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                                                className="h-9 rounded-lg border flex items-center justify-center gap-2 hover:bg-gray-50 text-gray-700"
+                                            >
+                                                <ArrowUpDown className="w-4 h-4" />
+                                                <span>{sortOrder === 'asc' ? 'Ascending' : 'Descending'}</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Active Filter Badges */}
+                                    {(searchQuery || filterGrade !== 'all' || filterSubject !== 'all' || filterType !== 'all') && (
+                                        <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-gray-100 dark:border-slate-800 text-xs">
+                                            <span className="text-gray-500 font-semibold flex items-center gap-1">
+                                                <SlidersHorizontal className="w-3.5 h-3.5" /> Active:
+                                            </span>
+                                            {searchQuery && (
+                                                <Badge variant="secondary" className="px-2 py-0.5 rounded-md gap-1">
+                                                    Search: "{searchQuery}"
+                                                    <span className="cursor-pointer font-bold hover:text-red-500" onClick={() => setSearchQuery('')}>×</span>
+                                                </Badge>
+                                            )}
+                                            {filterGrade !== 'all' && (
+                                                <Badge variant="secondary" className="px-2 py-0.5 rounded-md gap-1">
+                                                    Grade: {getGradeName(parseInt(filterGrade))}
+                                                    <span className="cursor-pointer font-bold hover:text-red-500" onClick={() => setFilterGrade('all')}>×</span>
+                                                </Badge>
+                                            )}
+                                            {filterSubject !== 'all' && (
+                                                <Badge variant="secondary" className="px-2 py-0.5 rounded-md gap-1">
+                                                    Subject: {getSubjectName(parseInt(filterSubject))}
+                                                    <span className="cursor-pointer font-bold hover:text-red-500" onClick={() => setFilterSubject('all')}>×</span>
+                                                </Badge>
+                                            )}
+                                            {filterType !== 'all' && (
+                                                <Badge variant="secondary" className="px-2 py-0.5 rounded-md gap-1">
+                                                    Type: {filterType.toUpperCase()}
+                                                    <span className="cursor-pointer font-bold hover:text-red-500" onClick={() => setFilterType('all')}>×</span>
+                                                </Badge>
+                                            )}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setSearchQuery('');
+                                                    setFilterGrade('all');
+                                                    setFilterSubject('all');
+                                                    setFilterType('all');
+                                                }}
+                                                className="text-red-500 hover:text-red-600 font-semibold h-auto py-0.5 px-2 text-xs"
+                                            >
+                                                Clear All
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {filteredContents.length === 0 ? (
+                                    <div className="text-center py-12 border-2 border-dashed rounded-2xl bg-gray-50/50">
+                                        <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                        <h4 className="text-lg font-bold text-gray-600 mb-1">No matching content found</h4>
+                                        <p className="text-sm text-gray-500 mb-4">Try adjusting your filters or search terms</p>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setSearchQuery('');
+                                                setFilterGrade('all');
+                                                setFilterSubject('all');
+                                                setFilterType('all');
+                                            }}
+                                            className="rounded-lg"
+                                        >
+                                            Reset Search & Filters
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        {filteredContents.map((content) => (
+                                            <div key={content.id} className="border-0 shadow-lg bg-white rounded-xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center space-x-3 mb-3">
+                                                            <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
+                                                                {getContentTypeIcon(content.content_type)}
+                                                            </div>
+                                                            <h3 className="font-bold text-xl text-gray-800">{content.title}</h3>
+                                                            <Badge 
+                                                                variant={content.is_published ? "default" : "secondary"}
+                                                                className={`px-3 py-1 rounded-full font-medium ${
+                                                                    content.is_published 
+                                                                        ? 'bg-green-100 text-green-800 border-green-200' 
+                                                                        : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                                                }`}
+                                                            >
+                                                                {content.is_published ? "Published" : "Draft"}
+                                                            </Badge>
+                                                        </div>
+                                                        <p className="text-gray-600 mb-4 leading-relaxed">{content.description}</p>
+                                                        <div className="flex flex-wrap items-center gap-3">
+                                                            <Badge variant="outline" className="px-3 py-1 text-blue-600 border-blue-200 bg-blue-50">
+                                                                {getGradeName(content.grade_id)}
+                                                            </Badge>
+                                                            <Badge variant="outline" className="px-3 py-1 text-green-600 border-green-200 bg-green-50">
+                                                                {getSubjectName(content.subject_id)}
+                                                            </Badge>
+                                                            <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                                                                Order: {content.lesson_order}
+                                                            </span>
+                                                            <Badge variant="outline" className="px-3 py-1 text-purple-600 border-purple-200 bg-purple-50">
+                                                                {content.content_type.toUpperCase()}
+                                                            </Badge>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2 ml-6">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => handlePreview(content)}
+                                                            className="p-2 hover:bg-purple-50 hover:border-purple-300 transition-all duration-300"
+                                                            title="Preview Lesson"
+                                                        >
+                                                            <ExternalLink className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => togglePublished(content)}
+                                                            className="p-2 hover:bg-green-50 hover:border-green-300 transition-all duration-300"
+                                                            title={content.is_published ? "Unpublish" : "Publish"}
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => handleEdit(content)}
+                                                            className="p-2 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300"
+                                                            title="Edit Content"
+                                                        >
+                                                            <Edit className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => handleDelete(content.id)}
+                                                            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-300 transition-all duration-300"
+                                                            title="Delete Content"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </CardContent>

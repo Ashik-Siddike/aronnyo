@@ -151,7 +151,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userCount, lessonCount }) => 
                 <div className="text-xs lg:text-sm text-gray-600 mt-1 font-medium">{t.heroLessons}</div>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} className="text-center p-4 lg:p-6 bg-white/80 backdrop-blur-md border border-orange-100 rounded-3xl shadow-xl shadow-orange-200/20 cursor-pointer group">
-                <div className="text-2xl lg:text-3xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform">99%</div>
+                <div className="text-2xl lg:text-3xl font-extrabold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent group-hover:scale-110 transition-transform">100%</div>
                 <div className="text-xs lg:text-sm text-gray-600 mt-1 font-medium">{t.heroFree}</div>
               </motion.div>
             </motion.div>

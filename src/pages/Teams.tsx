@@ -6,6 +6,18 @@ import { Button } from '@/components/ui/button';
 
 const teamMembers = [
   {
+    id: 2,
+    name: "SK Asaduzzaman",
+    position: "AI/ML Engineer & Feature Architect",
+    bio: "Talented AI/ML Engineer who integrated key smart features into 247School. He proposed the brilliant concept for the 'Writing Wizard' handwriting game, helped develop multiple learning modules, and optimized client-side AI performance for a seamless child-friendly experience.",
+    image: "/assets/SK Asaduzzaman.jpeg",
+    avatar: "🎨",
+    color: "from-eduplay-green to-teal-500",
+    skills: ["AI/ML Models", "Neural Networks", "Writing Wizard Game", "Tailwind CSS", "Figma Design", "Responsive Layouts"],
+    email: "asaduzzaman247s@gmail.com",
+    github: "Asaduzzaman-SK"
+  },
+  {
     id: 1,
     name: "MD Ashik Siddike",
     position: "Founder & Lead Developer",
@@ -13,19 +25,9 @@ const teamMembers = [
     image: "/assets/me- md ashik siddike .jpg",
     avatar: "👨‍💻",
     color: "from-eduplay-blue to-eduplay-purple",
-    skills: ["React", "Node.js", "MongoDB", "TypeScript", "System Architecture"],
+    skills: ["React", "Node.js", "MongoDB", "TypeScript", "System Architecture", "AI Integration", "Express.js", "Next.js", "React Native"],
+    email: "ashiksiddike@gmail.com",
     github: "Ashik-Siddike"
-  },
-  {
-    id: 2,
-    name: "SK Asaduzzaman",
-    position: "UI/UX Designer",
-    bio: "Creative frontend designer who crafted the beautiful, modern, and child-friendly layout of 247School. Focused on building responsive components, glassmorphism aesthetics, and delightful micro-interactions.",
-    image: "/assets/SK Asaduzzaman.jpeg",
-    avatar: "🎨",
-    color: "from-pink-500 to-rose-500",
-    skills: ["UI/UX Design", "Tailwind CSS", "Figma Design", "Responsive Layouts", "Frontend Design"],
-    email: "asaduzzaman@example.com"
   },
   {
     id: 3,
@@ -34,9 +36,10 @@ const teamMembers = [
     bio: "Pedagogical expert who guided the development of lesson plans. Focused on EYFS and Key Stage 1 curriculum alignment, conducted real-world classroom pilot testing in kindergartens, and managed student feedback.",
     image: "/assets/turna paul.jpeg",
     avatar: "🏫",
-    color: "from-eduplay-green to-teal-500",
+    color: "from-pink-500 to-rose-500",
     skills: ["Curriculum Design", "Early Childhood Education", "User Testing", "Trainer", "Feedback Analysis"],
-    email: "turna@example.com"
+    email: "turnapaul@gmail.com",
+    github: "Turna-Paul"
   }
 ];
 
@@ -75,58 +78,83 @@ const Teams = () => {
         </div>
 
         {/* Team Members */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20">
-          {teamMembers.map((member, index) => (
-            <Card
-              key={member.id}
-              className="bg-white border-0 playful-shadow hover:scale-105 transition-all duration-500 animate-fade-in overflow-hidden"
-              style={{ animationDelay: `${index * 200}ms` }}
-            >
-              {/* Gradient Header */}
-              <div className={`bg-gradient-to-r ${member.color} p-8 text-center flex flex-col items-center justify-center`}>
-                {member.image ? (
-                  <img 
-                    src={member.image} 
-                    alt={member.name} 
-                    className="w-28 h-28 rounded-full mb-3 object-cover border-4 border-white/80 shadow-lg hover:scale-105 transition-transform duration-300 bg-white"
-                  />
-                ) : (
-                  <div className="text-6xl mb-3 animate-bounce-gentle">{member.avatar}</div>
-                )}
-                <h2 className="text-2xl font-bold text-white mb-1">{member.name}</h2>
-                <p className="text-white/90 font-medium">{member.position}</p>
-              </div>
-              
-              <CardContent className="p-6">
-                <p className="text-gray-600 text-center mb-6 leading-relaxed min-h-[100px]">
-                  {member.bio}
-                </p>
-                
-                {/* Skills */}
-                <div className="flex flex-wrap justify-center gap-2 mb-6 min-h-[80px] items-center">
-                  {member.skills.map((skill, i) => (
-                    <span key={i} className="px-3 py-1 bg-gradient-to-r from-eduplay-purple/10 to-eduplay-blue/10 text-eduplay-purple text-sm font-medium rounded-full border border-eduplay-purple/20">
-                      {skill}
-                    </span>
-                  ))}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20 items-stretch">
+          {teamMembers.map((member, index) => {
+            const isLeader = member.id === 1;
+            return (
+              <Card
+                key={member.id}
+                className={`bg-white border-0 playful-shadow transition-all duration-500 animate-fade-in overflow-hidden relative flex flex-col justify-between ${
+                  isLeader 
+                    ? 'ring-4 ring-eduplay-purple shadow-[0_10px_35px_rgba(147,51,234,0.3)] scale-102 md:scale-105 z-10 border border-eduplay-purple/30 hover:shadow-[0_15px_45px_rgba(147,51,234,0.45)] hover:-translate-y-2' 
+                    : 'hover:scale-105 hover:-translate-y-2'
+                }`}
+                style={{ animationDelay: `${index * 200}ms` }}
+              >
+                {/* Gradient Header */}
+                <div className={`bg-gradient-to-r ${member.color} p-8 text-center flex flex-col items-center justify-center relative`}>
+                  {isLeader && (
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-950 text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1 z-10 uppercase tracking-wider animate-pulse">
+                      <Star className="w-3.5 h-3.5 fill-yellow-950 text-yellow-950" />
+                      Founder & Leader
+                    </div>
+                  )}
+                  {member.image ? (
+                    <img 
+                      src={member.image} 
+                      alt={member.name} 
+                      className="w-28 h-28 rounded-full mb-3 object-cover border-4 border-white/80 shadow-lg hover:scale-105 transition-transform duration-300 bg-white"
+                    />
+                  ) : (
+                    <div className="text-6xl mb-3 animate-bounce-gentle">{member.avatar}</div>
+                  )}
+                  <h2 className="text-2xl font-bold text-white mb-1">{member.name}</h2>
+                  <p className="text-white/90 font-medium">{member.position}</p>
                 </div>
                 
-                {/* Links */}
-                <div className="flex justify-center space-x-4">
-                  {member.email && (
-                    <a href={`mailto:${member.email}`} className="p-2 rounded-full bg-eduplay-blue/10 hover:bg-eduplay-blue/20 transition-colors" title="Email">
-                      <Mail className="w-5 h-5 text-eduplay-blue" />
-                    </a>
-                  )}
-                  {member.github && (
-                    <a href={`https://github.com/${member.github}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-gray-600/10 hover:bg-gray-600/20 transition-colors" title="GitHub">
-                      <Github className="w-5 h-5 text-gray-600" />
-                    </a>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                <CardContent className="p-6 flex flex-col flex-grow justify-between">
+                  <div>
+                    <p className="text-gray-600 text-center mb-6 leading-relaxed min-h-[100px]">
+                      {member.bio}
+                    </p>
+                    
+                    {/* Skills */}
+                    <div className="flex flex-wrap justify-center gap-2 mb-6 min-h-[80px] items-center">
+                      {member.skills.map((skill, i) => (
+                        <span key={i} className="px-3 py-1 bg-gradient-to-r from-eduplay-purple/10 to-eduplay-blue/10 text-eduplay-purple text-sm font-medium rounded-full border border-eduplay-purple/20">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Links */}
+                  <div className="flex justify-center items-center gap-4 mt-4">
+                    {member.email && (
+                      <a 
+                        href={`mailto:${member.email}`} 
+                        className="flex items-center justify-center w-12 h-12 rounded-full bg-eduplay-blue/10 hover:bg-eduplay-blue/20 transition-all duration-300 hover:scale-110 shadow-sm p-0" 
+                        title="Email"
+                      >
+                        <Mail className="w-5 h-5 text-eduplay-blue" />
+                      </a>
+                    )}
+                    {member.github && (
+                      <a 
+                        href={`https://github.com/${member.github}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-600/10 hover:bg-gray-600/20 transition-all duration-300 hover:scale-110 shadow-sm p-0" 
+                        title="GitHub"
+                      >
+                        <Github className="w-5 h-5 text-gray-600" />
+                      </a>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Project Stats */}
