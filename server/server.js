@@ -61,6 +61,8 @@ const requireAdmin = (req, res, next) => {
 const ALLOWED_ORIGINS = [
   'https://247-school.vercel.app',
   'https://play-learn-grow-kids.vercel.app',
+  'https://www.ashiksiddike.com',
+  'https://ashiksiddike.com',
   'http://localhost:8080',
   'http://localhost:8081',
   'http://localhost:5173',
