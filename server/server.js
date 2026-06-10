@@ -1315,10 +1315,11 @@ app.get('/api/student-dashboard', async (req, res) => {
     });
 
     // ── Real Weekly Activity (last 7 days) ────────────────────────────────
-    const days = ['শনি', 'রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র'];
-    const weeklyActivity = days.map((day, i) => {
+    const dayNames = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র', 'শনি'];
+    const weeklyActivity = Array.from({ length: 7 }).map((_, i) => {
       const targetDate = new Date();
       targetDate.setDate(targetDate.getDate() - (6 - i));
+      const day = dayNames[targetDate.getDay()];
       const dateStr = targetDate.toISOString().split('T')[0];
       const dayActivities = activities.filter(a => a.created_at && a.created_at.startsWith(dateStr));
       return {
@@ -1389,7 +1390,7 @@ app.get('/api/parent-dashboard', async (req, res) => {
     
     let [profile, activities, user] = await Promise.all([
       getCollection('profiles').findOne({ user_id: studentId }),
-      getCollection('activity').find({ student_id: studentId }).sort({ created_at: -1 }).limit(5).toArray(),
+      getCollection('activity').find({ student_id: studentId }).sort({ created_at: -1 }).limit(50).toArray(),
       getCollection('users').findOne({ _id: studentId })
     ]);
 
@@ -1421,8 +1422,10 @@ app.get('/api/parent-dashboard', async (req, res) => {
 
     const period = req.query.period || 'week'; // today, week, month, session
     
-    // Generate dynamic chart data based on period
+    // Generate dynamic chart data based on period & activities
     let timeData = [];
+    const now = new Date();
+    
     if (period === 'today') {
       timeData = [
         { name: '8 AM', score: 10, time: 5 },
@@ -1432,15 +1435,22 @@ app.get('/api/parent-dashboard', async (req, res) => {
         { name: '8 PM', score: 30, time: 15 },
       ];
     } else if (period === 'week') {
-      timeData = [
-        { name: 'শনি', score: 85, time: 45 },
-        { name: 'রবি', score: 70, time: 30 },
-        { name: 'সোম', score: 90, time: 60 },
-        { name: 'মঙ্গল', score: 60, time: 20 },
-        { name: 'বুধ', score: 85, time: 40 },
-        { name: 'বৃহঃ', score: 75, time: 35 },
-        { name: 'শুক্র', score: 95, time: 55 },
-      ];
+      const dayNames = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র', 'শনি'];
+      timeData = Array.from({ length: 7 }).map((_, i) => {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() - (6 - i));
+        const day = dayNames[targetDate.getDay()];
+        const dateStr = targetDate.toISOString().split('T')[0];
+        const dayActivities = activities.filter(a => a.created_at && a.created_at.startsWith(dateStr));
+        const scoreSum = dayActivities.reduce((s, a) => s + (a.stars_earned || 0), 0);
+        const timeSum = dayActivities.reduce((s, a) => s + (a.time_spent || 0), 0);
+        
+        return {
+          name: day,
+          score: scoreSum || (activities.length > 0 ? 0 : [35, 20, 45, 10, 30, 25, 50][i]),
+          time: timeSum || (activities.length > 0 ? 0 : [15, 10, 25, 5, 15, 10, 20][i])
+        };
+      });
     } else if (period === 'month') {
       timeData = [
         { name: 'Week 1', score: 300, time: 180 },
@@ -1457,6 +1467,75 @@ app.get('/api/parent-dashboard', async (req, res) => {
       ];
     }
 
+    // Dynamic subjects progress based on activities
+    const subjectDefs = [
+      { name: "গণিত (Math)", matchName: "Math", fallbackProgress: 88, fallbackTime: "14h", fallbackAccuracy: 95 },
+      { name: "ইংরেজি (English)", matchName: "English", fallbackProgress: 75, fallbackTime: "11h", fallbackAccuracy: 88 },
+      { name: "বাংলা (Bangla)", matchName: "Bangla", fallbackProgress: 92, fallbackTime: "14h", fallbackAccuracy: 96 },
+      { name: "বিজ্ঞান (Science)", matchName: "Science", fallbackProgress: 70, fallbackTime: "10h", fallbackAccuracy: 85 }
+    ];
+
+    const subjects = subjectDefs.map(sub => {
+      const subActivities = activities.filter(a =>
+        a.subject && a.subject.toLowerCase().includes(sub.matchName.toLowerCase())
+      );
+      const quizActivities = subActivities.filter(a => a.activity_type === 'quiz_completed');
+      const lessonActivities = subActivities.filter(a => a.activity_type === 'lesson_completed');
+      const totalMins = subActivities.reduce((s, a) => s + (a.time_spent || 0), 0);
+      const avgScore = quizActivities.length > 0
+        ? Math.round(quizActivities.reduce((s, a) => s + (a.score || 0), 0) / quizActivities.length)
+        : 0;
+      const lessonsCompleted = lessonActivities.length;
+      const progress = Math.min(Math.round((lessonsCompleted / 20) * 100), 100);
+      const hours = Math.round(totalMins / 60);
+
+      let lastActivityStr = "কোনো অ্যাক্টিভিটি নেই";
+      if (subActivities.length > 0) {
+        const lastAct = subActivities[0];
+        const diffDays = Math.floor((new Date().getTime() - new Date(lastAct.created_at).getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) lastActivityStr = "আজ";
+        else if (diffDays === 1) lastActivityStr = "গতকাল";
+        else lastActivityStr = `${diffDays} দিন আগে`;
+      }
+
+      return {
+        name: sub.name,
+        progress: activities.length > 0 ? Math.max(progress, 5) : sub.fallbackProgress,
+        timeSpent: activities.length > 0 ? (hours > 0 ? `${hours}h` : `${totalMins}m`) : sub.fallbackTime,
+        accuracy: activities.length > 0 ? (avgScore || 80) : sub.fallbackAccuracy,
+        lastActivity: activities.length > 0 ? lastActivityStr : "আজ"
+      };
+    });
+
+    // Dynamic Period Stats
+    let periodActivities = [];
+    if (period === 'today') {
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      periodActivities = activities.filter(a => new Date(a.created_at) >= startOfDay);
+    } else if (period === 'week') {
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      periodActivities = activities.filter(a => new Date(a.created_at) >= oneWeekAgo);
+    } else if (period === 'month') {
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      periodActivities = activities.filter(a => new Date(a.created_at) >= oneMonthAgo);
+    } else {
+      periodActivities = activities;
+    }
+
+    const periodLessons = periodActivities.filter(a => a.activity_type === 'lesson_completed').length;
+    const periodStars = periodActivities.reduce((s, a) => s + (a.stars_earned || 0), 0);
+    const periodMins = periodActivities.reduce((s, a) => s + (a.time_spent || 0), 0);
+    const periodHours = Math.floor(periodMins / 60);
+    const periodMinsRemaining = periodMins % 60;
+    const periodTimeStr = periodHours > 0 ? `${periodHours}h ${periodMinsRemaining}m` : `${periodMins}m`;
+
+    const periodStats = {
+      lessonsCompleted: activities.length > 0 ? periodLessons : (period === 'today' ? 2 : (period === 'week' ? 18 : 65)),
+      starsEarned: activities.length > 0 ? periodStars : (period === 'today' ? 15 : (period === 'week' ? 95 : 320)),
+      timeSpent: activities.length > 0 ? periodTimeStr : (period === 'today' ? "45m" : (period === 'week' ? "10h 45m" : "42h 10m")),
+      improvement: activities.length > 0 ? (periodLessons > 0 ? `+${Math.min(periodLessons * 5, 45)}%` : "+0%") : (period === 'today' ? "+2%" : (period === 'week' ? "+18%" : "+35%"))
+    };
+
     const dashboardData = {
       name: profile.full_name || 'শিক্ষার্থী',
       age: 6, // default
@@ -1466,24 +1545,18 @@ app.get('/api/parent-dashboard', async (req, res) => {
       averageAccuracy: profile.accuracy || 0,
       currentStreak: profile.streak || 0,
       timeData,
-      subjects: [
-        { name: "গণিত (Math)", progress: 88, timeSpent: "14h", accuracy: 95, lastActivity: "আজ" },
-        { name: "ইংরেজি (English)", progress: 75, timeSpent: "11h", accuracy: 88, lastActivity: "গতকাল" },
-        { name: "বাংলা (Bangla)", progress: 92, timeSpent: "14h", accuracy: 96, lastActivity: "আজ" },
-        { name: "বিজ্ঞান (Science)", progress: 70, timeSpent: "10h", accuracy: 85, lastActivity: "আজ" }
-      ],
-      periodStats: {
-        lessonsCompleted: period === 'today' ? 2 : (period === 'week' ? 18 : 65),
-        starsEarned: period === 'today' ? 15 : (period === 'week' ? 95 : 320),
-        timeSpent: period === 'today' ? "45m" : (period === 'week' ? "10h 45m" : "42h 10m"),
-        improvement: period === 'today' ? "+2%" : (period === 'week' ? "+18%" : "+35%")
-      },
-      recentActivity: activities.map(a => ({
-        subject: a.subject,
-        lesson: a.type === 'lesson_completed' ? 'পাঠ সম্পন্ন' : (a.type === 'quiz_taken' ? 'কুইজ' : 'অ্যাক্টিভিটি'),
-        score: `${a.score}% ⭐`,
-        time: new Date(a.created_at).toLocaleDateString()
-      })),
+      subjects,
+      periodStats,
+      recentActivity: activities.slice(0, 5).map(a => {
+        const type = a.activity_type || a.type;
+        const typeLabel = type === 'lesson_completed' ? 'পাঠ সম্পন্ন' : (type === 'quiz_completed' || type === 'quiz_taken' ? 'কুইজ' : (type === 'video_watched' ? 'ভিডিও ওয়াচ' : 'খেলাধুলা'));
+        return {
+          subject: a.subject,
+          lesson: a.lesson_name || typeLabel,
+          score: `${a.score || 100}% ⭐`,
+          time: new Date(a.created_at).toLocaleDateString('bn-BD')
+        };
+      }),
       recommendations: [
         `${profile.full_name || 'শিক্ষার্থী'} বাংলায় অসাধারণ করছে! তাকে আরও গল্পের বই পড়তে উৎসাহিত করুন। 📚`,
         "বিজ্ঞানে প্রতিদিন ১৫ মিনিট অনুশীলন করলে আরও ভালো করবে। 🔬",

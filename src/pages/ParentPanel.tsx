@@ -302,26 +302,30 @@ const ParentPanel = () => {
               <CardContent className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span>Complete 50 lessons</span>
-                    <span className="font-bold">42/50</span>
+                    <span>Complete 20 lessons</span>
+                    <span className="font-bold">{childData.lessonsCompleted}/20</span>
                   </div>
-                  <Progress value={84} className="h-2" />
+                  <Progress value={Math.min((childData.lessonsCompleted / 20) * 100, 100)} className="h-2" />
                 </div>
                 
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span>Maintain 85% accuracy</span>
-                    <span className="font-bold text-green-600">89% ✓</span>
+                    <span className={`font-bold ${childData.averageAccuracy >= 85 ? 'text-green-600' : 'text-orange-500'}`}>
+                      {childData.averageAccuracy}% {childData.averageAccuracy >= 85 ? '✓' : ''}
+                    </span>
                   </div>
-                  <Progress value={100} className="h-2" />
+                  <Progress value={childData.averageAccuracy >= 85 ? 100 : Math.round((childData.averageAccuracy / 85) * 100)} className="h-2" />
                 </div>
                 
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span>7-day learning streak</span>
-                    <span className="font-bold text-green-600">7/7 ✓</span>
+                    <span className={`font-bold ${childData.currentStreak >= 7 ? 'text-green-600' : 'text-orange-500'}`}>
+                      {childData.currentStreak}/7 {childData.currentStreak >= 7 ? '✓' : ''}
+                    </span>
                   </div>
-                  <Progress value={100} className="h-2" />
+                  <Progress value={Math.min((childData.currentStreak / 7) * 100, 100)} className="h-2" />
                 </div>
               </CardContent>
             </Card>

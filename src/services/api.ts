@@ -296,6 +296,13 @@ export const dashboardApi = {
     if (grade) query.append('grade', grade);
     const queryString = query.toString() ? `?${query.toString()}` : '';
     return fetchApi<any>(`/leaderboard${queryString}`);
+  },
+  getResults: (studentId: string, exam?: string, year?: string) => {
+    const query = new URLSearchParams();
+    query.append('student_id', studentId);
+    if (exam) query.append('exam', exam);
+    if (year) query.append('year', year);
+    return fetchApi<any[]>(`/results?${query.toString()}`);
   }
 };
 

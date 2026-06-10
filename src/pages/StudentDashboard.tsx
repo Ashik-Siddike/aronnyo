@@ -260,8 +260,33 @@ const StudentDashboard = () => {
                     </div>
                   )
                 })}
-              </div>
             </div>
+            </div>
+
+            {/* Learning Goals */}
+            {studentData.currentGoals && studentData.currentGoals.length > 0 && (
+              <div className="bg-white dark:bg-slate-800 rounded-[32px] p-6 lg:p-8 shadow-sm border border-slate-100 dark:border-slate-700">
+                <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                  🎯 {isBn ? 'আমার লক্ষ্য' : 'My Goals'}
+                </h2>
+                <div className="space-y-6">
+                  {studentData.currentGoals.map((goal: any, index: number) => {
+                    const pct = Math.round((goal.current / goal.target) * 100);
+                    return (
+                      <div key={index} className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-700">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-bold text-slate-800 dark:text-white text-sm">{goal.description}</span>
+                          <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-lg">
+                            {goal.current} / {goal.target}
+                          </span>
+                        </div>
+                        <Progress value={pct} className="h-2" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar - Right Side */}

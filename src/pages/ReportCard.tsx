@@ -1,9 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download, Printer, Star, Award, TrendingUp, BookOpen, Sparkles, ChevronDown, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { dashboardApi } from '@/services/api';
 
 interface SubjectResult {
   name: string;
@@ -77,7 +79,61 @@ const sampleStudents: StudentReport[] = [
 ];
 
 const ReportCard = () => {
-  const [selectedStudent, setSelectedStudent] = useState(sampleStudents[0]);
+  const [reports, setReports] = useState<StudentReport[]>(sampleStudents);
+  const [selectedStudent, setSelectedStudent] = useState<StudentReport>(sampleStudents[0]);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!user?.id) return;
+      try {
+        setLoading(true);
+        const data = await dashboardApi.getResults(user.id);
+        if (data && data.length > 0) {
+          const mappedReports: StudentReport[] = data.map((resultData: any, idx: number) => {
+            return {
+              id: resultData.id || resultData._id || (100 + idx),
+              name: resultData.student_name || user.full_name || 'Ashik Siddike',
+              avatar: '👦',
+              class: resultData.class || 'Nursery',
+              roll: resultData.roll || 1,
+              section: resultData.section || 'A',
+              exam: resultData.exam || 'বার্ষিক পরীক্ষা',
+              year: resultData.year || '2026',
+              subjects: resultData.subjects.map((s: any) => {
+                const pct = Math.round((s.marks / (s.total || 100)) * 100);
+                const g = getGrade(pct);
+                return {
+                  name: s.name,
+                  icon: s.icon || (s.name.includes('Math') || s.name.includes('গণিত') ? '🔢' : s.name.includes('English') || s.name.includes('ইংরেজি') ? '📖' : s.name.includes('Bangla') || s.name.includes('বাংলা') ? '🇧🇩' : s.name.includes('Science') || s.name.includes('বিজ্ঞান') ? '🔬' : '📚'),
+                  marks: s.marks,
+                  total: s.total || 100,
+                  grade: s.grade || g.grade,
+                  gradeColor: s.gradeColor || g.color,
+                  comment: s.comment || ''
+                };
+              }),
+              attendance: resultData.attendance || { present: 120, total: 125 },
+              rank: resultData.rank || 1,
+              totalStudents: resultData.totalStudents || 35,
+              teacherComment: resultData.teacher_comment || '',
+              principalComment: resultData.principal_comment || ''
+            };
+          });
+          
+          setReports([...mappedReports, ...sampleStudents]);
+          setSelectedStudent(mappedReports[0]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch student report card:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchResults();
+  }, [user]);
+
   const reportRef = useRef<HTMLDivElement>(null);
 
   const totalMarks = selectedStudent.subjects.reduce((sum, s) => sum + s.marks, 0);
@@ -137,7 +193,7 @@ const ReportCard = () => {
 
         {/* Student Selector (Screen only) */}
         <div className="flex flex-wrap gap-3 justify-center mb-10 print:hidden">
-          {sampleStudents.map((student) => (
+          {reports.map((student) => (
             <Button
               key={student.id}
               onClick={() => setSelectedStudent(student)}
