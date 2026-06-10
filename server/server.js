@@ -2030,6 +2030,42 @@ app.post('/api/messages', async (req, res) => {
       return res.status(400).json({ error: 'sender_id and text are required' });
     }
     await getCollection('messages').insertOne(msg);
+
+    // Forward to Telegram if sender is parent/student
+    if (msg.sender_role !== 'teacher' && msg.sender_role !== 'admin') {
+      const token = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      if (token && chatId) {
+        try {
+          // Fetch student details for context
+          const profile = await getCollection('profiles').findOne({ user_id: msg.sender_id });
+          const grade = profile ? (profile.grade_id === 1 ? 'Nursery' : `Grade ${profile.grade_id}`) : 'Nursery';
+          const roll = profile ? (profile.roll || 1) : 1;
+          const senderName = msg.sender_name || profile?.full_name || 'অভিভাবক';
+
+          const telegramMsgText = `📩 নতুন মেসেজ!\n` +
+            `👤 অভিভাবক: ${senderName} (${msg.sender_role || 'parent'})\n` +
+            `🏫 শ্রেণি: ${grade} | রোল: ${roll}\n` +
+            `🆔 স্টুডেন্ট আইডি: ${msg.sender_id}\n\n` +
+            `💬 মেসেজ: "${msg.text}"`;
+
+          await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: telegramMsgText
+            })
+          });
+          console.log('✅ Message successfully forwarded to Telegram!');
+        } catch (err) {
+          console.error('⚠️ Error forwarding message to Telegram:', err.message);
+        }
+      } else {
+        console.warn('⚠️ Telegram Bot Token or Chat ID not configured. Message not forwarded to Telegram.');
+      }
+    }
+
     res.json({ success: true, message: msg });
   } catch (error) {
     console.error('Messages POST error:', error);
@@ -2798,6 +2834,85 @@ Keep responses concise (under 3-4 sentences or 2 short paragraphs) so kids don't
 
 
 // ==========================================
+// TELEGRAM BOT FORWARDER & RECEIVER
+// ==========================================
+
+let lastUpdateId = 0;
+
+async function handleTelegramUpdate(update) {
+  const message = update.message;
+  if (!message || !message.text) return;
+
+  const replyTo = message.reply_to_message;
+  if (!replyTo || !replyTo.text) return;
+
+  // Extract student ID from the replied-to message
+  const idMatch = replyTo.text.match(/(?:🆔\s*(?:স্টুডেন্ট আইডি|Student ID):|Student ID:)\s*(user-\w+)/i);
+  if (!idMatch) return;
+
+  const studentId = idMatch[1];
+  const replyText = message.text;
+
+  try {
+    const msgDoc = {
+      sender_id: 'teacher',
+      sender_name: 'Teacher / Admin',
+      sender_role: 'teacher',
+      receiver_id: studentId,
+      text: replyText,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+
+    await getCollection('messages').insertOne(msgDoc);
+    console.log(`✅ Telegram reply saved for student: ${studentId}`);
+
+    // Confirm reply in Telegram
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: message.chat.id,
+        text: `✅ উত্তরটি সফলভাবে অ্যাপের ইনবক্সে পাঠানো হয়েছে!`,
+        reply_to_message_id: message.message_id
+      })
+    });
+  } catch (error) {
+    console.error('Error saving Telegram reply:', error.message);
+  }
+}
+
+async function pollTelegramBot() {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  
+  if (!token || !chatId) {
+    // Retry polling setup in 30 seconds if config is missing
+    setTimeout(pollTelegramBot, 30000);
+    return;
+  }
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${token}/getUpdates?offset=${lastUpdateId + 1}&timeout=10`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.ok && data.result.length > 0) {
+        for (const update of data.result) {
+          lastUpdateId = update.update_id;
+          await handleTelegramUpdate(update);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Telegram Bot Polling Error:', error.message);
+  }
+
+  // Poll again
+  setTimeout(pollTelegramBot, 1000);
+}
+
+// ==========================================
 // HEALTH CHECK
 // ==========================================
 
@@ -2819,6 +2934,7 @@ app.get('/api/health', async (req, res) => {
 if (process.env.NODE_ENV !== 'production' || process.env.RENDER) {
   async function start() {
     await connectDB();
+    pollTelegramBot(); // Start Telegram polling
     app.listen(PORT, () => {
       console.log(`🚀 Play Learn Grow API running on http://localhost:${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
