@@ -69,7 +69,7 @@ const Header = () => {
   };
 
   const NavItemStyles = (active: boolean) =>
-    `text-lg font-bold transition-all duration-300 hover:scale-105 flex items-center space-x-2 px-4 py-2 rounded-xl ${
+    `text-xs lg:text-[13px] xl:text-[15px] 2xl:text-base font-extrabold transition-all duration-200 hover:scale-102 flex items-center space-x-1.5 px-2 py-1.5 xl:px-3 2xl:px-3.5 rounded-xl whitespace-nowrap ${
       active
         ? 'text-eduplay-purple bg-eduplay-purple/10 shadow-sm'
         : 'text-gray-600 dark:text-gray-300 hover:text-eduplay-purple hover:bg-eduplay-purple/5'
@@ -85,27 +85,27 @@ const Header = () => {
           : 'bg-white/95 dark:bg-slate-950/95 backdrop-blur-md shadow-sm'
       }
     `}>
-      <div className="container mx-auto px-4 py-2 lg:py-3">
+      <div className="container mx-auto px-2 sm:px-4 py-2 lg:py-3">
         <div className="flex items-center justify-between">
           
           {/* 1. Logo (Left) */}
-          <Link to="/#hero-section" onClick={handleHomeClick} className="flex items-center space-x-2 animate-scale-in">
+          <Link to="/#hero-section" onClick={handleHomeClick} className="flex items-center space-x-1.5 xl:space-x-2 animate-scale-in">
             <img
               src="/assets/logo-2.png"
               alt="247School Logo"
-              className="h-10 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform duration-200"
+              className="h-8 lg:h-9 xl:h-10 w-auto object-contain drop-shadow-md hover:scale-105 transition-transform duration-200"
             />
-            <span className="text-2xl font-black bg-gradient-to-r from-eduplay-purple to-eduplay-blue bg-clip-text text-transparent hidden sm:block">
+            <span className="text-lg xl:text-xl 2xl:text-2xl font-black bg-gradient-to-r from-eduplay-purple to-eduplay-blue bg-clip-text text-transparent hidden sm:block">
               247School
             </span>
           </Link>
 
           {/* 2. Main Navigation (Center) - Desktop */}
-          <nav className="hidden lg:flex items-center space-x-2">
+          <nav className="hidden lg:flex items-center space-x-0.5 xl:space-x-1 2xl:space-x-2">
             
             {/* Home */}
             <Link to="/#hero-section" onClick={handleHomeClick} className={NavItemStyles(isActive("/#hero-section"))}>
-              <Home className="w-5 h-5 text-eduplay-orange" />
+              <Home className="w-4 h-4 lg:w-[18px] lg:h-[18px] xl:w-5 xl:h-5 text-eduplay-orange" />
               <span>{t.home}</span>
             </Link>
 
@@ -113,9 +113,9 @@ const Header = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className={NavItemStyles(isActive("/subjects") || location.pathname.includes('/class/'))}>
-                  <BookOpen className="w-5 h-5 text-eduplay-green" />
+                  <BookOpen className="w-4 h-4 lg:w-[18px] lg:h-[18px] xl:w-5 xl:h-5 text-eduplay-green" />
                   <span>{t.learn}</span>
-                  <ChevronDown className="w-4 h-4 opacity-50" />
+                  <ChevronDown className="w-3.5 h-3.5 opacity-50" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900 border-2 border-eduplay-green/20 rounded-xl p-2 shadow-xl">
@@ -144,13 +144,13 @@ const Header = () => {
 
             {/* Games */}
             <Link to="/games" className={NavItemStyles(isActive("/games"))}>
-              <Gamepad2 className="w-5 h-5 text-pink-500" />
+              <Gamepad2 className="w-4 h-4 lg:w-[18px] lg:h-[18px] xl:w-5 xl:h-5 text-pink-500" />
               <span>{t.games}</span>
             </Link>
 
             {/* Story Mode */}
             <Link to="/story-mode" className={NavItemStyles(isActive("/story-mode"))}>
-              <Map className="w-5 h-5 text-emerald-500" />
+              <Map className="w-4 h-4 lg:w-[18px] lg:h-[18px] xl:w-5 xl:h-5 text-emerald-500" />
               <span>{t.storyMode}</span>
             </Link>
 
@@ -158,9 +158,9 @@ const Header = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className={NavItemStyles(location.pathname === "/dashboard" || location.pathname === "/profile" || location.pathname === "/leaderboard")}>
-                  <Trophy className="w-5 h-5 text-yellow-500" />
+                  <Trophy className="w-4 h-4 lg:w-[18px] lg:h-[18px] xl:w-5 xl:h-5 text-yellow-500" />
                   <span>{t.progressMenu}</span>
-                  <ChevronDown className="w-4 h-4 opacity-50" />
+                  <ChevronDown className="w-3.5 h-3.5 opacity-50" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-52 bg-white dark:bg-slate-900 border-2 border-yellow-500/20 rounded-xl p-2 shadow-xl">
@@ -188,19 +188,19 @@ const Header = () => {
 
             {/* Parent */}
             <Link to="/parent" className={NavItemStyles(isActive("/parent"))}>
-              <Users className="w-5 h-5 text-eduplay-blue" />
+              <Users className="w-4 h-4 lg:w-[18px] lg:h-[18px] xl:w-5 xl:h-5 text-eduplay-blue" />
               <span>{t.parentPanel}</span>
             </Link>
 
             {/* Teams */}
             <Link to="/teams" className={NavItemStyles(isActive("/teams"))}>
-              <Users className="w-5 h-5 text-eduplay-purple" />
+              <Users className="w-4 h-4 lg:w-[18px] lg:h-[18px] xl:w-5 xl:h-5 text-eduplay-purple" />
               <span>{t.teams}</span>
             </Link>
           </nav>
 
           {/* 3. Right Actions */}
-          <div className="hidden lg:flex items-center gap-3 animate-fade-in delay-700">
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 2xl:gap-3 animate-fade-in delay-700">
             {/* Interactive Bell */}
             <div className="bg-gray-100 dark:bg-slate-800 rounded-full p-1 hover:bg-gray-200 dark:hover:bg-slate-700 transition">
               <NotificationBell />
@@ -209,23 +209,23 @@ const Header = () => {
             {/* Language Toggle */}
             <button
               onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')}
-              className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-purple-200/50 dark:border-purple-800/30 text-sm font-black text-slate-700 dark:text-slate-200 hover:bg-eduplay-purple hover:text-white dark:hover:bg-eduplay-purple dark:hover:text-white transition-all duration-300 shadow-sm"
+              className="flex items-center justify-center gap-1 px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-purple-200/50 dark:border-purple-800/30 text-xs xl:text-sm font-black text-slate-700 dark:text-slate-200 hover:bg-eduplay-purple hover:text-white dark:hover:bg-eduplay-purple dark:hover:text-white transition-all duration-300 shadow-sm"
               title="Change Language"
             >
-              <Languages className="w-4 h-4 text-eduplay-purple dark:text-purple-400" />
+              <Languages className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-eduplay-purple dark:text-purple-400" />
               <span>{lang === 'bn' ? 'EN' : 'বাং'}</span>
             </button>
 
             {/* Dark Mode */}
             <button
               onClick={toggleTheme}
-              className="flex items-center justify-center w-11 h-11 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-purple-200/50 dark:border-purple-800/30 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 shadow-sm"
+              className="flex items-center justify-center w-8 h-8 xl:w-10 xl:h-10 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur border border-purple-200/50 dark:border-purple-800/30 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 shadow-sm"
               title="Toggle Dark Mode"
             >
-              {isDark ? <Sun className="w-5 h-5 text-yellow-500 animate-pulse" /> : <Moon className="w-5 h-5 text-indigo-500" />}
+              {isDark ? <Sun className="w-4 h-4 xl:w-5 xl:h-5 text-yellow-500 animate-pulse" /> : <Moon className="w-4 h-4 xl:w-5 xl:h-5 text-indigo-500" />}
             </button>
 
-            <div className="pl-2 border-l border-gray-200 dark:border-slate-700">
+            <div className="pl-1.5 border-l border-gray-200 dark:border-slate-700">
               <UserProfileButton />
             </div>
           </div>
