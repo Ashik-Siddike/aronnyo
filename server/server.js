@@ -2839,45 +2839,54 @@ Keep responses concise (under 3-4 sentences or 2 short paragraphs) so kids don't
 // TELEGRAM BOT FORWARDER & RECEIVER
 // ==========================================
 
+// সর্বশেষ প্রসেস করা বার্তার আইডি ট্র্যাক করার ভেরিয়েবল (ডুপ্লিকেট মেসেজ এড়াতে)
 let lastUpdateId = 0;
 
+/**
+ * টেলিগ্রাম থেকে আসা কোনো মেসেজ প্রসেস করার ফাংশন
+ * মূলত এটি চ্যাট গ্রুপে কোনো টিচারের দেওয়া রিপ্লাই হ্যান্ডেল করে
+ */
 async function handleTelegramUpdate(update) {
+  // টেলিগ্রাম মেসেজ অবজেক্ট এক্সট্রাক্ট করা
   const message = update.message;
-  if (!message || !message.text) return;
+  if (!message || !message.text) return; // টেক্সট মেসেজ না হলে প্রস্থান
 
+  // চেক করা মেসেজটি অন্য কোনো মেসেজের 'Reply' কিনা
   const replyTo = message.reply_to_message;
   if (!replyTo || !replyTo.text) return;
 
-  // Extract student ID from the replied-to message
+  // অভিভাবকের পাঠানো পূর্ববর্তী মেসেজ থেকে Regex দিয়ে 'স্টুডেন্ট আইডি' (user-xxxx) খুঁজে বের করা
   const idMatch = replyTo.text.match(/(?:🆔\s*(?:স্টুডেন্ট আইডি|Student ID):|Student ID:)\s*(user-\w+)/i);
-  if (!idMatch) return;
+  if (!idMatch) return; // আইডি না পাওয়া গেলে প্রস্থান (এটি অন্য সাধারণ রিপ্লাই)
 
-  const studentId = idMatch[1];
-  const replyText = message.text;
+  const studentId = idMatch[1]; // ম্যাচ করা স্টুডেন্ট আইডি
+  const replyText = message.text; // শিক্ষকের দেওয়া উত্তরের টেক্সট
 
   try {
+    // ডাটাবেজের 'messages' কালেকশনে সেভ করার জন্য ডকুমেন্ট তৈরি
     const msgDoc = {
-      sender_id: 'teacher',
-      sender_name: 'Teacher / Admin',
-      sender_role: 'teacher',
-      receiver_id: studentId,
-      text: replyText,
-      timestamp: new Date().toISOString(),
-      read: false
+      sender_id: 'teacher',          // প্রেরক হলেন শিক্ষক
+      sender_name: 'Teacher / Admin', // প্রেরকের নাম
+      sender_role: 'teacher',         // প্রেরকের রোল
+      receiver_id: studentId,         // প্রাপক হলেন নির্দিষ্ট শিক্ষার্থী/অভিভাবক
+      text: replyText,               // শিক্ষকের মেসেজ কন্টেন্ট
+      timestamp: new Date().toISOString(), // সময় নির্ধারণ
+      read: false                    // রিড স্ট্যাটাস ডিফল্ট false
     };
 
+    // MongoDB ডাটাবেজে চ্যাট মেসেজটি সেভ করা
     await getCollection('messages').insertOne(msgDoc);
     console.log(`✅ Telegram reply saved for student: ${studentId}`);
 
-    // Confirm reply in Telegram
+    // রিপ্লাই সফলভাবে অ্যাপে পাঠানোর পর টেলিগ্রাম চ্যাটে কনফার্মেশন পাঠানো
     const token = process.env.TELEGRAM_BOT_TOKEN;
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: message.chat.id,
-        text: `✅ উত্তরটি সফলভাবে অ্যাপের ইনবক্সে পাঠানো হয়েছে!`,
-        reply_to_message_id: message.message_id
+        chat_id: message.chat.id, // যে চ্যাট থেকে মেসেজ এসেছে
+        text: `✅ উত্তরটি সফলভাবে অ্যাপের ইনবক্সে পাঠানো হয়েছে!`, // মেসেজ বডি
+        reply_to_message_id: message.message_id // শিক্ষকের রিপ্লাই করা মেসেজকে ট্যাগ করা
       })
     });
   } catch (error) {
@@ -2885,24 +2894,30 @@ async function handleTelegramUpdate(update) {
   }
 }
 
+/**
+ * লং পোলিং (Long Polling) লুপ যা ব্যাকগ্রাউন্ডে টেলিগ্রাম সার্ভার থেকে 
+ * অনবরত নতুন মেসেজ বা রিপ্লাই আছে কিনা তা কোয়েরি করে
+ */
 async function pollTelegramBot() {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   
+  // কনফিগারেশন মিসিং থাকলে প্রতি ৩০ সেকেন্ড পর পর রিট্রাই করার লুপ
   if (!token || !chatId) {
-    // Retry polling setup in 30 seconds if config is missing
     setTimeout(pollTelegramBot, 30000);
     return;
   }
 
   try {
+    // টেলিগ্রাম বট এপিআই এর getUpdates কল করা (পরবর্তী নতুন মেসেজের জন্য offset এবং timeout সেট করা)
     const response = await fetch(`https://api.telegram.org/bot${token}/getUpdates?offset=${lastUpdateId + 1}&timeout=10`);
     if (response.ok) {
       const data = await response.json();
+      // নতুন কোনো মেসেজ/আপডেট পাওয়া গেলে লুপ চালিয়ে প্রসেস করা
       if (data.ok && data.result.length > 0) {
         for (const update of data.result) {
-          lastUpdateId = update.update_id;
-          await handleTelegramUpdate(update);
+          lastUpdateId = update.update_id; // প্রসেসড আইডি আপডেট (যাতে ডুপ্লিকেট লোড না হয়)
+          await handleTelegramUpdate(update); // মেসেজ প্রসেস করার ফাংশন কল
         }
       }
     }
@@ -2910,7 +2925,7 @@ async function pollTelegramBot() {
     console.error('Telegram Bot Polling Error:', error.message);
   }
 
-  // Poll again
+  // পোলিং লুপ সচল রাখতে ১ সেকেন্ড পর পর নিজেকে পুনরায় কল করা
   setTimeout(pollTelegramBot, 1000);
 }
 
