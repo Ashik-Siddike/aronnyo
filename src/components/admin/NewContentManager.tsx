@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { staticGrades, staticSubjects, staticContents, mockDelay, Grade, Subject, Content } from '@/data/staticData';
+import { mockDelay } from '@/data/staticData';
+import { gradesApi, subjectsApi, contentsApi } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import {
@@ -104,59 +105,49 @@ const NewContentManager = () => {
     const loadAllData = async () => {
         try {
             setLoading(true);
-            console.log('Loading all data from static data...');
+            console.log('Loading all data from MongoDB...');
             
-            await mockDelay(300);
-            
-            console.log('Admin verified, fetching data...');
+            // Fetch from MongoDB API in parallel
+            const [gradesData, subjectsData, contentsData] = await Promise.all([
+                gradesApi.getAll(),
+                subjectsApi.getAll(),
+                contentsApi.getAll()
+            ]);
 
-            // Load from static data
-            const gradesData = [...staticGrades].sort((a, b) => 
+            // Sort data
+            const sortedGrades = [...gradesData].sort((a, b) => 
                 (a.order_index || 0) - (b.order_index || 0) || a.id - b.id
             );
             
-            const subjectsData = [...staticSubjects].sort((a, b) => 
+            const sortedSubjects = [...subjectsData].sort((a, b) => 
                 a.grade_id - b.grade_id || (a.order_index || 0) - (b.order_index || 0) || a.id - b.id
             );
             
-            const contentsData = [...staticContents].sort((a, b) => 
-                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            const sortedContents = [...contentsData].sort((a, b) => 
+                new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
             );
 
             console.log('Data loaded:', {
-                grades: gradesData.length,
-                subjects: subjectsData.length,
-                contents: contentsData.length
+                grades: sortedGrades.length,
+                subjects: sortedSubjects.length,
+                contents: sortedContents.length
             });
 
             // Set state
-            console.log('Setting data:', {
-                grades: gradesData?.length || 0,
-                subjects: subjectsData?.length || 0,
-                contents: contentsData?.length || 0
-            });
-            
-            setGrades(gradesData || []);
-            setSubjects(subjectsData || []);
-            setContents(contentsData || []);
+            setGrades(sortedGrades || []);
+            setSubjects(sortedSubjects || []);
+            setContents(sortedContents || []);
             
             toast({
                 title: "Data Loaded",
-                description: `Loaded ${gradesData?.length || 0} grades, ${subjectsData?.length || 0} subjects, ${contentsData?.length || 0} contents`,
+                description: `Loaded ${sortedGrades?.length || 0} grades, ${sortedSubjects?.length || 0} subjects, ${sortedContents?.length || 0} contents from Database`,
             });
 
-            console.log('Final state will be:', {
-                grades: gradesData?.length || 0,
-                subjects: subjectsData?.length || 0,
-                contents: contentsData?.length || 0,
-                gradesList: gradesData
-            });
-
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error loading data:', error);
             toast({
                 title: "Error",
-                description: `Failed to load data: ${error.message}`,
+                description: `Failed to load data from Database: ${error.message}`,
                 variant: "destructive",
             });
         } finally {
@@ -272,25 +263,14 @@ const NewContentManager = () => {
             await mockDelay(300);
 
             if (editingContent) {
-                // Update existing content in static data
-                const contentIndex = staticContents.findIndex(c => c.id === editingContent.id);
-                if (contentIndex !== -1) {
-                    staticContents[contentIndex] = {
-                        ...staticContents[contentIndex],
-                        ...contentPayload,
-                        id: editingContent.id,
-                        created_at: staticContents[contentIndex].created_at
-                    };
-                }
+                // Update existing content in MongoDB
+                await contentsApi.update(editingContent.id, contentPayload);
             } else {
-                // Create new content
-                const newContent: Content = {
-                    id: `content-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                // Create new content in MongoDB
+                await contentsApi.create({
                     ...contentPayload,
-                    is_published: contentPayload.is_published || false,
-                    created_at: new Date().toISOString()
-                };
-                staticContents.push(newContent);
+                    is_published: contentPayload.is_published || false
+                });
             }
 
             toast({
@@ -343,13 +323,7 @@ const NewContentManager = () => {
         if (!confirm(`Are you sure you want to delete "${content?.title}"?`)) return;
 
         try {
-            await mockDelay(300);
-            
-            // Remove from static data
-            const contentIndex = staticContents.findIndex(c => c.id === id);
-            if (contentIndex !== -1) {
-                staticContents.splice(contentIndex, 1);
-            }
+            await contentsApi.delete(id);
 
             toast({
                 title: "Success",
@@ -369,13 +343,9 @@ const NewContentManager = () => {
 
     const togglePublished = async (content: Content) => {
         try {
-            await mockDelay(300);
-            
-            // Update in static data
-            const contentIndex = staticContents.findIndex(c => c.id === content.id);
-            if (contentIndex !== -1) {
-                staticContents[contentIndex].is_published = !content.is_published;
-            }
+            await contentsApi.update(content.id, {
+                is_published: !content.is_published
+            });
 
             toast({
                 title: "Success",

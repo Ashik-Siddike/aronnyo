@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { staticGrades, staticSubjects, mockDelay, Grade, Subject } from '@/data/staticData';
+import { mockDelay } from '@/data/staticData';
+import { gradesApi, subjectsApi } from '@/services/api';
 import AdminLayout from './AdminLayout';
 import { 
   Plus, 
@@ -64,27 +65,30 @@ const NewGradeSubjectManager = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      console.log('Loading grades and subjects from static data...');
+      console.log('Loading grades and subjects from MongoDB...');
 
-      await mockDelay(300);
+      // Load from database in parallel
+      const [gradesData, subjectsData] = await Promise.all([
+        gradesApi.getAll(),
+        subjectsApi.getAll()
+      ]);
 
-      // Load from static data
-      const gradesData = [...staticGrades].sort((a, b) => a.id - b.id);
-      const subjectsData = [...staticSubjects].sort((a, b) => a.id - b.id);
+      const sortedGrades = [...gradesData].sort((a, b) => a.id - b.id);
+      const sortedSubjects = [...subjectsData].sort((a, b) => a.id - b.id);
 
-      setGrades(gradesData);
-      setSubjects(subjectsData);
+      setGrades(sortedGrades as Grade[]);
+      setSubjects(sortedSubjects as Subject[]);
 
-      console.log('Data loaded:', {
-        grades: gradesData.length,
-        subjects: subjectsData.length
+      console.log('Data loaded from DB:', {
+        grades: sortedGrades.length,
+        subjects: sortedSubjects.length
       });
 
     } catch (error: any) {
       console.error('Error loading data:', error);
       toast({
         title: "Error",
-        description: `Failed to load data: ${error?.message || 'Unknown error'}`,
+        description: `Failed to load data from Database: ${error?.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
@@ -128,19 +132,11 @@ const NewGradeSubjectManager = () => {
       };
 
       if (editingGrade) {
-        // Update in static data
-        const gradeIndex = staticGrades.findIndex(g => g.id === editingGrade.id);
-        if (gradeIndex !== -1) {
-          staticGrades[gradeIndex].name = gradeData.name;
-        }
+        // Update in MongoDB
+        await gradesApi.update(editingGrade.id, gradeData.name);
       } else {
-        // Create new grade
-        const newGrade: Grade = {
-          id: Math.max(...staticGrades.map(g => g.id), 0) + 1,
-          name: gradeData.name,
-          order_index: staticGrades.length + 1
-        };
-        staticGrades.push(newGrade);
+        // Create new grade in MongoDB
+        await gradesApi.create(gradeData.name);
       }
 
       toast({
@@ -186,38 +182,10 @@ const NewGradeSubjectManager = () => {
     if (!confirm(confirmMessage)) return;
 
     try {
-      await mockDelay(300);
-      console.log('Deleting grade:', id, grade.name);
+      console.log('Deleting grade from Database:', id, grade.name);
       
-      // Delete related content from static data
-      const contentIdsToDelete = staticContents
-        .filter(c => c.grade_id === parseInt(id))
-        .map(c => c.id);
-      
-      contentIdsToDelete.forEach(contentId => {
-        const contentIndex = staticContents.findIndex(c => c.id === contentId);
-        if (contentIndex !== -1) {
-          staticContents.splice(contentIndex, 1);
-        }
-      });
-
-      // Delete related subjects from static data
-      const subjectIdsToDelete = staticSubjects
-        .filter(s => s.grade_id === parseInt(id))
-        .map(s => s.id);
-      
-      subjectIdsToDelete.forEach(subjectId => {
-        const subjectIndex = staticSubjects.findIndex(s => s.id === subjectId);
-        if (subjectIndex !== -1) {
-          staticSubjects.splice(subjectIndex, 1);
-        }
-      });
-
-      // Delete the grade from static data
-      const gradeIndex = staticGrades.findIndex(g => g.id === parseInt(id));
-      if (gradeIndex !== -1) {
-        staticGrades.splice(gradeIndex, 1);
-      }
+      // Delete the grade from MongoDB (server handles cascading deletes of subjects and contents)
+      await gradesApi.delete(parseInt(id));
 
       toast({
         title: "Success",
@@ -291,21 +259,11 @@ const NewGradeSubjectManager = () => {
       };
 
       if (editingSubject) {
-        // Update in static data
-        const subjectIndex = staticSubjects.findIndex(s => s.id === editingSubject.id);
-        if (subjectIndex !== -1) {
-          staticSubjects[subjectIndex].name = subjectData.name;
-          staticSubjects[subjectIndex].grade_id = subjectData.grade_id;
-        }
+        // Update in MongoDB
+        await subjectsApi.update(editingSubject.id, subjectData.name, subjectData.grade_id);
       } else {
-        // Create new subject
-        const newSubject: Subject = {
-          id: Math.max(...staticSubjects.map(s => s.id), 0) + 1,
-          name: subjectData.name,
-          grade_id: subjectData.grade_id,
-          order_index: staticSubjects.filter(s => s.grade_id === subjectData.grade_id).length + 1
-        };
-        staticSubjects.push(newSubject);
+        // Create new subject in MongoDB
+        await subjectsApi.create(subjectData.name, subjectData.grade_id);
       }
 
       const gradeName = grades.find(g => g.id === subjectForm.grade_id)?.name;
@@ -353,26 +311,10 @@ const NewGradeSubjectManager = () => {
     if (!confirm(confirmMessage)) return;
 
     try {
-      await mockDelay(300);
-      console.log('Deleting subject:', id, subject.name);
+      console.log('Deleting subject from Database:', id, subject.name);
       
-      // Delete related content from static data
-      const contentIdsToDelete = staticContents
-        .filter(c => c.subject_id === parseInt(id))
-        .map(c => c.id);
-      
-      contentIdsToDelete.forEach(contentId => {
-        const contentIndex = staticContents.findIndex(c => c.id === contentId);
-        if (contentIndex !== -1) {
-          staticContents.splice(contentIndex, 1);
-        }
-      });
-
-      // Delete the subject from static data
-      const subjectIndex = staticSubjects.findIndex(s => s.id === parseInt(id));
-      if (subjectIndex !== -1) {
-        staticSubjects.splice(subjectIndex, 1);
-      }
+      // Delete the subject from MongoDB (server handles cascading deletes of contents)
+      await subjectsApi.delete(parseInt(id));
 
       toast({
         title: "Success",

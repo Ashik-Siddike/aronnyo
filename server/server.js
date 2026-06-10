@@ -590,12 +590,28 @@ app.delete('/api/grades/:id', authenticateToken, requireAdmin, async (req, res) 
     const id = parseInt(req.params.id);
     await getCollection('grades').deleteOne({ _id: id });
     await getCollection('subjects').deleteMany({ grade_id: id });
+    await getCollection('contents').deleteMany({ grade_id: id });
     res.json({ success: true });
   } catch (error) {
     console.error('Delete grade error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// PUT /api/grades/:id
+app.put('/api/grades/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: 'Grade name required' });
+    await getCollection('grades').updateOne({ _id: id }, { $set: { name } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update grade error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 // ==========================================
 // SUBJECTS ROUTES
@@ -643,12 +659,30 @@ app.delete('/api/subjects/:id', authenticateToken, requireAdmin, async (req, res
   try {
     const id = parseInt(req.params.id);
     await getCollection('subjects').deleteOne({ _id: id });
+    await getCollection('contents').deleteMany({ subject_id: id });
     res.json({ success: true });
   } catch (error) {
     console.error('Delete subject error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// PUT /api/subjects/:id
+app.put('/api/subjects/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { name, grade_id } = req.body;
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (grade_id) updateData.grade_id = parseInt(grade_id);
+    await getCollection('subjects').updateOne({ _id: id }, { $set: updateData });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update subject error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 // ==========================================
 // CHAPTERS ROUTES

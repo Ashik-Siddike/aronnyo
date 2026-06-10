@@ -155,6 +155,11 @@ export const gradesApi = {
       method: 'POST',
       body: JSON.stringify({ name }),
     }),
+  update: (id: number, name: string) =>
+    fetchApi<{ success: boolean }>(`/grades/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name }),
+    }),
   delete: (id: number) => fetchApi<{ success: boolean }>(`/grades/${id}`, { method: 'DELETE' }),
 };
 
@@ -177,6 +182,11 @@ export const subjectsApi = {
   create: (name: string, gradeId: number) =>
     fetchApi<SubjectData>('/subjects', {
       method: 'POST',
+      body: JSON.stringify({ name, grade_id: gradeId }),
+    }),
+  update: (id: number, name: string, gradeId: number) =>
+    fetchApi<{ success: boolean }>(`/subjects/${id}`, {
+      method: 'PUT',
       body: JSON.stringify({ name, grade_id: gradeId }),
     }),
   delete: (id: number) => fetchApi<{ success: boolean }>(`/subjects/${id}`, { method: 'DELETE' }),

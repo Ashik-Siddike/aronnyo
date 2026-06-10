@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { staticUsers, storage, STORAGE_KEYS, mockDelay, User as StaticUser } from '@/data/staticData';
+import { mockDelay } from '@/data/staticData';
+import { usersApi } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import AdminLayout from './AdminLayout';
 import { 
@@ -53,21 +54,20 @@ const NewUserManager = () => {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      console.log('Loading users from static data...');
-      
-      await mockDelay(300);
+      console.log('Loading users from MongoDB...');
 
-      // Load from static data
-      const usersData = [...staticUsers].sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      // Load from Database
+      const usersData = await usersApi.getAll();
+      const sortedUsers = [...usersData].sort((a, b) => 
+        new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
       );
 
-      setUsers(usersData);
-      console.log('Users loaded:', usersData.length);
+      setUsers(sortedUsers as User[]);
+      console.log('Users loaded from DB:', sortedUsers.length);
       
       toast({
         title: "Users Loaded",
-        description: `Loaded ${usersData.length} users`,
+        description: `Loaded ${sortedUsers.length} users from Database`,
       });
 
     } catch (error: any) {
@@ -122,14 +122,10 @@ const NewUserManager = () => {
     }
 
     try {
-      await mockDelay(300);
-      console.log('Updating user role:', userId, 'from', user.role, 'to', newRole);
+      console.log('Updating user role in Database:', userId, 'from', user.role, 'to', newRole);
       
-      // Update in static data
-      const userIndex = staticUsers.findIndex(u => u.id === userId);
-      if (userIndex !== -1) {
-        staticUsers[userIndex].role = newRole as any;
-      }
+      // Update in Database
+      await usersApi.update(userId, { role: newRole });
 
       toast({
         title: "Success",
@@ -168,14 +164,10 @@ const NewUserManager = () => {
     if (!confirm(confirmMessage)) return;
 
     try {
-      await mockDelay(300);
-      console.log('Deleting user:', userId, user.email);
+      console.log('Deleting user from Database:', userId, user.email);
       
-      // Remove from static data
-      const userIndex = staticUsers.findIndex(u => u.id === userId);
-      if (userIndex !== -1) {
-        staticUsers.splice(userIndex, 1);
-      }
+      // Delete from Database
+      await usersApi.delete(userId);
 
       toast({
         title: "Success",
