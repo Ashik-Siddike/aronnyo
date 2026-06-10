@@ -4,15 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Play, CheckCircle2, Star, Clock, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { activityApi, contentsApi, videoHistoryApi } from '@/services/api';
+import { activityApi, contentsApi, videoHistoryApi, profilesApi } from '@/services/api';
 import { toast } from 'sonner';
 
 // Fallback videos if DB has none
 const FALLBACK_VIDEOS = [
-  { id: 'video-math-1',    title: 'Basic Addition for Kids',   url: 'https://www.youtube.com/embed/1F_45p1mY5k', subject: 'Math',    duration: '5:20', stars: 10 },
-  { id: 'video-english-1', title: 'Learn English Alphabet',    url: 'https://www.youtube.com/embed/BELlZKpi1gs', subject: 'English', duration: '4:15', stars: 10 },
-  { id: 'video-science-1', title: 'Solar System Planets',      url: 'https://www.youtube.com/embed/libKVRa01L8', subject: 'Science', duration: '8:30', stars: 15 },
-  { id: 'video-bangla-1',  title: 'বাংলা স্বরবর্ণ',           url: 'https://www.youtube.com/embed/R9K4lqN-0Zc', subject: 'Bangla',  duration: '6:10', stars: 10 },
+  { id: 'video-math-1',    title: 'Basic Addition for Kids',   url: 'https://www.youtube.com/embed/1F_45p1mY5k', subject: 'Math',    duration: '5:20', stars: 10, class: '1st' },
+  { id: 'video-english-1', title: 'Learn English Alphabet',    url: 'https://www.youtube.com/embed/BELlZKpi1gs', subject: 'English', duration: '4:15', stars: 10, class: 'Nursery' },
+  { id: 'video-science-1', title: 'Solar System Planets',      url: 'https://www.youtube.com/embed/libKVRa01L8', subject: 'Science', duration: '8:30', stars: 15, class: '1st' },
+  { id: 'video-bangla-1',  title: 'বাংলা স্বরবর্ণ',           url: 'https://www.youtube.com/embed/R9K4lqN-0Zc', subject: 'Bangla',  duration: '6:10', stars: 10, class: 'Nursery' },
 ];
 
 type Video = {
@@ -22,6 +22,7 @@ type Video = {
   subject: string;
   duration: string;
   stars: number;
+  class?: string;
 };
 
 function mapContent(c: any): Video {
@@ -32,7 +33,33 @@ function mapContent(c: any): Video {
     subject:  c.subject || '',
     duration: c.duration || '—',
     stars:    c.stars ?? 10,
+    class:    c.class || '',
   };
+}
+
+function matchClass(videoClass: string, studentGradeId: number): boolean {
+  if (!videoClass) return false;
+  const vClass = videoClass.toLowerCase().trim();
+  
+  if (studentGradeId === 1) {
+    return vClass === 'nursery';
+  }
+  if (studentGradeId === 2) {
+    return vClass === '1st' || vClass === 'grade 1';
+  }
+  if (studentGradeId === 3) {
+    return vClass === '2nd' || vClass === 'grade 2';
+  }
+  if (studentGradeId === 4) {
+    return vClass === '3rd' || vClass === 'grade 3';
+  }
+  if (studentGradeId === 5) {
+    return vClass === '4th' || vClass === 'grade 4';
+  }
+  if (studentGradeId === 6) {
+    return vClass === '5th' || vClass === 'grade 5';
+  }
+  return false;
 }
 
 export default function VideoLessons() {
@@ -48,12 +75,50 @@ export default function VideoLessons() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        // contentsApi.getAll() — we filter by content_type on the client
-        // because the current API doesn't support content_type filter yet
+        let studentGradeId: number | null = null;
+
+        // 1. Get class/grade_id from URL query params
+        const params = new URLSearchParams(window.location.search);
+        const urlClass = params.get('class')?.toLowerCase().trim();
+        const urlGradeId = params.get('grade_id');
+
+        if (urlGradeId) {
+          studentGradeId = parseInt(urlGradeId);
+        } else if (urlClass) {
+          if (urlClass === 'nursery') studentGradeId = 1;
+          else if (urlClass === '1st' || urlClass === 'grade 1' || urlClass === 'class 1' || urlClass === '1') studentGradeId = 2;
+          else if (urlClass === '2nd' || urlClass === 'grade 2' || urlClass === 'class 2' || urlClass === '2') studentGradeId = 3;
+          else if (urlClass === '3rd' || urlClass === 'grade 3' || urlClass === 'class 3' || urlClass === '3') studentGradeId = 4;
+          else if (urlClass === '4th' || urlClass === 'grade 4' || urlClass === 'class 4' || urlClass === '4') studentGradeId = 5;
+          else if (urlClass === '5th' || urlClass === 'grade 5' || urlClass === 'class 5' || urlClass === '5') studentGradeId = 6;
+        }
+
+        // 2. If not in URL, and student is logged in, fetch from profile
+        if (!studentGradeId && user?.id) {
+          try {
+            const profileData = await profilesApi.get(user.id);
+            if (profileData && profileData.grade_id) {
+              studentGradeId = profileData.grade_id;
+            }
+          } catch (profileErr) {
+            console.error('Failed to fetch profile in VideoLessons:', profileErr);
+          }
+        }
+
+        // 3. Fetch all videos
         const all = await contentsApi.getAll();
-        const vids = all
+        let vids = all
           .filter((c: any) => c.content_type === 'video' && c.is_published !== false)
           .map(mapContent);
+
+        // 4. Apply class filter if we determined a grade ID
+        if (studentGradeId) {
+          const matchedVids = vids.filter((v: any) => v.class && matchClass(v.class, studentGradeId!));
+          // If we have matching videos for the student's class, filter to them
+          if (matchedVids.length > 0) {
+            vids = matchedVids;
+          }
+        }
 
         if (vids.length > 0) {
           setVideos(vids);
@@ -70,7 +135,7 @@ export default function VideoLessons() {
       }
     };
     fetchVideos();
-  }, []);
+  }, [user]);
 
   // ── Load watch history: DB first, localStorage fallback ──
   useEffect(() => {

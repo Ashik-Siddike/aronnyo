@@ -393,6 +393,33 @@ export const timetableApi = {
     fetchApi<{ success: boolean }>(`/timetable/${id}`, { method: 'DELETE' }),
 };
 
+// ==========================================
+// PROFILES API
+// ==========================================
+
+export interface ProfileData {
+  _id: string;
+  user_id: string;
+  full_name: string;
+  avatar_emoji: string;
+  grade_id: number;
+  total_stars: number;
+  badges: number;
+  hours_learned: number;
+  accuracy: number;
+  streak: number;
+  level: string;
+}
+
+export const profilesApi = {
+  get: (userId: string) => fetchApi<ProfileData>(`/profiles/${userId}`),
+  update: (userId: string, data: Partial<ProfileData>) =>
+    fetchApi<{ success: boolean }>(`/profiles/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+};
+
 export default {
   auth: authApi,
   users: usersApi,
@@ -408,4 +435,5 @@ export default {
   timetable: timetableApi,
   storyProgress: storyProgressApi,
   videoHistory: videoHistoryApi,
+  profiles: profilesApi,
 };
