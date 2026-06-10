@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 function getAuthUser(): { id: string } | null {
   try {
-    const raw = localStorage.getItem('auth_user');
+    const raw = localStorage.getItem('play_learn_grow_auth_user');
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
