@@ -5,6 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLang } from '@/contexts/LangContext';
 import { playNarration, stopNarration } from '@/services/audioService';
 
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+
 interface Message {
   id: number;
   text: string;
@@ -171,7 +173,7 @@ const AIChatbot: React.FC = () => {
       };
 
       // Call API Endpoint
-      const res = await fetch('/api/chatbot', {
+      const res = await fetch(`${API_BASE}/chatbot`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

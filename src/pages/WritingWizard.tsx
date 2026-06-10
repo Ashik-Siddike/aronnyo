@@ -8,6 +8,8 @@ import { playNarration, playSound } from '@/services/audioService';
 import { useLessonProgress } from '@/hooks/useLessonProgress';
 import confetti from 'canvas-confetti';
 
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
+
 // Character sets for practice
 const ENGLISH_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const ENGLISH_NUMBERS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
@@ -341,7 +343,7 @@ const WritingWizard = () => {
     const langCode = isBangla ? 'bn' : 'en';
 
     try {
-      const res = await fetch('/api/handwriting', {
+      const res = await fetch(`${API_BASE}/handwriting`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -413,18 +415,14 @@ const WritingWizard = () => {
       }
     } catch (err) {
       console.error('Validation error:', err);
-      // Fallback in case of server failure: assume success if they drew enough strokes
-      if (strokeBuffer.current.length >= 1) {
-        setMascotState('success');
-        setMascotBubble(lang === 'bn' ? 'দারুণ প্রচেষ্টা! চমৎকার এঁকেছ! 🌟' : 'Excellent try! Lovely drawing! 🌟');
-        playSound('correct');
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-        setEarnedStars(5);
-        setShowRewardModal(true);
-      } else {
-        setMascotState('welcome');
-        setMascotBubble(lang === 'bn' ? 'কিছু ভুল হয়েছে, চলো আবার চেষ্টা করি! ✏️' : 'Something went wrong, let\'s try again!');
-      }
+      // Fallback in case of server failure: inform the user of connection error and prompt retry
+      setMascotState('encouragement');
+      setMascotBubble(
+        lang === 'bn' 
+          ? 'দুঃখিত সোনামণি, ইন্টারনেট সমস্যার কারণে টুটু বোর্ডটি দেখতে পারছে না। চলো আবার চেষ্টা করি! ✏️' 
+          : "Sorry dear, Tutu can't read the board due to connection issue. Let's try again! ✏️"
+      );
+      playSound('wrong');
     } finally {
       setIsLoading(false);
     }
