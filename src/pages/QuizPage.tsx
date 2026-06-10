@@ -12,10 +12,12 @@ import { ActivityService } from '@/services/activityService';
 import { useToast } from '@/hooks/use-toast';
 import confetti from 'canvas-confetti';
 import { playSound } from '@/utils/sounds';
+import { useStudentActivity } from '@/contexts/StudentActivityContext';
 
 const QuizPage = () => {
   const { subject, id } = useParams();
   const { toast } = useToast();
+  const { refreshStats } = useStudentActivity();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState('');
   const [answers, setAnswers] = useState<string[]>([]);
@@ -105,6 +107,7 @@ const QuizPage = () => {
             timeSpent,
             { quiz_id: id }
           );
+          await refreshStats().catch(() => {});
 
           if (percentage >= 80) {
             playSound('levelUp');

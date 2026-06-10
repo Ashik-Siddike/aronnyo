@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { ActivityService } from '@/services/activityService';
 import { useToast } from '@/hooks/use-toast';
+import { useStudentActivity } from '@/contexts/StudentActivityContext';
 
 interface LessonProgressHook {
   isTracking: boolean;
@@ -14,6 +15,7 @@ export const useLessonProgress = (): LessonProgressHook => {
   const [isTracking, setIsTracking] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const { toast } = useToast();
+  const { refreshStats } = useStudentActivity();
 
   const trackLessonStart = useCallback((subject: string, lessonName: string) => {
     setStartTime(new Date());
@@ -35,6 +37,7 @@ export const useLessonProgress = (): LessonProgressHook => {
         : 10;
 
       await ActivityService.trackLessonCompletion(subject, lessonName, timeSpent, metadata);
+      await refreshStats().catch(() => {});
 
       toast({
         title: "পাঠ সম্পন্ন! 🎉",
@@ -52,7 +55,7 @@ export const useLessonProgress = (): LessonProgressHook => {
       setIsTracking(false);
       setStartTime(null);
     }
-  }, [isTracking, startTime, toast]);
+  }, [isTracking, startTime, toast, refreshStats]);
 
   // ── Quiz Complete → MongoDB via ActivityService ──────────────────────────
   const trackQuizComplete = useCallback(async (
@@ -72,6 +75,7 @@ export const useLessonProgress = (): LessonProgressHook => {
 
       const correctAnswers = metadata?.correct_answers ?? Math.round((score / 100) * totalQuestions);
       await ActivityService.submitQuiz(subject, quizName, score, correctAnswers, totalQuestions, timeSpent, metadata);
+      await refreshStats().catch(() => {});
 
       const emoji = score >= 80 ? '🌟' : '👍';
       toast({
@@ -90,7 +94,7 @@ export const useLessonProgress = (): LessonProgressHook => {
       setIsTracking(false);
       setStartTime(null);
     }
-  }, [isTracking, startTime, toast]);
+  }, [isTracking, startTime, toast, refreshStats]);
 
   // ── Game Complete → MongoDB via ActivityService ──────────────────────────
   const trackGameComplete = useCallback(async (
@@ -107,6 +111,7 @@ export const useLessonProgress = (): LessonProgressHook => {
         : 3;
 
       await ActivityService.trackGameCompletion(gameName, score, timeSpent, metadata);
+      await refreshStats().catch(() => {});
 
       toast({
         title: "Game শেষ! 🎮",
@@ -124,7 +129,7 @@ export const useLessonProgress = (): LessonProgressHook => {
       setIsTracking(false);
       setStartTime(null);
     }
-  }, [isTracking, startTime, toast]);
+  }, [isTracking, startTime, toast, refreshStats]);
 
   return {
     isTracking,

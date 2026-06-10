@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Trophy, Star, CheckCircle2, Target, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLang } from '@/contexts/LangContext';
+import { useStudentActivity } from '@/contexts/StudentActivityContext';
 
 export default function DailyChallenge() {
   const { user } = useAuth();
+  const { refreshStats } = useStudentActivity();
   const [challengeData, setChallengeData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
@@ -50,6 +52,7 @@ export default function DailyChallenge() {
         toast.success(t.toastChallengeComplete.replace('{stars}', formatNumber(res.rewardStars).toString()));
         // Refresh to show completed state
         fetchChallenge();
+        await refreshStats().catch(() => {});
       }
     } catch (err) {
       toast.error(t.toastChallengeError);

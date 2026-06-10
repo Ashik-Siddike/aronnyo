@@ -9,6 +9,7 @@ import { useLang } from '@/contexts/LangContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { activityApi } from '@/services/api';
 import { toast } from 'sonner';
+import { useStudentActivity } from '@/contexts/StudentActivityContext';
 
 const API = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api');
 
@@ -31,6 +32,7 @@ export default function Assignments() {
   const { user } = useAuth();
   const { t }    = useLang();
   const { isDark } = useTheme();
+  const { refreshStats } = useStudentActivity();
 
   const [assignments, setAssignments] = useState<any[]>([]);
   const [submitting,  setSubmitting]  = useState<string | null>(null);
@@ -98,6 +100,8 @@ export default function Assignments() {
           stars_earned:  15,
           time_spent:    10,
         }).catch(() => {});
+
+        await refreshStats().catch(() => {});
 
         toast.success(t.submitSuccess);
       } else {

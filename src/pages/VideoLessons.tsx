@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { activityApi, contentsApi, videoHistoryApi, profilesApi } from '@/services/api';
 import { toast } from 'sonner';
+import { useStudentActivity } from '@/contexts/StudentActivityContext';
 
 // Fallback videos if DB has none
 const FALLBACK_VIDEOS = [
@@ -64,6 +65,7 @@ function matchClass(videoClass: string, studentGradeId: number): boolean {
 
 export default function VideoLessons() {
   const { user } = useAuth();
+  const { refreshStats } = useStudentActivity();
 
   const [videos,        setVideos]        = useState<Video[]>([]);
   const [activeVideo,   setActiveVideo]   = useState<Video | null>(null);
@@ -179,6 +181,8 @@ export default function VideoLessons() {
         stars_earned:  activeVideo.stars,
         time_spent:    parseInt(activeVideo.duration) || 5,
       });
+
+      await refreshStats().catch(() => {});
 
       // Save to video history DB + localStorage mirror
       await videoHistoryApi.markWatched(user.id, activeVideo.id);
